@@ -2,8 +2,8 @@
 # https://api.slack.com/bot-users
 
 # intended workflow:
-# - call gradebot from command line with switches for grade file and template; e.g., gradebot -g gradebook.xlsx -t template.txt
-# - completed template is messaged to each user based on their row in grade file
+# - render a template against a gradebook file to create a unique message to send to each student having a row in the gradebook file
+# - the resulting messages are then messaged to each user in Slack
 
 # cases covered:
 # - assignment grades/feedback
@@ -27,12 +27,10 @@
 
 # Prof. X saves a config file in YAML format as config.yaml, with all bot parameters needed to make API calls
 
-# Prof. X uses the command line to set the bot config file as gradebot -c config.yaml, which sets environmental variables for all bot parameters
+# Prof. X initiates a bot class object using the config file
 
-# Prof. X uses the command line to set the bot config file as gradebot -g gradebook.xlsx -t template.
+# Prof. X uses a bot class method to render the template file against the gradebook file, returning a dictionary of messages keyed by Slack user name
 
-# A text summary is displayed of what will be sent to whom and output to an ISO 8661 datetime-stamped file with name template-completed-datetime-stamp.txt
+# Prof. X prints the dictionary to ensure messages are as intended
 
-# A prompt is then given to send or cancel
-
-# Prof. X chooses send, and messages are sent as the bot user specified in config.yaml
+# Prof. X uses a bot class method to send the messages to all students indicated in the dictionary
