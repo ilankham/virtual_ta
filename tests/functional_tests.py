@@ -10,9 +10,10 @@
 # - grade progress reports
 
 # additional features to consider:
-# - posting to a LMS gradebook
-# - parsing GitHub PRs
+# - posting grades & feedback to a LMS gradebook
+# - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading
 # - chatops for instructors entering grades and/or students checking grades
+# - generating LaTeX schedule table, weekly overview emails, etc., from Alignment Map Excel file
 
 
 
