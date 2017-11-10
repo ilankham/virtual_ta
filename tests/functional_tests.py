@@ -11,9 +11,10 @@
 
 # additional features to consider:
 # - posting grades & feedback to a LMS gradebook
-# - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading
 # - chatops for instructors entering grades and/or students checking grades
-# - generating LaTeX schedule table, weekly overview emails, etc., from Alignment Map Excel file
+# - generating LaTeX schedule table, weekly overview emails (w/ LMS posting?), etc., from Alignment Map Excel file (spin off into separate module?)
+# - setup GitHub teams/repos within an organization (spin off into separate 'github-team-setup' module?)
+# - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading (spin off into separate 'github-team-setup' module?)
 
 
 
