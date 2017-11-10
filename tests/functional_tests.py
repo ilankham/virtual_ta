@@ -9,12 +9,20 @@
 # - assignment grades/feedback
 # - grade progress reports
 
+# tentative package structure:
+# - root folder called gradesbot
+# - local subfolder .env with venv
+# - subfolder called tests
+# - subfolder called examples
+# - subfolder gradesbot w/ __init__.py making SlackBot class available
+# - SlackBot class has __init__ method requiring a config file to be provided, render method requiring gradebook and template files to be provided with a dictionary keyed by Slack username returned, and a message users method requiring a dictionary keyed by Slack username
+
 # additional features to consider:
-# - posting grades & feedback to a LMS gradebook
-# - chatops for instructors entering grades and/or students checking grades
-# - generating LaTeX schedule table, weekly overview emails (w/ LMS posting?), etc., from Alignment Map Excel file (spin off into separate module?)
-# - setup GitHub teams/repos within an organization (spin off into separate 'github-team-setup' module?)
-# - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading (spin off into separate 'github-team-setup' module?)
+# - posting grades & feedback to a LMS gradebook (provided by adding an LMSBot class?)
+# - generating LaTeX schedule table, weekly overview emails (w/ LMS posting via LMSBot?), etc., from Alignment Map Excel file (provided by adding a GradeBook class, which depends upon an Excel file with tabs for students and for each assignment, and/or a relational data store like SQLite? This class could also be used with SlackBot class methods requiring a gradebook Excel file and could have additional gradebook management features)
+# - setup GitHub teams/repos within an organization (provided by adding a GitHubBot class relying on GradeBook class and a separate 'github-teams-setup' module?)
+# - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading (provided by adding a GitHubBot class relying on GradeBook class and a separate 'github-teams-setup' module?)
+# - chatops for instructors entering grades and/or students checking grades (spin off into separate module relying on gradesbot?)
 
 
 
