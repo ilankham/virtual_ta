@@ -10,11 +10,11 @@
 # - grade progress reports
 
 # tentative package structure:
-# - root folder called gradesbot
+# - root folder called virtual-teaching-assistant
 # - local subfolder .env with venv
 # - subfolder called tests
 # - subfolder called examples
-# - subfolder gradesbot w/ __init__.py making SlackBot class available
+# - subfolder virtualta w/ __init__.py making SlackBot class (and other classes?) available
 # - SlackBot class has __init__ method requiring a config file to be provided, render method requiring gradebook and template files to be provided with a dictionary keyed by Slack username returned, and a message users method requiring a dictionary keyed by Slack username
 
 # additional features to consider:
