@@ -43,7 +43,6 @@ from virtual_ta import render_template_from_csv_file
 
 class TAWorkflowTests(TestCase):
     def test_send_slack_messages_with_csv_import(self):
-
         # Prof. X sets up a custom bot user, following the instructions at
         # https://api.slack.com/bot-users to obtain an API Token, which is
         # saved in a file, and set a bot name, icon, full name, description,
@@ -68,6 +67,6 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X initiates a SlackBot object and then uses the
         # set_api_token_from_file method to load their API Token
-
+        self.fail('Finish the test!')
         # Prof. X uses the SlackBot direct_message_users method to send the
         # messages in the dictionary to the indicated students
