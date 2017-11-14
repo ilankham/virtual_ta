@@ -12,8 +12,7 @@ Release URL in #project2_repo_urls: {{Release_URL_in_Designated_Slack_Channel}}
 
 
 Overall Feedback:
-
-{% if Components_Completed >= 4 %}
+{% if Components_Completed == '4' %}
 - Looks good; thanks!
 {% else %}
 - Submission incomplete

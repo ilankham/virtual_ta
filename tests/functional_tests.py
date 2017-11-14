@@ -35,20 +35,39 @@
 # - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading (provided by adding a GitHubBot class relying on GradeBook class and a separate 'github-teams-setup' module?)
 # - chatops for instructors entering grades and/or students checking grades (spin off into separate module relying on virtual_ta?)
 
+from pprint import pprint
+from unittest import TestCase
+
+from virtual_ta import render_template_from_csv_file
 
 
-# tentative example workflow:
+class TAWorkflowTests(TestCase):
+    def test_send_slack_messages_with_csv_import(self):
 
-# Prof. X sets up a custom bot user, following the instructions at https://api.slack.com/bot-users to obtain an API Token, which is saved in a file, and set a bot name, icon, full name, description, and allowed IP Address range
+        # Prof. X sets up a custom bot user, following the instructions at
+        # https://api.slack.com/bot-users to obtain an API Token, which is
+        # saved in a file, and set a bot name, icon, full name, description,
+        # and allowed IP Address range
 
-# Prof. X saves a gradebook csv file named with column headings into a directory
+        # Prof. X saves a gradebook csv file named with column headings
 
-# Prof. X saves a template text file as a Jinja2 template into the same directory, with each variable name a column heading in the gradebook csv file
+        # Prof. X saves a template text file as a Jinja2 template, with each
+        # variable name a column heading in the gradebook csv file
 
-# Prof. X uses the render_template_from_csv_file method to render their template file against their gradebook file, returning a dictionary of messages keyed by Slack user name
+        # Prof. X uses the render_template_from_csv_file method to render their
+        # template file against their gradebook file, returning a dictionary of
+        # messages keyed by Slack user name
+        with open('examples/example_template.txt') as template_fp:
+            with open('examples/example_gradebook.csv') as gradebook_fp:
+                template_results = render_template_from_csv_file(
+                    template_fp,gradebook_fp,key='Slack_User_Name'
+                )
 
-# Prof. X prints the dictionary to ensure messages are as intended
+        # Prof. X prints the dictionary to ensure messages are as intended
+        pprint(template_results)
 
-# Prof. X initiates a SlackBot object and then uses the set_api_token_from_file method to load their API Token
+        # Prof. X initiates a SlackBot object and then uses the
+        # set_api_token_from_file method to load their API Token
 
-# Prof. X uses the SlackBot direct_message_users method to send the messages in the dictionary to the indicated students
+        # Prof. X uses the SlackBot direct_message_users method to send the
+        # messages in the dictionary to the indicated students
