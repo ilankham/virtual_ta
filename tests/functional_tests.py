@@ -23,9 +23,9 @@
 # - local subfolder .env with venv
 # - subfolder called tests
 # - subfolder called examples
-# - subfolder virtual_ta w/ __init__.py, renders.py, and slackbot.py files
+# - subfolder virtual_ta w/ __init__.py, renderers.py, and slackbot.py files
 # - __init__.py makes all functions/classes available under virtual_ta
-# - render.py has a render_template_from_csv_file function that renders a gradebook csv file and a template text file, and returns a dictionary keyed by a specified column
+# - renderers.py has a render_template_from_csv_file function that renders a gradebook csv file and a template text file, and returns a dictionary keyed by a specified column
 # - slackbot.py has a SlackBot class with a __init__ method having optional API Token parameter, a set_api_token_from_file method requiring a file/file-like object, and a direct_message_users method requiring a dictionary keyed by Slack username
 
 # additional features to consider:
