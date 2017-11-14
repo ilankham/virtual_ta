@@ -33,7 +33,7 @@
 # - generating LaTeX schedule table, weekly overview emails (w/ LMS posting via LMSBot?), etc., from Alignment Map Excel file (provided by adding a GradeBook class, which depends upon an Excel file with tabs for students and for each assignment, and/or a relational data store like SQLite? This class could also be used with SlackBot class methods requiring a gradebook Excel file and could have additional gradebook management features)
 # - setup GitHub teams/repos within an organization (provided by adding a GitHubBot class relying on GradeBook class and a separate 'github-teams-setup' module?)
 # - parsing GitHub PRs for course wiki hw submissions to streamline interweaving and grading (provided by adding a GitHubBot class relying on GradeBook class and a separate 'github-teams-setup' module?)
-# - chatops for instructors entering grades and/or students checking grades (spin off into separate module relying on gradesbot?)
+# - chatops for instructors entering grades and/or students checking grades (spin off into separate module relying on virtual_ta?)
 
 
 
