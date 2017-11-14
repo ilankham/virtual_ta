@@ -7,6 +7,9 @@
 # Slack API methods:
 # https://api.slack.com/methods
 
+# Jinja2 documentation:
+# http://jinja.pocoo.org/docs/2.10/api/
+
 # intended workflow:
 # - render a template against a gradebook file to create a unique message to send to each student having a row in the gradebook file
 # - the resulting messages are then messaged to each user in a Slack Workspace
@@ -36,11 +39,11 @@
 
 # tentative example workflow:
 
-# Prof. X sets up a custom bot user, following the instructions at https://api.slack.com/bot-users to obtain an API Token and set a bot name, icon, full name, description, and allowed IP Address range
+# Prof. X sets up a custom bot user, following the instructions at https://api.slack.com/bot-users to obtain an API Token, which is saved in a file, and set a bot name, icon, full name, description, and allowed IP Address range
 
 # Prof. X saves a gradebook csv file named with column headings into a directory
 
-# Prof. X saves a template text file named with {<variable name>} throughout, with each <variable name> a column heading in an gradebook file
+# Prof. X saves a template text file as a Jinja2 template into the same directory, with each variable name a column heading in the gradebook csv file
 
 # Prof. X uses the render_template_from_csv_file method to render their template file against their gradebook file, returning a dictionary of messages keyed by Slack user name
 

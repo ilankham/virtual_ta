@@ -1,0 +1,25 @@
+Feedback for {{First_Name}} {{Last_Name}}
+
+Team Assignment: {{Team_Assignment}}
+
+Specified Repo Names/Structure: {{Specified_Repo_Structure}}
+
+Use of GitHub Flow Evident: {{Use_of_GitHub_Flow_Evident}}
+
+Specified File Contents: {{Specified_File_Contents}}
+
+Release URL in #project2_repo_urls: {{Release_URL_in_Designated_Slack_Channel}}
+
+
+Overall Feedback:
+
+{% if Components_Completed >= 4 %}
+- Looks good; thanks!
+{% else %}
+- Submission incomplete
+{% if Resubmission_Allowed >= "Y" %}
+- Please review directions and direct message me in Slack to discuss any questions or concerns. The resubmission deadline is 11:59 PM on Saturday.
+{% else %}
+- The resubmission deadline has passed. Please direct message me in Slack to discuss options.
+{% endif %}
+{% endif %}
