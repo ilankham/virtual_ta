@@ -38,7 +38,7 @@
 from pprint import pprint
 from unittest import TestCase
 
-from virtual_ta import render_template_from_csv_file
+from virtual_ta import render_template_from_csv_file, SlackBot
 
 
 class TAWorkflowTests(TestCase):
@@ -48,7 +48,8 @@ class TAWorkflowTests(TestCase):
         # saved in a file, and set a bot name, icon, full name, description,
         # and allowed IP Address range
 
-        # Prof. X saves a gradebook csv file named with column headings
+        # Prof. X saves a gradebook csv file named with column headings and one
+        # row per student, including themselves as a row
 
         # Prof. X saves a template text file as a Jinja2 template, with each
         # variable name a column heading in the gradebook csv file
@@ -67,6 +68,17 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X initiates a SlackBot object and then uses the
         # set_api_token_from_file method to load their API Token
-        self.fail('Finish the test!')
+        test_bot = SlackBot()
+        with open('examples/token.ini') as fp:
+            test_bot.set_api_token_from_file(fp)
+
+        # Prof. X then prints the SlackBot's API Token to verify it was loaded
+        # correctly
+        print(test_bot.api_token)
+
         # Prof. X uses the SlackBot direct_message_users method to send the
         # messages in the dictionary to the indicated students
+        test_bot.direct_message_by_username(template_results)
+
+        # Prof. X then verifies that they received a properly formatted message
+        # in Slack
