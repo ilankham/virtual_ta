@@ -8,7 +8,23 @@ class SlackBot(object):
     def set_api_token_from_file(self, fp):
         self.api_token = fp.readline()
 
-    def direct_message_by_username(self, messages_by_username):
+    @property
+    def user_ids(self):
+        users_list_response = requests.post(
+            url="https://slack.com/api/users.list",
+            headers={
+                "Authorization": f"Bearer {self.api_token}",
+                "Content-type": "application/json",
+            },
+        )
+        return_value = {}
+        for user in users_list_response.json()['members']:
+            return_value[user['name']] = user['id']
+
+        return return_value
+
+    @property
+    def user_dm_channels(self):
         im_list_response = requests.post(
             url="https://slack.com/api/im.list",
             headers={
@@ -20,21 +36,17 @@ class SlackBot(object):
         for channel in im_list_response.json()['ims']:
             channels[channel['user']] = channel['id']
 
-        users_list_response = requests.post(
-            url="https://slack.com/api/users.list",
-            headers={
-                "Authorization": f"Bearer {self.api_token}",
-                "Content-type": "application/json",
-            },
-        )
-        users = {}
-        for user in users_list_response.json()['members']:
-            users[user['name']] = user['id']
-
-        user_dm_channels = {}
+        return_value = {}
+        users = self.user_ids
         for user in users:
-            user_dm_channels[user] = channels.get(users[user], None)
+            return_value[user] = channels.get(users[user], None)
 
+        return return_value
+
+    def direct_message_by_username(self, messages_by_username):
+        user_dm_channels = self.user_dm_channels
+
+        return_value = {}
         for username in messages_by_username:
             requests.post(
                 url="https://slack.com/api/chat.postMessage",
@@ -48,3 +60,8 @@ class SlackBot(object):
                     "as_user": "true"
                 }
             )
+            return_value[user_dm_channels[username]] = (
+                messages_by_username[username]
+            )
+
+        return return_value
