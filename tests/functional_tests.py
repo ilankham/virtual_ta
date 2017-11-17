@@ -43,13 +43,17 @@ from virtual_ta import render_template_from_csv_file, SlackBot
 
 class TAWorkflowTests(TestCase):
     def test_send_slack_messages_with_csv_import(self):
-        # Prof. X sets up a custom bot user, following the instructions at
-        # https://api.slack.com/bot-users to obtain an API Token, which is
-        # saved in a file, and set a bot name, icon, full name, description,
-        # and allowed IP Address range
+        # For the intended Slack Workspace and the user account from which they
+        # wish to have messages originate, Prof. X creates an API Token by
+        # (1) visiting https://api.slack.com/custom-integrations/legacy-tokens
+        #     and generating a Legacy Token, or
+        # (2) visiting https://api.slack.com/apps and creating a new app with
+        #     permission scopes for chat:write:user, im:read, and users:read
+
+        # Prof. X saves the API Token in a text file
 
         # Prof. X saves a gradebook csv file named with column headings and one
-        # row per student, including themselves as a row
+        # row per student grade record
 
         # Prof. X saves a template text file as a Jinja2 template, with each
         # variable name a column heading in the gradebook csv file
@@ -80,5 +84,5 @@ class TAWorkflowTests(TestCase):
         # messages in the dictionary to the indicated students
         test_bot.direct_message_by_username(template_results)
 
-        # Prof. X then verifies that they received a properly formatted message
-        # in Slack
+        # Prof. X then verifies that all direct messages have been send with
+        # themselves as the apparent sender
