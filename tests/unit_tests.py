@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import requests_mock
 
-from virtual_ta import render_template_from_csv_file, SlackBot
+from virtual_ta import render_template_from_csv_file, SlackAccount
 
 
 # noinspection SpellCheckingInspection
@@ -49,17 +49,17 @@ class TestRenderers(TestCase):
 
 
 # noinspection SpellCheckingInspection
-class TestSlackBots(TestCase):
+class TestSlackAccounts(TestCase):
     def test_slack_bot_class_init(self):
         test_token = "Test Token Value"
-        test_bot = SlackBot(test_token)
+        test_bot = SlackAccount(test_token)
         self.assertEqual(test_token, test_bot.api_token)
 
     def test_set_api_token_from_file(self):
         test_token = "Test Token Value"
         test_fp = StringIO(test_token)
 
-        test_bot = SlackBot()
+        test_bot = SlackAccount()
         test_bot.set_api_token_from_file(test_fp)
         self.assertEqual(test_token, test_bot.api_token)
 
@@ -85,7 +85,7 @@ class TestSlackBots(TestCase):
                 json={'members': test_json_user_ids},
             )
 
-            test_bot = SlackBot(test_token)
+            test_bot = SlackAccount(test_token)
             self.assertEqual(test_bot.user_ids, test_response_user_ids)
 
     def test_user_dm_channels_property(self):
@@ -123,7 +123,7 @@ class TestSlackBots(TestCase):
                 json={'ims': test_json_dm_channels},
             )
 
-            test_bot = SlackBot(test_token)
+            test_bot = SlackAccount(test_token)
             self.assertEqual(
                 test_bot.user_dm_channels,
                 test_response_dm_channels
@@ -176,7 +176,7 @@ class TestSlackBots(TestCase):
                 },
             )
 
-            test_bot = SlackBot(test_token)
+            test_bot = SlackAccount(test_token)
             self.assertEqual(
                 test_bot.direct_message_by_username(test_dms),
                 test_respond_dms

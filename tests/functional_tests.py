@@ -8,7 +8,7 @@ contents comprising a valid Slack Web API Token.
 from pprint import pprint
 from unittest import TestCase
 
-from virtual_ta import render_template_from_csv_file, SlackBot
+from virtual_ta import render_template_from_csv_file, SlackAccount
 
 
 class TAWorkflowTests(TestCase):
@@ -40,17 +40,17 @@ class TAWorkflowTests(TestCase):
         # Prof. X prints the dictionary to ensure messages are as intended
         pprint(template_results)
 
-        # Prof. X initiates a SlackBot object and then uses the
+        # Prof. X initiates a SlackAccount object and then uses the
         # set_api_token_from_file method to load their API Token
-        test_bot = SlackBot()
+        test_bot = SlackAccount()
         with open('examples/token.ini') as fp:
             test_bot.set_api_token_from_file(fp)
 
-        # Prof. X then checks the SlackBot's API Token was loaded correctly
+        # Prof. X then checks the SlackAccount's API Token was loaded correctly
         with open('examples/token.ini') as fp:
             self.assertEqual(fp.readline(), test_bot.api_token)
 
-        # Prof. X uses the SlackBot direct_message_users method to send the
+        # Prof. X uses the SlackAccount direct_message_users method to send the
         # messages in the dictionary to the indicated students
         test_bot.direct_message_by_username(template_results)
 

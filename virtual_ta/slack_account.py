@@ -17,11 +17,11 @@ import requests
 FileIO = Union[StringIO, TextIOWrapper]
 
 
-class SlackBot(object):
+class SlackAccount(object):
     """Class for interfacing with Slack Web API"""
 
     def __init__(self, api_token: str = None) -> None:
-        """Initializes SlackBot object using API Token
+        """Initializes SlackAccount object using API Token
 
         Args:
             api_token: a Slack API Token generated using either
