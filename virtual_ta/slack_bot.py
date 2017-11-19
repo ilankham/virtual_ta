@@ -9,12 +9,17 @@ See https://api.slack.com/web for more information about the Slack Web API.
 
 """
 
+from io import StringIO, TextIOWrapper
+from typing import Union
+
 import requests
-import typing
+
+FileIO = Union[StringIO, TextIOWrapper]
 
 
 class SlackBot(object):
     """Class for interfacing with Slack Web API"""
+
     def __init__(self, api_token: str = None) -> None:
         """Initializes SlackBot object using API Token
 
@@ -29,7 +34,7 @@ class SlackBot(object):
         """
         self.api_token = api_token
 
-    def set_api_token_from_file(self, fp: typing.IO) -> None:
+    def set_api_token_from_file(self, fp: FileIO) -> None:
         """Loads Slack API Token from file
 
         Args:

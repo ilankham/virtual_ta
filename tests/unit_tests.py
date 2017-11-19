@@ -1,3 +1,5 @@
+"""Creates unit tests for project using unittest module"""
+
 from io import StringIO
 from unittest import TestCase
 

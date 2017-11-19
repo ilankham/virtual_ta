@@ -1,16 +1,19 @@
 """Creates functions for rendering templates against supplied parameters"""
 
 from csv import DictReader
-import typing
+from io import StringIO, TextIOWrapper
+from typing import Union
 
 from jinja2 import Template
 
+FileIO = Union[StringIO, TextIOWrapper]
+
 
 def render_template_from_csv_file(
-    template_fp: typing.IO,
-    gradebook_fp: typing.IO,
-    *,
-    key: str = None
+        template_fp: FileIO,
+        gradebook_fp: FileIO,
+        *,
+        key: str = None
 ) -> dict:
     """Renders a Jinja2 template against a CSV file
 
