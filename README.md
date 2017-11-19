@@ -1,4 +1,4 @@
-[![Python 3.6](https://img.shields.io/badge/python-3.6-brightgreen.svg)](#Prerequisites)  [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](LICENSE)
+[![Python 3.6](https://img.shields.io/badge/python-3.6-brightgreen.svg)](#prerequisites)  [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](LICENSE)
 
 # Virtual TA
 A package for managing student grades
