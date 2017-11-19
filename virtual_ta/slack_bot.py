@@ -1,15 +1,16 @@
 import requests
+import typing
 
 
 class SlackBot(object):
-    def __init__(self, api_token=None):
+    def __init__(self, api_token: str = None) -> None:
         self.api_token = api_token
 
-    def set_api_token_from_file(self, fp):
+    def set_api_token_from_file(self, fp: typing.IO) -> None:
         self.api_token = fp.readline()
 
     @property
-    def user_ids(self):
+    def user_ids(self) -> dict:
         users_list_response = requests.post(
             url="https://slack.com/api/users.list",
             headers={
@@ -24,7 +25,7 @@ class SlackBot(object):
         return return_value
 
     @property
-    def user_dm_channels(self):
+    def user_dm_channels(self) -> dict:
         im_list_response = requests.post(
             url="https://slack.com/api/im.list",
             headers={
@@ -43,7 +44,7 @@ class SlackBot(object):
 
         return return_value
 
-    def direct_message_by_username(self, messages_by_username):
+    def direct_message_by_username(self, messages_by_username: dict) -> dict:
         user_dm_channels = self.user_dm_channels
 
         return_value = {}
