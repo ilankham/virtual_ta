@@ -2,7 +2,9 @@ from pprint import pprint
 
 from virtual_ta import render_template_from_csv_file, SlackAccount
 
+#
 # Examples Setup
+#
 
 # set API Token for Slack Account
 api_token = '[your account API token]'
