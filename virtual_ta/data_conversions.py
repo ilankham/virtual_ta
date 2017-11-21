@@ -50,3 +50,41 @@ def mail_merge_from_csv_file(
         return_value[row[key]] = template_text.render(row)
 
     return return_value
+
+
+def flatten_dict(
+        data_items: dict,
+        key_value_separator: str = '\n',
+        items_separator: str = '\n',
+        **kwargs
+) -> str:
+    """Convert dictionary to string with specified separators
+
+    This function converts dictionary data_items to a string, with
+    key_value_separator used to separate keys from values and items_separator
+    used to separate items; in addition, options can be passed to the builtin
+    function sorted
+
+    Args:
+        data_items: a dictionary whose keys and items will be treated as or
+            converted to strings
+        key_value_separator: used to separate keys from values
+        items_separator: used to separate items
+        **kwargs: options passed through to the builtin function sorted
+
+    Returns:
+        A string with key_value_separator used to separate keys from values and
+        items_separator used to separate items
+
+    """
+
+    return_value = items_separator
+    last_record_number = len(data_items)
+    for n, k in enumerate(sorted(data_items.keys(), **kwargs)):
+        return_value += str(k)
+        return_value += key_value_separator
+        return_value += str(data_items[k])
+        if n < last_record_number - 1:
+            return_value += items_separator
+
+    return return_value

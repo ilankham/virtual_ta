@@ -5,7 +5,11 @@ from unittest import TestCase
 
 import requests_mock
 
-from virtual_ta import mail_merge_from_csv_file, SlackAccount
+from virtual_ta import (
+    flatten_dict,
+    mail_merge_from_csv_file,
+    SlackAccount,
+)
 
 
 # noinspection SpellCheckingInspection
@@ -46,6 +50,39 @@ class TestDataConversions(TestCase):
             test_csv,
         )
         self.assertEqual(test_expectations, test_results)
+
+    def test_flatten_dict_with_options_passed_through(self):
+        test_dict = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+        test_key_value_separator = ""
+        test_items_separator = ""
+        test_expectations = "buser2b user2auser1a user1"
+
+        test_results = flatten_dict(
+            test_dict,
+            test_key_value_separator,
+            test_items_separator,
+            reverse=True
+        )
+        self.assertEqual(test_results, test_expectations)
+
+    def test_flatten_dict_without_options_passed_through(self):
+        test_dict = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+        test_key_value_separator = ""
+        test_items_separator = ""
+        test_expectations = "auser1a user1buser2b user2"
+
+        test_results = flatten_dict(
+            test_dict,
+            test_key_value_separator,
+            test_items_separator,
+        )
+        self.assertEqual(test_results, test_expectations)
 
 
 # noinspection SpellCheckingInspection
