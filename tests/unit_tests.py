@@ -5,12 +5,12 @@ from unittest import TestCase
 
 import requests_mock
 
-from virtual_ta import render_template_from_csv_file, SlackAccount
+from virtual_ta import mail_merge_from_csv_file, SlackAccount
 
 
 # noinspection SpellCheckingInspection
-class TestRenderers(TestCase):
-    def test_render_template_from_csv_file_with_key(self):
+class TestDataConversions(TestCase):
+    def test_mail_merge_from_csv_file_with_key(self):
         test_template = StringIO('{{First_Name}} {{Last_Name}}')
         test_expectations = {
             "auser1": "a user1",
@@ -22,14 +22,14 @@ class TestRenderers(TestCase):
             "buser2,b,user2"
         ]
         test_csv = StringIO("\n".join(test_csv_entries))
-        test_results = render_template_from_csv_file(
+        test_results = mail_merge_from_csv_file(
             test_template,
             test_csv,
             key="User_Name",
         )
         self.assertEqual(test_expectations, test_results)
 
-    def test_render_template_from_csv_file_without_key(self):
+    def test_mail_merge_from_csv_file_without_key(self):
         test_template = StringIO('{{First_Name}} {{Last_Name}}')
         test_expectations = {
             "auser1": "a user1",
@@ -41,7 +41,7 @@ class TestRenderers(TestCase):
             "buser2,b,user2"
         ]
         test_csv = StringIO("\n".join(test_csv_entries))
-        test_results = render_template_from_csv_file(
+        test_results = mail_merge_from_csv_file(
             test_template,
             test_csv,
         )

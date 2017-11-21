@@ -8,7 +8,7 @@ contents comprising a valid Slack Web API Token.
 from pprint import pprint
 from unittest import TestCase
 
-from virtual_ta import render_template_from_csv_file, SlackAccount
+from virtual_ta import mail_merge_from_csv_file, SlackAccount
 
 
 class TAWorkflowTests(TestCase):
@@ -28,17 +28,17 @@ class TAWorkflowTests(TestCase):
         # Prof. X saves a template text file as a Jinja2 template, with each
         # variable name a column heading in the gradebook csv file
 
-        # Prof. X uses the render_template_from_csv_file method to render their
+        # Prof. X uses the mail_merge_from_csv_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
         # messages keyed by Slack user name
         with open('examples/example_template.txt') as template_fp:
             with open('examples/example_gradebook.csv') as gradebook_fp:
-                template_results = render_template_from_csv_file(
+                mail_merge_results = mail_merge_from_csv_file(
                     template_fp, gradebook_fp, key='Slack_User_Name'
                 )
 
         # Prof. X prints the dictionary to ensure messages are as intended
-        pprint(template_results)
+        pprint(mail_merge_results)
 
         # Prof. X initiates a SlackAccount object and then uses the
         # set_api_token_from_file method to load their API Token
@@ -52,7 +52,7 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the SlackAccount direct_message_users method to send the
         # messages in the dictionary to the indicated students
-        test_bot.direct_message_by_username(template_results)
+        test_bot.direct_message_by_username(mail_merge_results)
 
         # Prof. X then verifies in the Slack Workspace corresponding to their
         # API Token direct messages have been send with themselves as the

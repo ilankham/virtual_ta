@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from virtual_ta import render_template_from_csv_file, SlackAccount
+from virtual_ta import mail_merge_from_csv_file, SlackAccount
 
 #
 # Examples Setup
@@ -39,21 +39,20 @@ messages_to_send = {
 account.direct_message_by_username(messages_to_send)
 
 #
-# Example 3: multiple template-rendered messages to multiple users
+# Example 3: mail merged messages to multiple users
 #
 
-# render example template file against example gradebook file
-# Note: before importing the CSV file, the values in the first column,
-# Slack_User_Name should be updated with actual user names from the Slack
-# Workspace being used
+# mail merge example template file against example gradebook file; note: before
+# importing the CSV file, the values in the first column, Slack_User_Name
+# should be updated with actual user names from the Slack Workspace being used
 with open('example_template.txt') as template_fp:
     with open('example_gradebook.csv') as gradebook_fp:
-        template_results = render_template_from_csv_file(
+        mail_merge_results = mail_merge_from_csv_file(
             template_fp, gradebook_fp, key='Slack_User_Name'
         )
 
-# print template-rendering results
-pprint(template_results)
+# print mail merge results
+pprint(mail_merge_results)
 
 # send messages to users
-account.direct_message_by_username(template_results)
+account.direct_message_by_username(mail_merge_results)

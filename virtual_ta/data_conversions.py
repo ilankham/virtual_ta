@@ -1,4 +1,4 @@
-"""Creates functions for rendering templates against supplied parameters"""
+"""Creates functions for converting between data formats"""
 
 from csv import DictReader
 from io import StringIO, TextIOWrapper
@@ -9,13 +9,13 @@ from jinja2 import Template
 FileIO = Union[StringIO, TextIOWrapper]
 
 
-def render_template_from_csv_file(
+def mail_merge_from_csv_file(
         template_fp: FileIO,
-        csv_fp: FileIO,
+        data_csv_fp: FileIO,
         *,
         key: str = None
 ) -> dict:
-    """Renders a Jinja2 template against a CSV file
+    """Mail merges a Jinja2 template against a CSV file
 
     This function inputs a Jinja2 template file and a CSV file whose column
     headers correspond to the variables in the template fle (and, optionally, a
@@ -27,10 +27,10 @@ def render_template_from_csv_file(
     Args:
         template_fp: pointer to file or file-like object that is ready to read
             from and contains a Jinja2 template
-        csv_fp: pointer to file or file-like object that is ready to read from
-            and contains a CSV file with columns headers in its first row
-        key: a column header from csv_fp, whose values should be used as key
-            values in the dictionary generated
+        data_csv_fp: pointer to file or file-like object that is ready to read
+            from and contains a CSV file with columns headers in its first row
+        key: a column header from data_csv_fp, whose values should be used as
+            key values in the dictionary generated
 
     Returns:
         A dictionary whose keys come from the column specified by the argument
@@ -41,7 +41,7 @@ def render_template_from_csv_file(
     """
     template_text = Template(template_fp.read())
 
-    csv_file_reader = DictReader(csv_fp)
+    csv_file_reader = DictReader(data_csv_fp)
     if key is None:
         key = csv_file_reader.fieldnames[0]
 
