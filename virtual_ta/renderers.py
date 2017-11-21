@@ -11,7 +11,7 @@ FileIO = Union[StringIO, TextIOWrapper]
 
 def render_template_from_csv_file(
         template_fp: FileIO,
-        gradebook_fp: FileIO,
+        csv_fp: FileIO,
         *,
         key: str = None
 ) -> dict:
@@ -27,10 +27,10 @@ def render_template_from_csv_file(
     Args:
         template_fp: pointer to file or file-like object that is ready to read
             from and contains a Jinja2 template
-        gradebook_fp: pointer to file or file-like object that is ready to read
-            from and contains a CSV file with columns headers in its first row
-        key: a column header from gradebook_fp, whose values should be used as
-            key values in the dictionary generated
+        csv_fp: pointer to file or file-like object that is ready to read from
+            and contains a CSV file with columns headers in its first row
+        key: a column header from csv_fp, whose values should be used as key
+            values in the dictionary generated
 
     Returns:
         A dictionary whose keys come from the column specified by the argument
@@ -41,12 +41,12 @@ def render_template_from_csv_file(
     """
     template_text = Template(template_fp.read())
 
-    gradebook_file_reader = DictReader(gradebook_fp)
+    csv_file_reader = DictReader(csv_fp)
     if key is None:
-        key = gradebook_file_reader.fieldnames[0]
+        key = csv_file_reader.fieldnames[0]
 
     return_value = {}
-    for row in gradebook_file_reader:
+    for row in csv_file_reader:
         return_value[row[key]] = template_text.render(row)
 
     return return_value

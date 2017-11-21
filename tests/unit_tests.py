@@ -16,15 +16,15 @@ class TestRenderers(TestCase):
             "auser1": "a user1",
             "buser2": "b user2",
         }
-        test_gradebook_entries = [
+        test_csv_entries = [
             "User_Name,First_Name,Last_Name",
             "auser1,a,user1",
             "buser2,b,user2"
         ]
-        test_gradebook = StringIO("\n".join(test_gradebook_entries))
+        test_csv = StringIO("\n".join(test_csv_entries))
         test_results = render_template_from_csv_file(
             test_template,
-            test_gradebook,
+            test_csv,
             key="User_Name",
         )
         self.assertEqual(test_expectations, test_results)
@@ -35,15 +35,15 @@ class TestRenderers(TestCase):
             "auser1": "a user1",
             "buser2": "b user2",
         }
-        test_gradebook_entries = [
+        test_csv_entries = [
             "User_Name,First_Name,Last_Name",
             "auser1,a,user1",
             "buser2,b,user2"
         ]
-        test_gradebook = StringIO("\n".join(test_gradebook_entries))
+        test_csv = StringIO("\n".join(test_csv_entries))
         test_results = render_template_from_csv_file(
             test_template,
-            test_gradebook,
+            test_csv,
         )
         self.assertEqual(test_expectations, test_results)
 
