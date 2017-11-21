@@ -9,6 +9,40 @@ from jinja2 import Template
 FileIO = Union[StringIO, TextIOWrapper]
 
 
+def mail_merge_from_dict(
+        template_fp: FileIO,
+        data_dict: dict,
+) -> dict:
+    """Mail merges a Jinja2 template against a dictionary of dictionaries
+
+    This function inputs a Jinja2 template file and a dictionary of
+    dictionaries, each having as keys variables in the template file, and
+    outputs a dictionary with the same keys as the input dictionary and as
+    values the results of rendering the template against the corresponding
+    entry in the input dictionary
+
+    Args:
+        template_fp: pointer to file or file-like object that is ready to read
+            from and contains a Jinja2 template
+        data_dict: dictionary of dictionaries, each having as keys variables
+            from the template
+
+    Returns:
+        A dictionary with the same keys as the input dictionary and as values
+        the results of rendering the template against the corresponding entry
+        in the input dictionary
+
+    """
+
+    template_text = Template(template_fp.read())
+
+    return_value = {}
+    for k in data_dict:
+        return_value[k] = template_text.render(data_dict[k])
+
+    return return_value
+
+
 def mail_merge_from_csv_file(
         template_fp: FileIO,
         data_csv_fp: FileIO,
@@ -39,17 +73,17 @@ def mail_merge_from_csv_file(
         row in the CSV file corresponding to the key value
 
     """
-    template_text = Template(template_fp.read())
 
     csv_file_reader = DictReader(data_csv_fp)
     if key is None:
         key = csv_file_reader.fieldnames[0]
 
-    return_value = {}
+    data_dict = {}
     for row in csv_file_reader:
-        return_value[row[key]] = template_text.render(row)
+        data_dict[row[key]] = row
+    print(data_dict)
 
-    return return_value
+    return mail_merge_from_dict(template_fp, data_dict)
 
 
 def flatten_dict(

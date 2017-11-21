@@ -9,12 +9,37 @@ import requests_mock
 from virtual_ta import (
     flatten_dict,
     mail_merge_from_csv_file,
+    mail_merge_from_dict,
     SlackAccount,
 )
 
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
+    def test_mail_merge_from_dict(self):
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+        test_dict = {
+            "auser1": {
+                "User_Name": "auser1",
+                "First_Name": "a",
+                "Last_Name": "user1",
+            },
+            "buser2": {
+                "User_Name": "buser2",
+                "First_Name": "b",
+                "Last_Name": "user2",
+            },
+        }
+        test_results = mail_merge_from_dict(
+            test_template,
+            test_dict,
+        )
+        self.assertEqual(test_expectations, test_results)
+
     def test_mail_merge_from_csv_file_with_key(self):
         test_template = StringIO('{{First_Name}} {{Last_Name}}')
         test_expectations = {
