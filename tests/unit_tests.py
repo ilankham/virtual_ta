@@ -2,6 +2,7 @@
 
 from io import StringIO
 from unittest import TestCase
+from unittest.mock import patch, PropertyMock
 
 import requests_mock
 
@@ -125,12 +126,14 @@ class TestSlackAccounts(TestCase):
             test_bot = SlackAccount(test_token)
             self.assertEqual(test_bot.user_ids, test_response_user_ids)
 
-    def test_user_dm_channels_property(self):
+    @patch('virtual_ta.SlackAccount.user_ids', new_callable=PropertyMock)
+    def test_user_dm_channels_property(self, mock_user_ids):
+        mock_user_ids.return_value = {
+            'auser1': 'userid-auser1',
+            'buser1': 'userid-buser1'
+        }
+
         test_token = "Test Token Value"
-        test_json_user_ids = [
-            {'name': 'auser1', 'id': 'userid-auser1'},
-            {'name': 'buser1', 'id': 'userid-buser1'}
-        ]
         test_json_dm_channels = [
             {'user': 'userid-auser1', 'id': 'dmid-auser1'},
             {'user': 'userid-buser1', 'id': 'dmid-buser1'}
@@ -141,15 +144,6 @@ class TestSlackAccounts(TestCase):
         }
 
         with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'POST',
-                "https://slack.com/api/users.list",
-                request_headers={
-                    "Authorization": f"Bearer {test_token}",
-                    "Content-type": "application/json",
-                },
-                json={'members': test_json_user_ids},
-            )
             mock_requests.register_uri(
                 'POST',
                 "https://slack.com/api/im.list",
@@ -166,16 +160,17 @@ class TestSlackAccounts(TestCase):
                 test_response_dm_channels
             )
 
-    def test_direct_message_by_username(self):
+    @patch(
+        'virtual_ta.SlackAccount.user_dm_channels',
+        new_callable=PropertyMock
+    )
+    def test_direct_message_by_username(self, mock_user_dm_channels):
+        mock_user_dm_channels.return_value = {
+            'auser1': 'dmid-auser1',
+            'buser1': 'dmid-buser1',
+        }
+
         test_token = "Test Token Value"
-        test_json_user_ids = [
-            {'name': 'auser1', 'id': 'userid-auser1'},
-            {'name': 'buser1', 'id': 'userid-buser1'}
-        ]
-        test_json_dm_channels = [
-            {'user': 'userid-auser1', 'id': 'dmid-auser1'},
-            {'user': 'userid-buser1', 'id': 'dmid-buser1'}
-        ]
         test_dms = {
             'auser1': 'a user1',
             'buser1': 'b user1',
@@ -186,24 +181,6 @@ class TestSlackAccounts(TestCase):
         }
 
         with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'POST',
-                "https://slack.com/api/users.list",
-                request_headers={
-                    "Authorization": f"Bearer {test_token}",
-                    "Content-type": "application/json",
-                },
-                json={'members': test_json_user_ids},
-            )
-            mock_requests.register_uri(
-                'POST',
-                "https://slack.com/api/im.list",
-                request_headers={
-                    "Authorization": f"Bearer {test_token}",
-                    "Content-type": "application/json",
-                },
-                json={'ims': test_json_dm_channels},
-            )
             mock_requests.register_uri(
                 'POST',
                 "https://slack.com/api/chat.postMessage",
@@ -219,6 +196,4 @@ class TestSlackAccounts(TestCase):
                 test_respond_dms
             )
 
-        # mock adapter should have been called 2 more times than the number of
-        # test messages
-        self.assertEqual(mock_requests.call_count, len(test_respond_dms) + 2)
+        self.assertEqual(mock_requests.call_count, len(test_respond_dms))
