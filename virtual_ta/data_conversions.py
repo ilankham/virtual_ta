@@ -43,6 +43,40 @@ def mail_merge_from_dict(
     return return_value
 
 
+def convert_from_csv_to_dict(
+        data_csv_fp: FileIO,
+        *,
+        key: str = None
+) -> dict:
+    """Convert CSV file to dictionary of dictionaries
+
+    This function inputs a CSV file and outputs a dictionary keyed by the
+    specified key column and having as values dictionaries encoding the row of
+    the CSV file corresponding to the key value
+
+    Args:
+        data_csv_fp: pointer to file or file-like object that is ready to read
+            from and contains a CSV file with columns headers in its first row
+        key: a column header from data_csv_fp, whose values should be used as
+            key values in the dictionary generated
+
+    Returns:
+        A dictionary of dictionaries encoding the row of the CSV file
+        corresponding to the key value
+
+    """
+
+    csv_file_reader = DictReader(data_csv_fp)
+    if key is None:
+        key = csv_file_reader.fieldnames[0]
+
+    return_value = {}
+    for row in csv_file_reader:
+        return_value[row[key]] = row
+
+    return return_value
+
+
 def mail_merge_from_csv_file(
         template_fp: FileIO,
         data_csv_fp: FileIO,
@@ -74,16 +108,11 @@ def mail_merge_from_csv_file(
 
     """
 
-    csv_file_reader = DictReader(data_csv_fp)
-    if key is None:
-        key = csv_file_reader.fieldnames[0]
+    data_dict = convert_from_csv_to_dict(data_csv_fp,key=key)
 
-    data_dict = {}
-    for row in csv_file_reader:
-        data_dict[row[key]] = row
-    print(data_dict)
+    return_value = mail_merge_from_dict(template_fp, data_dict)
 
-    return mail_merge_from_dict(template_fp, data_dict)
+    return return_value
 
 
 def flatten_dict(
