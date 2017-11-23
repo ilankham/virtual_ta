@@ -8,7 +8,7 @@ import requests_mock
 
 from virtual_ta import (
     mail_merge_from_dict,
-    convert_from_csv_to_dict,
+    convert_csv_to_dict,
     mail_merge_from_csv_file,
     flatten_dict,
     SlackAccount,
@@ -63,7 +63,7 @@ class TestDataConversions(TestCase):
             "buser2,b,user2"
         ]
         test_csv = StringIO("\n".join(test_csv_entries))
-        test_results = convert_from_csv_to_dict(
+        test_results = convert_csv_to_dict(
             test_csv,
             key="User_Name",
         )

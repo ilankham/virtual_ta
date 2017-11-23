@@ -43,7 +43,7 @@ def mail_merge_from_dict(
     return return_value
 
 
-def convert_from_csv_to_dict(
+def convert_csv_to_dict(
         data_csv_fp: FileIO,
         *,
         key: str = None
@@ -108,7 +108,7 @@ def mail_merge_from_csv_file(
 
     """
 
-    data_dict = convert_from_csv_to_dict(data_csv_fp,key=key)
+    data_dict = convert_csv_to_dict(data_csv_fp,key=key)
 
     return_value = mail_merge_from_dict(template_fp, data_dict)
 
