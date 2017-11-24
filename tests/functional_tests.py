@@ -64,3 +64,34 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X verifies in the Slack Workspace corresponding to their API
         # Token direct messages have been send with themselves as the sender
+
+    def test_post_to_bb_with_xlsx_import(self):
+        # Prof. X obtains a Blackboard API Token
+
+        # Prof. X saves the API Token in a file
+
+        # Prof. X saves a gradebook xlsx file named with column headings and
+        # one row per student grade record
+
+        # Prof. X saves a template text file as a Jinja2 template, with each
+        # variable name a column heading in the gradebook xlsx file
+
+        # Prof. X uses the mail_merge_from_xlsx_file method to mail merge their
+        # template file against their gradebook file, returning a dictionary of
+        # messages keyed by Blackboard account identifier
+        self.fail('Finish the test!')
+
+        # Prof. X prints a flattened version of the dictionary to verify
+        # assignment feedback contents are as intended
+
+        # Prof. X initiates a BlackboardAccount object and then uses the
+        # set_api_token_from_file method to load their API Token
+
+        # Prof. X then checks the BlackboardAccount's API Token was loaded
+        # correctly
+
+        # Prof. X uses the BlackboardAccount update_gradebook method to
+        # send the assignment feedback in the dictionary to the indicated
+        # students
+
+        # Prof. X verifies in the assignment feedback was correctly added
