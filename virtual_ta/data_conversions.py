@@ -1,12 +1,13 @@
 """Creates functions for converting between data formats"""
 
 from csv import DictReader
-from io import StringIO, TextIOWrapper
+from io import BytesIO, FileIO, StringIO, TextIOWrapper
 from typing import Union
 
 from jinja2 import Template
+from openpyxl import load_workbook
 
-FileIO = Union[StringIO, TextIOWrapper]
+FileIO = Union[BytesIO, FileIO, StringIO, TextIOWrapper]
 
 
 def mail_merge_from_dict(
@@ -46,13 +47,14 @@ def mail_merge_from_dict(
 def convert_csv_to_dict(
         data_csv_fp: FileIO,
         *,
-        key: str = None
+        key: str = None,
 ) -> dict:
     """Convert CSV file to dictionary of dictionaries
 
-    This function inputs a CSV file and outputs a dictionary keyed by the
-    specified key column and having as values dictionaries encoding the row of
-    the CSV file corresponding to the key value
+    This function inputs a CSV file and an optional key column (defaulting to
+    the left-most column, if not specified) and outputs a dictionary keyed by
+    the specified key column and having as values dictionaries encoding the row
+    from the CSV file corresponding to the key value
 
     Args:
         data_csv_fp: pointer to file or file-like object that is ready to read
@@ -61,8 +63,9 @@ def convert_csv_to_dict(
             key values in the dictionary generated
 
     Returns:
-        A dictionary of dictionaries encoding the row of the CSV file
-        corresponding to the key value
+        A dictionary keyed by the specified key column and having as values
+        dictionaries encoding the row from the CSV file corresponding to the
+        key value
 
     """
 
@@ -77,20 +80,72 @@ def convert_csv_to_dict(
     return return_value
 
 
+def convert_xlsx_to_dict(
+        data_xlsx_fp: FileIO,
+        *,
+        key: str = None,
+        worksheet: str = None,
+):
+    """Convert XLSX file to dictionary of dictionaries
+
+    This function inputs an XLSX file, an optional key column (defaulting to the
+    left-most column, if not specified), and an optional worksheet name column
+    (defaulting to the first worksheet, if not specified), and outputs a
+    dictionary keyed by the specified key column and having as values
+    dictionaries encoding the row from the specified worksheet of the XLSX file
+    corresponding to the key value
+
+    Args:
+        data_xlsx_fp: pointer to file or file-like object that is ready to read
+            from and contains an XLSX file with columns headers in first rows
+        key: a column header from data_xlsx_fp, whose values should be used as
+            key values in the dictionary generated
+        worksheet: a worksheet name from data_xlsx_fp
+
+    Returns:
+        A dictionary keyed by the specified key column and having as values
+        dictionaries encoding the row from the specified worksheet of the XLSX
+        file corresponding to the key value
+
+    """
+
+    xlsx_file_reader = load_workbook(data_xlsx_fp, read_only=True)
+    if worksheet is None:
+        worksheet = xlsx_file_reader[0]
+    if key is None:
+        key = worksheet.cell(row=1, column=1)
+
+    xlsx_worksheet_reader = xlsx_file_reader[worksheet]
+    xlsx_worksheet_columns = xlsx_worksheet_reader.rows
+    xlsx_worksheet_headers = [
+        cell.value
+        for cell in next(xlsx_worksheet_columns)
+    ]
+    key_column_index = xlsx_worksheet_headers.index(key)
+
+    return_value = {}
+    for i, row in enumerate(xlsx_worksheet_columns):
+        new_row_to_add = {}
+        for j, cell in enumerate(row):
+            new_row_to_add[xlsx_worksheet_headers[j]] = row[j].value
+        return_value[row[key_column_index].value] = new_row_to_add
+
+    return return_value
+
+
 def mail_merge_from_csv_file(
         template_fp: FileIO,
         data_csv_fp: FileIO,
         *,
-        key: str = None
+        key: str = None,
 ) -> dict:
     """Mail merges a Jinja2 template against a CSV file
 
-    This function inputs a Jinja2 template file and a CSV file whose column
-    headers correspond to the variables in the template fle (and, optionally, a
-    string specifying a column header from the CSV file; otherwise, the first
-    column in the CSV file is used) and outputs a dictionary keyed by the
-    specified column and having as values the results of rendering the template
-    against the row of the CSV file corresponding to the key value
+    This function inputs a Jinja2 template file a CSV file, and an optional key
+    column (defaulting to the left-most column, if not specified) and outputs a
+    dictionary keyed by the specified column and having as values the results
+    of rendering the template against the row from the CSV file corresponding
+    to the key value
 
     Args:
         template_fp: pointer to file or file-like object that is ready to read
@@ -101,14 +156,52 @@ def mail_merge_from_csv_file(
             key values in the dictionary generated
 
     Returns:
-        A dictionary whose keys come from the column specified by the argument
-        key (or from the first column in the CSV file, if no value is
-        specified) and whose values are the template file rendered against the
-        row in the CSV file corresponding to the key value
+        A dictionary keyed by the specified column and having as values the
+        results of rendering the template against the row from the CSV file
+        corresponding to the key value
 
     """
 
-    data_dict = convert_csv_to_dict(data_csv_fp,key=key)
+    data_dict = convert_csv_to_dict(data_csv_fp, key=key)
+
+    return_value = mail_merge_from_dict(template_fp, data_dict)
+
+    return return_value
+
+
+def mail_merge_from_xlsx_file(
+        template_fp: FileIO,
+        data_xlsx_fp: FileIO,
+        *,
+        key: str = None,
+        worksheet: str = None,
+) -> dict:
+    """Mail merges a Jinja2 template against an XLSX file
+
+    This function inputs a Jinja2 template file an XLSX file, an optional key
+    column (defaulting to the left-most column, if not specified), and an
+    optional worksheet name column (defaulting to the first worksheet, if not
+    specified) and outputs a dictionary keyed by the specified column and
+    having as values the results of rendering the template against the row from
+    the specified worksheet of the XLSX file corresponding to the key value
+
+    Args:
+        template_fp: pointer to file or file-like object that is ready to read
+            from and contains a Jinja2 template
+        data_xlsx_fp: pointer to file or file-like object that is ready to read
+            from and contains an XLSX file with columns headers in its first row
+        key: a column header from data_xlsx_fp, whose values should be used as
+            key values in the dictionary generated
+        worksheet: a worksheet name from data_xlsx_fp
+
+    Returns:
+        A dictionary keyed by the specified column and having as values the
+        results of rendering the template against the row from the specified
+        worksheet of the XLSX file corresponding to the key value
+
+    """
+
+    data_dict = convert_xlsx_to_dict(data_xlsx_fp, key=key, worksheet=worksheet)
 
     return_value = mail_merge_from_dict(template_fp, data_dict)
 

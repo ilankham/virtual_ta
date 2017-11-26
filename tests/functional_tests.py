@@ -10,6 +10,7 @@ from unittest import TestCase
 from virtual_ta import (
     flatten_dict,
     mail_merge_from_csv_file,
+    mail_merge_from_xlsx_file,
     SlackAccount,
 )
 
@@ -79,13 +80,26 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the mail_merge_from_xlsx_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
         # messages keyed by Blackboard account identifier
-        self.fail('Finish the test!')
+        with open('examples/example_template.txt') as template_fp:
+            with open('examples/example_gradebook.xlsx', 'rb') as gradebook_fp:
+                mail_merge_results = mail_merge_from_xlsx_file(
+                    template_fp,
+                    gradebook_fp,
+                    key='Slack_User_Name',
+                    worksheet='example_gradebook',
+                )
 
         # Prof. X prints a flattened version of the dictionary to verify
         # assignment feedback contents are as intended
+        print(flatten_dict(
+            mail_merge_results,
+            key_value_separator="\n\n-----\n\n",
+            items_separator="\n\n--------------------\n\nMessage to "
+        ))
 
         # Prof. X initiates a BlackboardAccount object and then uses the
         # set_api_token_from_file method to load their API Token
+        self.fail('Finish the test!')
 
         # Prof. X then checks the BlackboardAccount's API Token was loaded
         # correctly

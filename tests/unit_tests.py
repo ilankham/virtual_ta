@@ -1,15 +1,18 @@
 """Creates unit tests for project using unittest module"""
 
-from io import StringIO
+from io import BytesIO, StringIO
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
 
+from openpyxl import Workbook
 import requests_mock
 
 from virtual_ta import (
     mail_merge_from_dict,
     convert_csv_to_dict,
+    convert_xlsx_to_dict,
     mail_merge_from_csv_file,
+    mail_merge_from_xlsx_file,
     flatten_dict,
     SlackAccount,
 )
@@ -43,7 +46,7 @@ class TestDataConversions(TestCase):
 
         self.assertEqual(test_expectations, test_results)
 
-    def test_convert_from_csv_to_dict(self):
+    def test_convert_csv_to_dict(self):
         test_expectations = {
             "auser1": {
                 "User_Name": "auser1",
@@ -66,6 +69,44 @@ class TestDataConversions(TestCase):
         test_results = convert_csv_to_dict(
             test_csv,
             key="User_Name",
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_convert_xlsx_to_dict(self):
+        test_expectations = {
+            "auser1": {
+                "User_Name": "auser1",
+                "First_Name": "a",
+                "Last_Name": "user1",
+            },
+            "buser2": {
+                "User_Name": "buser2",
+                "First_Name": "b",
+                "Last_Name": "user2",
+            },
+        }
+
+        test_xlsx_entries = [
+            ["User_Name", "First_Name", "Last_Name"],
+            ["auser1", "a", "user1"],
+            ["buser2", "b", "user2"],
+        ]
+        test_xlsx = BytesIO()
+        test_workbook = Workbook()
+        test_workbook.create_sheet('test0')
+        test_worksheet = test_workbook.create_sheet('test1')
+        for i, row in enumerate(test_xlsx_entries):
+            for j, item in enumerate(row):
+                test_worksheet.cell(row=i+1, column=j+1).value = item
+        test_workbook.create_sheet('test2')
+        test_workbook.save(test_xlsx)
+
+        test_xlsx.seek(0)
+        test_results = convert_xlsx_to_dict(
+            test_xlsx,
+            key="User_Name",
+            worksheet='test1',
         )
 
         self.assertEqual(test_expectations, test_results)
@@ -107,6 +148,38 @@ class TestDataConversions(TestCase):
         test_results = mail_merge_from_csv_file(
             test_template,
             test_csv,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_mail_merge_from_xlsx_file(self):
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_xlsx_entries = [
+            ["User_Name", "First_Name", "Last_Name"],
+            ["auser1", "a", "user1"],
+            ["buser2", "b", "user2"],
+        ]
+        test_xlsx = BytesIO()
+        test_workbook = Workbook()
+        test_workbook.create_sheet('test0')
+        test_worksheet = test_workbook.create_sheet('test1')
+        for i, row in enumerate(test_xlsx_entries):
+            for j, item in enumerate(row):
+                test_worksheet.cell(row=i+1, column=j+1).value = item
+        test_workbook.create_sheet('test2')
+        test_workbook.save(test_xlsx)
+
+        test_xlsx.seek(0)
+        test_results = mail_merge_from_xlsx_file(
+            test_template,
+            test_xlsx,
+            key="User_Name",
+            worksheet='test1',
         )
 
         self.assertEqual(test_expectations, test_results)
