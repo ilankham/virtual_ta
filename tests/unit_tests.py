@@ -1,10 +1,9 @@
 """Creates unit tests for project using unittest module"""
 
-from io import BytesIO, StringIO
+from io import StringIO
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
 
-from openpyxl import Workbook
 import requests_mock
 
 from virtual_ta import (
@@ -16,6 +15,7 @@ from virtual_ta import (
     flatten_dict,
     SlackAccount,
 )
+from .xlsx_mock import XlsxMock
 
 
 # noinspection SpellCheckingInspection
@@ -92,19 +92,13 @@ class TestDataConversions(TestCase):
             ["auser1", "a", "user1"],
             ["buser2", "b", "user2"],
         ]
-        test_xlsx = BytesIO()
-        test_workbook = Workbook()
+        test_workbook = XlsxMock()
         test_workbook.create_sheet('test0')
         test_worksheet = test_workbook.create_sheet('test1')
-        for i, row in enumerate(test_xlsx_entries):
-            for j, item in enumerate(row):
-                test_worksheet.cell(row=i+1, column=j+1).value = item
+        test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
-        test_workbook.save(test_xlsx)
-
-        test_xlsx.seek(0)
         test_results = convert_xlsx_to_dict(
-            test_xlsx,
+            test_workbook.as_file,
             key="User_Name",
             worksheet='test1',
         )
@@ -164,20 +158,14 @@ class TestDataConversions(TestCase):
             ["auser1", "a", "user1"],
             ["buser2", "b", "user2"],
         ]
-        test_xlsx = BytesIO()
-        test_workbook = Workbook()
+        test_workbook = XlsxMock()
         test_workbook.create_sheet('test0')
         test_worksheet = test_workbook.create_sheet('test1')
-        for i, row in enumerate(test_xlsx_entries):
-            for j, item in enumerate(row):
-                test_worksheet.cell(row=i+1, column=j+1).value = item
+        test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
-        test_workbook.save(test_xlsx)
-
-        test_xlsx.seek(0)
         test_results = mail_merge_from_xlsx_file(
             test_template,
-            test_xlsx,
+            test_workbook.as_file,
             key="User_Name",
             worksheet='test1',
         )
