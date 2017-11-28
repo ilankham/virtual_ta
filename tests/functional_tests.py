@@ -5,6 +5,7 @@ contents comprising a valid Slack Web API Token.
 
 """
 
+from contextlib import ExitStack
 from unittest import TestCase
 
 from virtual_ta import (
@@ -35,11 +36,16 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the mail_merge_from_csv_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
         # messages keyed by Slack user name
-        with open('examples/example_template.txt') as template_fp:
-            with open('examples/example_gradebook.csv') as gradebook_fp:
-                mail_merge_results = mail_merge_from_csv_file(
-                    template_fp, gradebook_fp, key='Slack_User_Name'
-                )
+        with ExitStack() as es:
+            template_fp = es.enter_context(
+                open('examples/example_feedback_template.txt')
+            )
+            gradebook_fp = es.enter_context(
+                open('examples/example_gradebook.csv')
+            )
+            mail_merge_results = mail_merge_from_csv_file(
+                template_fp, gradebook_fp, key='Slack_User_Name'
+            )
 
         # Prof. X prints a flattened version of the dictionary to verify
         # message contents are as intended
@@ -80,14 +86,19 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the mail_merge_from_xlsx_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
         # messages keyed by Blackboard account identifier
-        with open('examples/example_template.txt') as template_fp:
-            with open('examples/example_gradebook.xlsx', 'rb') as gradebook_fp:
-                mail_merge_results = mail_merge_from_xlsx_file(
-                    template_fp,
-                    gradebook_fp,
-                    key='Slack_User_Name',
-                    worksheet='example_gradebook',
-                )
+        with ExitStack() as es:
+            template_fp = es.enter_context(
+                open('examples/example_feedback_template.txt')
+            )
+            gradebook_fp = es.enter_context(
+                open('examples/example_gradebook.xlsx', 'rb')
+            )
+            mail_merge_results = mail_merge_from_xlsx_file(
+                template_fp,
+                gradebook_fp,
+                key='Slack_User_Name',
+                worksheet='example_gradebook',
+            )
 
         # Prof. X prints a flattened version of the dictionary to verify
         # assignment feedback contents are as intended
