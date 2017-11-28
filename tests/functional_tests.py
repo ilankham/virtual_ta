@@ -101,6 +101,13 @@ class TAWorkflowTests(TestCase):
         # set_api_token_from_file method to load their API Token
         self.fail('Finish the test!')
 
+        # Note: Per https://community.blackboard.com/docs/DOC-1733 and
+        # https://community.blackboard.com/thread/3375-http-403-while-using
+        # -rest-api-patch-and-post-requests-through-ajax , it might
+        # not be possible to automate this process without having admin access
+        # to a Blackboard server in order to grant access to make patch/post
+        # requests from https://developer.blackboard.com/portal/displayApi
+
         # Prof. X then checks the BlackboardAccount's API Token was loaded
         # correctly
 
@@ -108,4 +115,4 @@ class TAWorkflowTests(TestCase):
         # send the assignment feedback in the dictionary to the indicated
         # students
 
-        # Prof. X verifies in the assignment feedback was correctly added
+        # Prof. X verifies the assignment feedback was correctly added
