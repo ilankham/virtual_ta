@@ -49,11 +49,18 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X prints a flattened version of the dictionary to verify
         # message contents are as intended
-        print(flatten_dict(
-            mail_merge_results,
-            key_value_separator="\n\n-----\n\n",
-            items_separator="\n\n--------------------\n\nMessage to "
-        ))
+        with open(
+            'examples/expected_render_results_for_test_send_slack_messages_with'
+            '_csv_import.txt'
+        ) as test_fp:
+            self.assertEqual(
+                flatten_dict(
+                    mail_merge_results,
+                    key_value_separator="\n\n-----\n\n",
+                    items_separator="\n\n--------------------\n\nMessage to "
+                ),
+                test_fp.read()
+            )
 
         # Prof. X initiates a SlackAccount object and then uses the
         # set_api_token_from_file method to load their API Token
@@ -102,11 +109,21 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X prints a flattened version of the dictionary to verify
         # assignment feedback contents are as intended
-        print(flatten_dict(
-            mail_merge_results,
-            key_value_separator="\n\n-----\n\n",
-            items_separator="\n\n--------------------\n\nMessage to "
-        ))
+
+        # Prof. X prints a flattened version of the dictionary to verify
+        # message contents are as intended
+        with open(
+            'examples/expected_render_results_for_test_post_to_bb_with'
+            '_xlsx_import.txt'
+        ) as test_fp:
+            self.assertEqual(
+                flatten_dict(
+                    mail_merge_results,
+                    key_value_separator="\n\n-----\n\n",
+                    items_separator="\n\n--------------------\n\nMessage to "
+                ),
+                test_fp.read()
+            )
 
         # Prof. X initiates a BlackboardAccount object and then uses the
         # set_api_token_from_file method to load their API Token

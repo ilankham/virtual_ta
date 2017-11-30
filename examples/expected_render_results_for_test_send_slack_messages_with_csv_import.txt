@@ -1,0 +1,51 @@
+
+
+--------------------
+
+Message to uuser1
+
+-----
+
+Assignment Feedback for user user1
+
+Team Assignment: team-1
+
+Specified Repo Names/Structure: Y
+
+Use of GitHub Flow Evident: Y
+
+Specified File Contents: N (data-analysis file does not follow style guide)
+
+Release URL in #project2_repo_urls: Y (please use v1.1 or later for resubmission)
+
+
+Overall Feedback:
+
+- Submission incomplete
+
+- Please review directions and direct message me in Slack to discuss any questions or concerns. The resubmission deadline is 11:59 PM on Saturday.
+
+
+
+--------------------
+
+Message to uuser2
+
+-----
+
+Assignment Feedback for user user2
+
+Team Assignment: team-2
+
+Specified Repo Names/Structure: Y
+
+Use of GitHub Flow Evident: Y
+
+Specified File Contents: Y
+
+Release URL in #project2_repo_urls: Y
+
+
+Overall Feedback:
+
+- Looks good; thanks!
