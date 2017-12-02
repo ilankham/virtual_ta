@@ -12,10 +12,10 @@ from unittest import TestCase
 
 from virtual_ta import (
     flatten_dict,
-    generate_calendar_yaml,
+    convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
     mail_merge_from_xlsx_file,
-    mail_merge_from_yaml,
+    mail_merge_from_yaml_file,
     SlackAccount,
 )
 
@@ -151,29 +151,31 @@ class TAWorkflowTests(TestCase):
 
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
-        # day of week, with each cell listing one or more pipe-delimited items
+        # each day of week, with each cell listing one or more delimited items
         # to be calendared
 
         # Prof. X uses the generate_calendar_yaml function to create an ordered
         # sequence of nested YAML statements organized by week
         with open('examples/example_calendar_data.xlsx', 'rb') as assessment_fp:
-            calendar_yaml = generate_calendar_yaml(
+            yaml_calendar = convert_xlsx_to_yaml_calendar(
                 data_xlsx_fp=assessment_fp,
                 start_date=date(2018, 1, 1),
-                worksheet="",
+                item_delimiter='|',
+                week_column='Week',
+                worksheet='Assessments',
             )
 
         # Prof. X prints calendar_yaml to inspect for accuracy
-        print(calendar_yaml)
+        print(yaml_calendar)
 
         # Prof. X saves calendar_yaml to a file for manual editing/updating,
         # including adding comments or additional content
-        data_yaml_fp = StringIO(calendar_yaml)
+        data_yaml_fp = StringIO(yaml_calendar)
 
         # Prof. X uses the mail_merge_from_yaml function to create a LaTeX
         # table representation of data_yaml_fp
         with open('examples/example_latex_table_template.txt') as template_fp:
-            latex_results = mail_merge_from_yaml(
+            latex_results = mail_merge_from_yaml_file(
                 template_fp=template_fp,
                 data_yaml_fp=data_yaml_fp,
             )
