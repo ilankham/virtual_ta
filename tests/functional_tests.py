@@ -151,8 +151,9 @@ class TAWorkflowTests(TestCase):
 
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
-        # each day of week, with each cell listing one or more delimited items
-        # to be calendared
+        # each day of the week (Monday through Sunday, following ISO 8601),
+        # with each cell listing one or more delimited items to be calendared
+        self.fail('Finish the test!')
 
         # Prof. X uses the generate_calendar_yaml function to create an ordered
         # sequence of nested YAML statements organized by week
@@ -161,7 +162,7 @@ class TAWorkflowTests(TestCase):
                 data_xlsx_fp=assessment_fp,
                 start_date=date(2018, 1, 1),
                 item_delimiter='|',
-                week_column='Week',
+                week_number_column='Week',
                 worksheet='Assessments',
             )
 
