@@ -10,11 +10,11 @@ See https://api.slack.com/web for more information about the Slack Web API.
 """
 
 from io import StringIO, TextIOWrapper
-from typing import Union
+from typing import TextIO, Union
 
 import requests
 
-FileIO = Union[StringIO, TextIOWrapper]
+FileIO = Union[StringIO, TextIO, TextIOWrapper]
 
 
 class SlackAccount(object):
