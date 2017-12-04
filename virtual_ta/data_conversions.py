@@ -1,6 +1,8 @@
 """Creates functions for converting between data formats"""
 
+from calendar import day_name
 from csv import DictReader
+from datetime import date
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
 from typing import Union
 
@@ -85,7 +87,7 @@ def convert_xlsx_to_dict(
         *,
         key: str = None,
         worksheet: str = None,
-):
+) -> dict:
     """Convert XLSX file to dictionary of dictionaries
 
     This function inputs an XLSX file, an optional key column (defaulting to the
@@ -131,6 +133,32 @@ def convert_xlsx_to_dict(
         return_value[row[key_column_index].value] = new_row_to_add
 
     return return_value
+
+
+def convert_xlsx_to_yaml_calendar(
+        data_xlsx_fp: FileIO,
+        start_date: date,
+        *,
+        item_delimiter: str = "|",
+        week_number_column: str = None,
+        worksheet: str = None,
+) -> str:
+    # start day will be adjusted to first Monday of following week, if imputed
+    # date of first data item is before start date
+    #
+    # day names use current locale, as identified by calendar module, in ISO
+    # 8601 order, Monday through Sunday
+    
+    data_dict = convert_xlsx_to_dict(
+        data_xlsx_fp,
+        key=week_number_column,
+        worksheet=worksheet
+    )
+
+    # check whether start_date needs to be rounded to start of next week
+
+    # for each data, map day of week to number using
+    # [day.lower() for day in day_name]
 
 
 def mail_merge_from_csv_file(
