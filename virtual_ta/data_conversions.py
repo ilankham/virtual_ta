@@ -143,8 +143,11 @@ def convert_xlsx_to_yaml_calendar(
         week_number_column: str = None,
         worksheet: str = None,
 ) -> str:
-    # start day will be adjusted to first Monday of following week, if imputed
-    # date of first data item is before start date
+    # start day will be adjusted to Monday of the week that start_date
+    # appears in, where weeks are defined as running from Monday to Sunday
+    #
+    # Week numbers in the week_number_column column of data_xlsx_fp should be
+    # integers, with 1 the week that start_date appears in
     #
     # day names use current locale, as identified by calendar module, in ISO
     # 8601 order, Monday through Sunday
