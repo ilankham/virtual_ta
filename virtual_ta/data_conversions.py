@@ -2,7 +2,7 @@
 
 from calendar import day_name
 from csv import DictReader
-from datetime import date
+from datetime import date, timedelta
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
 from typing import Union
 
@@ -158,7 +158,7 @@ def convert_xlsx_to_yaml_calendar(
         worksheet=worksheet
     )
 
-    # check whether start_date needs to be rounded to start of next week
+    # check whether start_date needs to be adjusted
 
     # for each data, map day of week to number using
     # [day.lower() for day in day_name]
