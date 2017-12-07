@@ -253,7 +253,7 @@ class TestDataConversions(TestCase):
         ]
         test_expectations = '\n'.join(test_expectations_list)
 
-        test_start_date = date(2018, 1, 1)
+        test_start_date = date(2018, 1, 3)
         test_item_delimiter = '|'
         test_week_number_column = 'Week'
         test_worksheet_name = 'Assessments'
@@ -307,45 +307,42 @@ class TestDataConversions(TestCase):
     def test_convert_xlsx_to_yaml_calendar_on_start_date(self):
         test_expectations_list = [
             "1:",
-            "  Monday:",
-            "    Date: 01JAN2018",
-            "    Activities:",
-            "      - Week 1 Activity 1",
             "  Tuesday:",
             "    Date: 02JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 2",
-            "      - Week 1 Activity 3",
+            "    - Week 1 Activity 2",
+            "    - Week 1 Activity 3",
             "  Wednesday:",
             "    Date: 03JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 4",
+            "    - Week 1 Activity 4",
             "  Thursday:",
             "    Date: 04JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 5",
+            "    - Week 1 Activity 5",
             "  Friday:",
             "    Date: 05JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 6",
+            "    - Week 1 Activity 6",
             "  Saturday:",
             "    Date: 06JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 7",
+            "    - Week 1 Activity 7",
             "  Sunday:",
             "    Date: 07JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 8",
+            "    - Week 1 Activity 8",
             "3:",
             "  Tuesday:",
-            "    Date: 09JAN2018",
+            "    Date: 16JAN2018",
             "    Activities:",
-            "      - Week 3 Activity 1",
+            "    - Week 3 Activity 1",
             "  Friday:",
-            "    Date: 12JAN2018",
+            "    Date: 19JAN2018",
             "    Activities:",
-            "      - Week 3 Activity 2",
-            "      - Week 3 Activity 3",
+            "    - Week 3 Activity 2",
+            "    - Week 3 Activity 3",
+            "",
         ]
         test_expectations = '\n'.join(test_expectations_list)
 
@@ -366,7 +363,7 @@ class TestDataConversions(TestCase):
             ],
             [
                 "1",
-                "Week 1 Activity 1",
+                "",
                 "Week 1 Activity 2|Week 1 Activity 3",
                 "Week 1 Activity 4",
                 "Week 1 Activity 5",
@@ -403,49 +400,46 @@ class TestDataConversions(TestCase):
     def test_convert_xlsx_to_yaml_calendar_before_start_date(self):
         test_expectations_list = [
             "1:",
-            "  Monday:",
-            "    Date: 08JAN2018",
-            "    Activities:",
-            "      - Week 1 Activity 1",
             "  Tuesday:",
-            "    Date: 09JAN2018",
+            "    Date: 02JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 2",
-            "      - Week 1 Activity 3",
+            "    - Week 1 Activity 2",
+            "    - Week 1 Activity 3",
             "  Wednesday:",
-            "    Date: 10JAN2018",
+            "    Date: 03JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 4",
+            "    - Week 1 Activity 4",
             "  Thursday:",
-            "    Date: 11JAN2018",
+            "    Date: 04JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 5",
+            "    - Week 1 Activity 5",
             "  Friday:",
-            "    Date: 12JAN2018",
+            "    Date: 05JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 6",
+            "    - Week 1 Activity 6",
             "  Saturday:",
-            "    Date: 13JAN2018",
+            "    Date: 06JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 7",
+            "    - Week 1 Activity 7",
             "  Sunday:",
-            "    Date: 14JAN2018",
+            "    Date: 07JAN2018",
             "    Activities:",
-            "      - Week 1 Activity 8",
+            "    - Week 1 Activity 8",
             "3:",
             "  Tuesday:",
             "    Date: 16JAN2018",
             "    Activities:",
-            "      - Week 3 Activity 1",
+            "    - Week 3 Activity 1",
             "  Friday:",
             "    Date: 19JAN2018",
             "    Activities:",
-            "      - Week 3 Activity 2",
-            "      - Week 3 Activity 3",
+            "    - Week 3 Activity 2",
+            "    - Week 3 Activity 3",
+            "",
         ]
         test_expectations = '\n'.join(test_expectations_list)
 
-        test_start_date = date(2018, 1, 2)
+        test_start_date = date(2018, 1, 1)
         test_item_delimiter = '|'
         test_week_number_column = 'Week'
         test_worksheet_name = 'Assessments'
@@ -462,7 +456,7 @@ class TestDataConversions(TestCase):
             ],
             [
                 "1",
-                "Week 1 Activity 1",
+                "",
                 "Week 1 Activity 2|Week 1 Activity 3",
                 "Week 1 Activity 4",
                 "Week 1 Activity 5",

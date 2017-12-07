@@ -4,14 +4,14 @@ from calendar import day_name
 from csv import DictReader
 from datetime import date, timedelta
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
-from typing import Union
+from typing import BinaryIO, Union
 
 from jinja2 import Template
 from openpyxl import load_workbook
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-FileIO = Union[BytesIO, FileIO, StringIO, TextIOWrapper]
+FileIO = Union[BinaryIO, BytesIO, FileIO, StringIO, TextIOWrapper]
 
 
 def mail_merge_from_dict(
@@ -177,9 +177,8 @@ def convert_xlsx_to_yaml_calendar(
                         start_date_adjusted
                         +
                         timedelta(
-                            days=
-                            7 * (int(week_number) - 1)
-                            + int(weekday_numbers[weekday.lower()])
+                            days=7 * (int(week_number) - 1) +
+                            int(weekday_numbers[weekday.lower()])
                         )
                 ).strftime('%d%b%Y').upper()
                 calendar_dict[week_number][weekday] = CommentedMap()
