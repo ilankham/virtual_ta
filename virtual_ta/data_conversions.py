@@ -8,6 +8,8 @@ from typing import Union
 
 from jinja2 import Template
 from openpyxl import load_workbook
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 FileIO = Union[BytesIO, FileIO, StringIO, TextIOWrapper]
 
@@ -151,17 +153,47 @@ def convert_xlsx_to_yaml_calendar(
     #
     # day names use current locale, as identified by calendar module, in ISO
     # 8601 order, Monday through Sunday
-    
+
     data_dict = convert_xlsx_to_dict(
         data_xlsx_fp,
         key=week_number_column,
         worksheet=worksheet
     )
 
-    # check whether start_date needs to be adjusted
+    start_date_adjusted = start_date - timedelta(days=start_date.weekday())
 
-    # for each data, map day of week to number using
-    # [day.lower() for day in day_name]
+    weekday_numbers = {day.lower(): n for n, day in enumerate(day_name)}
+
+    calendar_dict = CommentedMap()
+    for week_number, week_data in data_dict.items():
+        week_number = int(week_number)
+        calendar_dict[week_number] = CommentedMap()
+        for weekday in week_data:
+            if (
+                weekday.lower() in weekday_numbers
+                and week_data[weekday] is not None
+            ):
+                weekday_date = (
+                        start_date_adjusted
+                        +
+                        timedelta(
+                            days=
+                            7 * (int(week_number) - 1)
+                            + int(weekday_numbers[weekday.lower()])
+                        )
+                ).strftime('%d%b%Y').upper()
+                calendar_dict[week_number][weekday] = CommentedMap()
+                calendar_dict[week_number][weekday]['Date'] = weekday_date
+                calendar_dict[week_number][weekday]['Activities'] = (
+                    week_data[weekday].split(item_delimiter)
+                )
+
+    yaml = YAML()
+    calendar_yaml = StringIO()
+    yaml.dump(data=calendar_dict, stream=calendar_yaml)
+    calendar_yaml.seek(0)
+
+    return calendar_yaml.read()
 
 
 def mail_merge_from_csv_file(
