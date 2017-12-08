@@ -15,7 +15,7 @@ from virtual_ta import (
     convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
     mail_merge_from_xlsx_file,
-    mail_merge_from_yaml_file,
+    # mail_merge_from_yaml_file,
     SlackAccount,
 )
 
