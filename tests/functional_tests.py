@@ -153,7 +153,6 @@ class TAWorkflowTests(TestCase):
         # Prof. X creates an Excel file with column labels for week number and
         # each day of the week (Monday through Sunday, following ISO 8601),
         # with each cell listing one or more delimited items to be calendared
-        self.fail('Finish the test!')
 
         # Prof. X uses the generate_calendar_yaml function to create an ordered
         # sequence of nested YAML statements organized by week
@@ -167,7 +166,14 @@ class TAWorkflowTests(TestCase):
             )
 
         # Prof. X prints calendar_yaml to inspect for accuracy
-        print(yaml_calendar)
+        with open(
+            'examples/expected_render_results_for_test_render_calendar_table-'
+            'yaml_calendar.yaml'
+        ) as test_fp:
+            self.assertEqual(
+                yaml_calendar,
+                test_fp.read()
+            )
 
         # Prof. X saves calendar_yaml to a file for manual editing/updating,
         # including adding comments or additional content
