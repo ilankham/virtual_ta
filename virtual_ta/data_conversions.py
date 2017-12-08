@@ -152,8 +152,9 @@ def convert_xlsx_to_yaml_calendar(
     optional key column for week numbers (defaulting to the left-most column,
     if not specified), and an optional worksheet name column (defaulting to the
     first worksheet, if not specified), and outputs a string containing a YAML
-    representation keyed by the specified key column and having as values lists
-    encoding the row from the specified worksheet of the XLSX file corresponding
+    representation keyed by the specified key column and having as values
+    dictionaries encoding the row from the specified worksheet of the XLSX file
+    corresponding
     to the key value
 
     Args:
@@ -177,8 +178,8 @@ def convert_xlsx_to_yaml_calendar(
 
     Returns:
          A string containing a YAML representation keyed by the specified key
-         column and having as values lists encoding the row from the specified
-         worksheet of the XLSX file corresponding to the key value
+         column and having as values dictionaries encoding the row from the
+         specified worksheet of the XLSX file corresponding to the key value
 
     """
 
@@ -195,7 +196,7 @@ def convert_xlsx_to_yaml_calendar(
     calendar_dict = CommentedMap()
     for week_number, week_data in data_dict.items():
         week_number = int(week_number)
-        calendar_dict[week_number] = []
+        calendar_dict[week_number] = CommentedMap()
         for weekday in week_data:
             if weekday == week_number_column or week_data[weekday] is None:
                 continue
@@ -208,16 +209,16 @@ def convert_xlsx_to_yaml_calendar(
                             int(weekdays_lookup_dict[weekday.lower()])
                         )
                 ).strftime('%d%b%Y').upper()
-                weekday_data = CommentedMap()
-                weekday_data[weekday] = CommentedMap()
-                weekday_data[weekday]['Date'] = weekday_date
-                weekday_data[weekday]['Activities'] = (
+                calendar_dict[week_number][weekday] = CommentedMap()
+                calendar_dict[week_number][weekday]['Date'] = weekday_date
+                calendar_dict[week_number][weekday]['Activities'] = (
                     week_data[weekday].split(item_delimiter)
                 )
-                calendar_dict[week_number].append(weekday_data)
+
             else:
-                other_data = {weekday: week_data[weekday].split(item_delimiter)}
-                calendar_dict[week_number].append(other_data)
+                calendar_dict[week_number][weekday] = (
+                    week_data[weekday].split(item_delimiter)
+                )
 
     yaml = YAML()
     calendar_yaml = StringIO()
