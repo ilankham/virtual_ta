@@ -15,7 +15,7 @@ from virtual_ta import (
     convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
     mail_merge_from_xlsx_file,
-    # mail_merge_from_yaml_file,
+    mail_merge_from_yaml_file,
     SlackAccount,
 )
 
@@ -112,9 +112,6 @@ class TAWorkflowTests(TestCase):
             )
 
         # Prof. X prints a flattened version of the dictionary to verify
-        # assignment feedback contents are as intended
-
-        # Prof. X prints a flattened version of the dictionary to verify
         # message contents are as intended
         with open(
             'examples/expected_render_results_for_test_post_to_bb_with'
@@ -180,12 +177,25 @@ class TAWorkflowTests(TestCase):
         data_yaml_fp = StringIO(yaml_calendar)
 
         # Prof. X uses the mail_merge_from_yaml function to create a LaTeX
-        # table representation of data_yaml_fp
-        with open('examples/example_latex_table_template.txt') as template_fp:
+        # table representation of data_yaml_fp as a dictionary
+        with open('examples/example_latex_table_template.tex') as template_fp:
             latex_results = mail_merge_from_yaml_file(
                 template_fp=template_fp,
                 data_yaml_fp=data_yaml_fp,
             )
 
-        # Prof. X then prints the resulting LaTeX code to verify correctness
-        print(latex_results)
+        # Prof. X prints a flattened version of the dictionary to verify
+        # calendar entries are as intended
+        with open(
+            'examples/expected_render_results_for_test_render_calendar_table-'
+            'latex_table.tex'
+        ) as test_fp:
+            self.assertEqual(
+                flatten_dict(
+                    latex_results,
+                    key_value_separator="",
+                    items_separator='\n'+('%'*80+'\n')*3,
+                    suppress_keys=True
+                ),
+                test_fp.read()
+            )

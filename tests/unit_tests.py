@@ -14,6 +14,7 @@ from virtual_ta import (
     mail_merge_from_csv_file,
     mail_merge_from_dict,
     mail_merge_from_xlsx_file,
+    mail_merge_from_yaml_file,
     flatten_dict,
     SlackAccount,
 )
@@ -487,6 +488,30 @@ class TestDataConversions(TestCase):
                 week_number_column=test_week_number_column,
                 worksheet=test_worksheet_name,
             )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_mail_merge_from_yaml_file(self):
+        test_expectations = {
+            1: "a user1",
+            2: "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_yaml_entries = [
+            "1:",
+            "  First_Name: a",
+            "  Last_Name: user1",
+            "2:",
+            "  First_Name: b",
+            "  Last_Name: user2",
+            "",
+        ]
+        test_yaml = '\n'.join(test_yaml_entries)
+        test_results = mail_merge_from_yaml_file(
+            test_template,
+            test_yaml
+        )
 
         self.assertEqual(test_expectations, test_results)
 

@@ -4,14 +4,14 @@ from calendar import day_name
 from csv import DictReader
 from datetime import date, timedelta
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
-from typing import BinaryIO, Union
+from typing import BinaryIO, TextIO, Union
 
 from jinja2 import Template
 from openpyxl import load_workbook
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-FileIO = Union[BinaryIO, BytesIO, FileIO, StringIO, TextIOWrapper]
+FileIO = Union[BinaryIO, BytesIO, FileIO, StringIO, TextIO, TextIOWrapper]
 
 
 def mail_merge_from_dict(
@@ -303,10 +303,28 @@ def mail_merge_from_xlsx_file(
     return return_value
 
 
+def mail_merge_from_yaml_file(
+        template_fp: FileIO,
+        data_yaml_fp: Union[FileIO, str],
+) -> dict:
+
+    yaml = YAML()
+    data_dict = yaml.load(data_yaml_fp)
+
+    for key in data_dict:
+        data_dict[key]['yaml_file_main_key'] = key
+
+    return_value = mail_merge_from_dict(template_fp, data_dict)
+
+    return return_value
+
+
 def flatten_dict(
         data_items: dict,
         key_value_separator: str = '\n',
         items_separator: str = '\n',
+        *,
+        suppress_keys: bool = False,
         **kwargs
 ) -> str:
     """Convert dictionary to string with specified separators
@@ -321,6 +339,8 @@ def flatten_dict(
             converted to strings
         key_value_separator: used to separate keys from values
         items_separator: used to separate items
+        suppress_keys: Boolean for determining whether to include keys in the
+            returned string
         **kwargs: options passed through to the builtin function sorted
 
     Returns:
@@ -332,8 +352,9 @@ def flatten_dict(
     return_value = items_separator
     last_record_number = len(data_items)
     for n, k in enumerate(sorted(data_items.keys(), **kwargs)):
-        return_value += str(k)
-        return_value += key_value_separator
+        if not suppress_keys:
+            return_value += str(k)
+            return_value += key_value_separator
         return_value += str(data_items[k])
         if n < last_record_number - 1:
             return_value += items_separator

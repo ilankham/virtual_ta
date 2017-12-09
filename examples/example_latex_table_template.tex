@@ -1,0 +1,74 @@
+\begin{minipage}{2.25cm}
+    \center{\bf {{yaml_file_main_key}} }
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Tuesday is defined -%}
+    {\bf {{Tuesday.Date}} }
+    {% endif -%}
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Thursday is defined -%}
+    {\bf {{Thursday.Date}} }
+    {% endif -%}
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Saturday is defined -%}
+    {\bf {{Saturday.Date}} }
+    {% endif -%}
+\end{minipage}
+\\
+\begin{minipage}{2.25cm}
+    \footnotesize
+    \vspace{1mm}
+    {% for reading in Readings -%}
+     {{reading}}\\
+    {% endfor -%}
+
+    {% for reading_note in Reading_Notes -%}
+    % {{reading_note}}
+    {% endfor -%}
+
+    {% for reading_equivalence in Reading_Equivalences -%}
+    % {{reading_equivalence}}
+    {% endfor -%}
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Tuesday is defined -%}
+    \vspace{1mm}
+    {\bf Due by 11:59 PM}:\\
+    {% for activity in Tuesday.Activities -%}
+    {\small \phantom{i}\raisebox{0.25mm}{$\bullet$} {{activity}} }
+    {{ "\\\\" if not loop.last }}
+    {% endfor -%}
+    \vspace{1.5mm}
+    {% endif -%}
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Thursday is defined -%}
+    \vspace{1mm}
+    {\bf Due by 11:59 PM}:\\
+    {% for activity in Thursday.Activities -%}
+    {\small \phantom{i}\raisebox{0.25mm}{$\bullet$} {{activity}} }
+    {{ "\\\\" if not loop.last }}
+    {% endfor -%}
+    \vspace{1.5mm}
+    {% endif -%}
+\end{minipage}
+&
+\begin{minipage}{4.8cm}
+    {% if Saturday is defined -%}
+    \vspace{1mm}
+    {\bf Due by 11:59 PM}:\\
+    {% for activity in Saturday.Activities -%}
+    {\small \phantom{i}\raisebox{0.25mm}{$\bullet$} {{activity}} }
+    {{ "\\\\" if not loop.last }}
+    {% endfor -%}
+    \vspace{1.5mm}
+    {% endif -%}
+\end{minipage}
+\\\hline
