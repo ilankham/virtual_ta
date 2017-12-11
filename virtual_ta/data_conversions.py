@@ -79,7 +79,7 @@ def convert_xlsx_to_dict(
 
     """
 
-    xlsx_file_reader = load_workbook(data_xlsx_fp, read_only=True)
+    xlsx_file_reader = load_workbook(data_xlsx_fp, read_only=True, data_only=True)
     if worksheet is None:
         worksheet = xlsx_file_reader[0]
     if key is None:
