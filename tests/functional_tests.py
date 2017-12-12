@@ -32,7 +32,7 @@ class TAWorkflowTests(TestCase):
         # Prof. X saves the API Token in a text file
 
         # Prof. X saves a gradebook csv file named with column headings and one
-        # row per student grade record
+        # row per student grade record; columns include Slack_User_Name
 
         # Prof. X saves a template text file as a Jinja2 template, with each
         # variable name a column heading in the gradebook csv file
@@ -199,3 +199,29 @@ class TAWorkflowTests(TestCase):
                 ),
                 test_fp.read()
             )
+
+    def test_github_setup_with_xlsx_import(self):
+        # Prof. X sets up a GitHub Organization and follows the instructions at
+        # https://github.com/blog/1509-personal-api-tokens to create a Personal
+        # API Token with scopes admin:org and public_repo
+
+        # Prof. X saves the API Token in a text file
+
+        # Prof. X saves a gradebook xlsx file named with column headings and one
+        # row per student grade record; columns include GitHub_User_Name and
+        # Team Number
+
+        # Prof. X reads in the gradebook and creates a dictionary keyed by
+        # Team Number and values comprising lists of corresponding
+        # GitHub_User_Name values
+
+        # Prof. X initiates a GitHubAccount object associated with the GitHub
+        # Organziation and then loads their API Token from text file
+
+        # Prof. X uses the GitHubAccount object to create teams within the
+        # GitHub Organization
+
+        # Prof. X uses the GitHubAccount object to create project repos for
+        # each team
+
+        self.fail('Finish the test!')
