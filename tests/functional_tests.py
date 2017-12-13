@@ -1,8 +1,8 @@
 """Create functional tests for project using unittest module
 
-This module assumes the file tests/slack_test_token.ini exists and has a single
-line of contents comprising a valid Slack Web API Token, in addition to the
-files in the examples directory.
+This module assumes the files tests/slack_test_token.ini and tests/
+github_test_token.ini exist and each have a single line of content comprising
+a valid Slack Web API Token and a valid GitHub API Token, respectively.
 
 """
 
@@ -201,28 +201,28 @@ class TAWorkflowTests(TestCase):
                 test_fp.read()
             )
 
-    def test_github_setup_with_xlsx_import(self):
+    def test_github_setup_with_csv_import(self):
         # Prof. X sets up a GitHub Organization and follows the instructions at
         # https://github.com/blog/1509-personal-api-tokens to create a Personal
         # API Token with scopes admin:org and public_repo
 
         # Prof. X saves the API Token in a text file
 
-        # Prof. X saves a gradebook xlsx file named with column headings and
+        # Prof. X saves a gradebook csv file named with column headings and
         # one row per student grade record; columns include GitHub_User_Name
-        # and Team Number
+        # and Team_Number
 
         # Prof. X reads in the gradebook and creates a dictionary keyed by
-        # Team Number and values comprising lists of corresponding
+        # Team_Number and values comprising lists of corresponding
         # GitHub_User_Name values
 
-        # Prof. X initiates a GitHubAccount object associated with the GitHub
-        # Organization and then loads their API Token from text file
+        # Prof. X initiates a GitHubOrganization object associated with the
+        # GitHub Organization and then loads their API Token from the text file
 
-        # Prof. X uses the GitHubAccount object to create teams within the
+        # Prof. X uses the GitHubOrganization object to create teams within the
         # GitHub Organization
 
-        # Prof. X uses the GitHubAccount object to create project repos for
-        # each team
+        # Prof. X uses the GitHubOrganization object to create project repos
+        # for each team
 
         self.fail('Finish the test!')
