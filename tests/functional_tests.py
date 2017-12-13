@@ -1,7 +1,8 @@
 """Create functional tests for project using unittest module
 
-This module assumes the file examples/token.ini exists and has a single line of
-contents comprising a valid Slack Web API Token.
+This module assumes the file tests/slack_test_token.ini exists and has a single
+line of contents comprising a valid Slack Web API Token, in addition to the
+files in the examples directory.
 
 """
 
@@ -69,11 +70,11 @@ class TAWorkflowTests(TestCase):
         # Prof. X initiates a SlackAccount object and then uses the
         # set_api_token_from_file method to load their API Token
         test_bot = SlackAccount()
-        with open('examples/token.ini') as fp:
+        with open('tests/slack_test_token.ini') as fp:
             test_bot.set_api_token_from_file(fp)
 
         # Prof. X then checks the SlackAccount's API Token was loaded correctly
-        with open('examples/token.ini') as fp:
+        with open('tests/slack_test_token.ini') as fp:
             self.assertEqual(fp.readline(), test_bot.api_token)
 
         # Prof. X uses the SlackAccount direct_message_users method to send the
