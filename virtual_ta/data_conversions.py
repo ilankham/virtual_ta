@@ -58,9 +58,9 @@ def convert_xlsx_to_dict(
 ) -> dict:
     """Convert XLSX file to dictionary of dictionaries
 
-    This function inputs an XLSX file, an optional key column (defaulting to the
-    left-most column, if not specified), and an optional worksheet name column
-    (defaulting to the first worksheet, if not specified), and outputs a
+    This function inputs an XLSX file, an optional key column (defaulting to
+    the left-most column, if not specified), and an optional worksheet name
+    column (defaulting to the first worksheet, if not specified), and outputs a
     dictionary keyed by the specified key column and having as values
     dictionaries encoding the row from the specified worksheet of the XLSX file
     corresponding to the key value
@@ -79,7 +79,11 @@ def convert_xlsx_to_dict(
 
     """
 
-    xlsx_file_reader = load_workbook(data_xlsx_fp, read_only=True, data_only=True)
+    xlsx_file_reader = load_workbook(
+        data_xlsx_fp,
+        read_only=True,
+        data_only=True
+    )
     if worksheet is None:
         worksheet = xlsx_file_reader[0]
     if key is None:
@@ -127,13 +131,13 @@ def convert_xlsx_to_yaml_calendar(
         data_xlsx_fp: pointer to file or file-like object that is ready to read
             from and contains an XLSX file with columns headers in first rows;
             any column names in data_xlsx_fp corresponding to day names in the
-            current locale, as identified by the calendar module, are treated as
-            providing activities for the corresponding calendar date and will be
-            ordered according to ISO 8601 in output; all other columns are
-            treated as providing information about the week itself
-        start_date: specifies the start date for the calendar, which is adjusted
-            to the Monday of the week that the start_date appears in, where
-            weeks are defined as running from Monday to Sunday
+            current locale, as identified by the calendar module, are treated
+            as providing activities for the corresponding calendar date and
+            will be ordered according to ISO 8601 in output; all other columns
+            are treated as providing information about the week itself
+        start_date: specifies the start date for the calendar, which is
+            adjusted to the Monday of the week that the start_date appears in,
+            where weeks are defined as running from Monday to Sunday
         item_delimiter: a string whose values will be used to split item values
             into lists
         week_number_column: a column header from data_xlsx_fp, whose values

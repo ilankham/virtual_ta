@@ -101,7 +101,8 @@ def mail_merge_from_xlsx_file(
         template_fp: pointer to file or file-like object that is ready to read
             from and contains a Jinja2 template
         data_xlsx_fp: pointer to file or file-like object that is ready to read
-            from and contains an XLSX file with columns headers in its first row
+            from and contains an XLSX file with columns headers in its first
+            row
         key: a column header from data_xlsx_fp, whose values should be used as
             key values in the dictionary generated
         worksheet: a worksheet name from data_xlsx_fp
@@ -113,7 +114,11 @@ def mail_merge_from_xlsx_file(
 
     """
 
-    data_dict = convert_xlsx_to_dict(data_xlsx_fp, key=key, worksheet=worksheet)
+    data_dict = convert_xlsx_to_dict(
+        data_xlsx_fp,
+        key=key,
+        worksheet=worksheet
+    )
 
     return_value = mail_merge_from_dict(template_fp, data_dict)
 

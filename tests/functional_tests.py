@@ -55,8 +55,8 @@ class TAWorkflowTests(TestCase):
         # Prof. X prints a flattened version of the dictionary to verify
         # message contents are as intended
         with open(
-            'examples/expected_render_results_for_test_send_slack_messages_with'
-            '_csv_import.txt'
+            'examples/expected_render_results_for_test_send_slack_messages'
+            '_with_csv_import.txt'
         ) as test_fp:
             self.assertEqual(
                 flatten_dict(
@@ -154,9 +154,9 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the generate_calendar_yaml function to create an ordered
         # sequence of nested YAML statements organized by week
-        with open('examples/example_calendar_data.xlsx', 'rb') as assessment_fp:
+        with open('examples/example_calendar_data.xlsx', 'rb') as calendar_fp:
             yaml_calendar = convert_xlsx_to_yaml_calendar(
-                data_xlsx_fp=assessment_fp,
+                data_xlsx_fp=calendar_fp,
                 start_date=date(2018, 1, 1),
                 item_delimiter='|',
                 week_number_column='Week',
@@ -208,16 +208,16 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X saves the API Token in a text file
 
-        # Prof. X saves a gradebook xlsx file named with column headings and one
-        # row per student grade record; columns include GitHub_User_Name and
-        # Team Number
+        # Prof. X saves a gradebook xlsx file named with column headings and
+        # one row per student grade record; columns include GitHub_User_Name
+        # and Team Number
 
         # Prof. X reads in the gradebook and creates a dictionary keyed by
         # Team Number and values comprising lists of corresponding
         # GitHub_User_Name values
 
         # Prof. X initiates a GitHubAccount object associated with the GitHub
-        # Organziation and then loads their API Token from text file
+        # Organization and then loads their API Token from text file
 
         # Prof. X uses the GitHubAccount object to create teams within the
         # GitHub Organization
