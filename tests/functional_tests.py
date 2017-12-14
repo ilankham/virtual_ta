@@ -13,6 +13,7 @@ from unittest import TestCase
 
 from virtual_ta import (
     flatten_dict,
+    convert_csv_to_multimap,
     convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
     mail_merge_from_xlsx_file,
@@ -215,14 +216,21 @@ class TAWorkflowTests(TestCase):
         # Prof. X reads in the gradebook and creates a dictionary keyed by
         # Team_Number and values comprising lists of corresponding
         # GitHub_User_Name values
+        with open('examples/example_gradebook2.csv') as gradebook_fp:
+            team_assignments = convert_csv_to_multimap(
+                gradebook_fp,
+                key_column='Team_Number',
+                values_column='GitHub_User_Name',
+                overwrite_values=False,
+            )
+            print(team_assignments)
 
         # Prof. X initiates a GitHubOrganization object associated with the
         # GitHub Organization and then loads their API Token from the text file
+        self.fail('Finish the test!')
 
         # Prof. X uses the GitHubOrganization object to create teams within the
         # GitHub Organization
 
         # Prof. X uses the GitHubOrganization object to create project repos
         # for each team
-
-        self.fail('Finish the test!')
