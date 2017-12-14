@@ -23,32 +23,6 @@ from .xlsx_mock import XlsxMock
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
-    def test_mail_merge_from_dict(self):
-        test_expectations = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-
-        test_template = StringIO('{{First_Name}} {{Last_Name}}')
-        test_dict = {
-            "auser1": {
-                "User_Name": "auser1",
-                "First_Name": "a",
-                "Last_Name": "user1",
-            },
-            "buser2": {
-                "User_Name": "buser2",
-                "First_Name": "b",
-                "Last_Name": "user2",
-            },
-        }
-        test_results = mail_merge_from_dict(
-            test_template,
-            test_dict,
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
     def test_convert_csv_to_dict(self):
         test_expectations = {
             "auser1": {
@@ -101,73 +75,6 @@ class TestDataConversions(TestCase):
         test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
         test_results = convert_xlsx_to_dict(
-            test_workbook.as_file,
-            key="User_Name",
-            worksheet='test1',
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_mail_merge_from_csv_file_with_key(self):
-        test_expectations = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-
-        test_template = StringIO('{{First_Name}} {{Last_Name}}')
-        test_csv_entries = [
-            "User_Name,First_Name,Last_Name",
-            "auser1,a,user1",
-            "buser2,b,user2"
-        ]
-        test_csv = StringIO("\n".join(test_csv_entries))
-        test_results = mail_merge_from_csv_file(
-            test_template,
-            test_csv,
-            key="User_Name",
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_mail_merge_from_csv_file_without_key(self):
-        test_expectations = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-
-        test_template = StringIO('{{First_Name}} {{Last_Name}}')
-        test_csv_entries = [
-            "User_Name,First_Name,Last_Name",
-            "auser1,a,user1",
-            "buser2,b,user2"
-        ]
-        test_csv = StringIO("\n".join(test_csv_entries))
-        test_results = mail_merge_from_csv_file(
-            test_template,
-            test_csv,
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_mail_merge_from_xlsx_file(self):
-        test_expectations = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-
-        test_template = StringIO('{{First_Name}} {{Last_Name}}')
-        test_xlsx_entries = [
-            ["User_Name", "First_Name", "Last_Name"],
-            ["auser1", "a", "user1"],
-            ["buser2", "b", "user2"],
-        ]
-        test_workbook = XlsxMock()
-        test_workbook.create_sheet('test0')
-        test_worksheet = test_workbook.create_sheet('test1')
-        test_workbook.load_data(test_worksheet, test_xlsx_entries)
-        test_workbook.create_sheet('test2')
-        test_results = mail_merge_from_xlsx_file(
-            test_template,
             test_workbook.as_file,
             key="User_Name",
             worksheet='test1',
@@ -488,6 +395,102 @@ class TestDataConversions(TestCase):
                 week_number_column=test_week_number_column,
                 worksheet=test_worksheet_name,
             )
+
+        self.assertEqual(test_expectations, test_results)
+
+
+# noinspection SpellCheckingInspection
+class TestMailMerging(TestCase):
+    def test_mail_merge_from_dict(self):
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_dict = {
+            "auser1": {
+                "User_Name": "auser1",
+                "First_Name": "a",
+                "Last_Name": "user1",
+            },
+            "buser2": {
+                "User_Name": "buser2",
+                "First_Name": "b",
+                "Last_Name": "user2",
+            },
+        }
+        test_results = mail_merge_from_dict(
+            test_template,
+            test_dict,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_mail_merge_from_csv_file_with_key(self):
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_csv_entries = [
+            "User_Name,First_Name,Last_Name",
+            "auser1,a,user1",
+            "buser2,b,user2"
+        ]
+        test_csv = StringIO("\n".join(test_csv_entries))
+        test_results = mail_merge_from_csv_file(
+            test_template,
+            test_csv,
+            key="User_Name",
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_mail_merge_from_csv_file_without_key(self):
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_csv_entries = [
+            "User_Name,First_Name,Last_Name",
+            "auser1,a,user1",
+            "buser2,b,user2"
+        ]
+        test_csv = StringIO("\n".join(test_csv_entries))
+        test_results = mail_merge_from_csv_file(
+            test_template,
+            test_csv,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_mail_merge_from_xlsx_file(self):
+        test_expectations = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+
+        test_template = StringIO('{{First_Name}} {{Last_Name}}')
+        test_xlsx_entries = [
+            ["User_Name", "First_Name", "Last_Name"],
+            ["auser1", "a", "user1"],
+            ["buser2", "b", "user2"],
+        ]
+        test_workbook = XlsxMock()
+        test_workbook.create_sheet('test0')
+        test_worksheet = test_workbook.create_sheet('test1')
+        test_workbook.load_data(test_worksheet, test_xlsx_entries)
+        test_workbook.create_sheet('test2')
+        test_results = mail_merge_from_xlsx_file(
+            test_template,
+            test_workbook.as_file,
+            key="User_Name",
+            worksheet='test1',
+        )
 
         self.assertEqual(test_expectations, test_results)
 
