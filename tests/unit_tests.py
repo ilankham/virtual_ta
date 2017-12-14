@@ -9,6 +9,7 @@ import requests_mock
 
 from virtual_ta import (
     convert_csv_to_dict,
+    convert_csv_to_multimap,
     convert_xlsx_to_dict,
     convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
@@ -203,12 +204,12 @@ class TestDataConversions(TestCase):
         test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
         test_results = convert_xlsx_to_yaml_calendar(
-                data_xlsx_fp=test_workbook.as_file,
-                start_date=test_start_date,
-                item_delimiter=test_item_delimiter,
-                week_number_column=test_week_number_column,
-                worksheet=test_worksheet_name,
-            )
+            data_xlsx_fp=test_workbook.as_file,
+            start_date=test_start_date,
+            item_delimiter=test_item_delimiter,
+            week_number_column=test_week_number_column,
+            worksheet=test_worksheet_name,
+        )
 
         self.assertEqual(test_expectations, test_results)
 
@@ -296,12 +297,12 @@ class TestDataConversions(TestCase):
         test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
         test_results = convert_xlsx_to_yaml_calendar(
-                data_xlsx_fp=test_workbook.as_file,
-                start_date=test_start_date,
-                item_delimiter=test_item_delimiter,
-                week_number_column=test_week_number_column,
-                worksheet=test_worksheet_name,
-            )
+            data_xlsx_fp=test_workbook.as_file,
+            start_date=test_start_date,
+            item_delimiter=test_item_delimiter,
+            week_number_column=test_week_number_column,
+            worksheet=test_worksheet_name,
+        )
 
         self.assertEqual(test_expectations, test_results)
 
@@ -389,12 +390,43 @@ class TestDataConversions(TestCase):
         test_workbook.load_data(test_worksheet, test_xlsx_entries)
         test_workbook.create_sheet('test2')
         test_results = convert_xlsx_to_yaml_calendar(
-                data_xlsx_fp=test_workbook.as_file,
-                start_date=test_start_date,
-                item_delimiter=test_item_delimiter,
-                week_number_column=test_week_number_column,
-                worksheet=test_worksheet_name,
-            )
+            data_xlsx_fp=test_workbook.as_file,
+            start_date=test_start_date,
+            item_delimiter=test_item_delimiter,
+            week_number_column=test_week_number_column,
+            worksheet=test_worksheet_name,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_convert_csv_to_multimap(self):
+        test_expectations = {
+            "team-1": [
+                "uuser1-virtual_ta_testing",
+                "uuser4-virtual_ta_testing",
+            ],
+            "team-2": [
+                "uuser2-virtual_ta_testing",
+                "uuser3-virtual_ta_testing",
+            ],
+        }
+
+        test_csv_entries = [
+            "GitHub_User_Name,Team_Number",
+            "uuser1-virtual_ta_testing,team-1",
+            "uuser2-virtual_ta_testing,team-2",
+            "uuser3-virtual_ta_testing,team-2",
+            "uuser4-virtual_ta_testing,team-1",
+        ]
+        test_csv = StringIO("\n".join(test_csv_entries))
+        test_key_column = 'Team_Number'
+        test_values_column = 'GitHub_User_Name'
+        test_results = convert_csv_to_multimap(
+            test_csv,
+            key_column=test_key_column,
+            values_column=test_values_column,
+            overwrite_values=False,
+        )
 
         self.assertEqual(test_expectations, test_results)
 

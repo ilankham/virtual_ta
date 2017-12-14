@@ -50,6 +50,58 @@ def convert_csv_to_dict(
     return return_value
 
 
+def convert_csv_to_multimap(
+        data_csv_fp: FileIO,
+        *,
+        key_column: str = None,
+        values_column: str = None,
+        overwrite_values: bool = False,
+) -> dict:
+    """Convert CSV file to dictionary of dictionaries
+
+    This function inputs a CSV file and an optional key column (defaulting to
+    the left-most column, if not specified) and outputs a dictionary keyed by
+    the specified key_column and having as values the entries in
+    overwrite_values corresponding to each key, with values collected into a
+    list if overwrite_values == False, and the last value in the file otherwise
+
+    Args:
+        data_csv_fp: pointer to file or file-like object that is ready to read
+            from and contains a CSV file with columns headers in its first row
+        key_column: a column header from data_csv_fp, whose values should be
+            used as key values in the dictionary generated
+        values_column: a column header from data_csv_fp, whose values should be
+            used as item values in the dictionary generated
+        overwrite_values: determines where the last-appearing value
+            corresponding to each key is returned; if False, then a list of
+            values is returned for each key
+
+    Returns:
+        A dictionary keyed by the specified key_column and having as values the
+        entries in overwrite_values corresponding to each key, with values
+        collected into a list if overwrite_values == False, and the last value
+        in the file otherwise
+
+    """
+
+    csv_file_reader = DictReader(data_csv_fp)
+    if key_column is None:
+        key_column = csv_file_reader.fieldnames[0]
+    if values_column is None:
+        values_column = csv_file_reader.fieldnames[1]
+
+    return_value = {}
+    for row in csv_file_reader:
+        if overwrite_values:
+            return_value[row[key_column]] = row[values_column]
+        elif row[key_column] in return_value.keys():
+            return_value[row[key_column]].append(row[values_column])
+        else:
+            return_value[row[key_column]] = [row[values_column]]
+
+    return return_value
+
+
 def convert_xlsx_to_dict(
         data_xlsx_fp: FileIO,
         *,

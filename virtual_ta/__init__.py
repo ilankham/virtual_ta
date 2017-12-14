@@ -1,5 +1,6 @@
 from .data_conversions import (
     convert_csv_to_dict,
+    convert_csv_to_multimap,
     convert_xlsx_to_dict,
     convert_xlsx_to_yaml_calendar,
     flatten_dict,
