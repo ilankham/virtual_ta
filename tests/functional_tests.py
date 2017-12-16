@@ -86,9 +86,15 @@ class TAWorkflowTests(TestCase):
         # Token direct messages have been send with themselves as the sender
 
     def test_post_to_bb_with_xlsx_import(self):
-        # Prof. X obtains a Blackboard API Token
+        # Prof. X follows the instructions at https://community.blackboard.com/
+        # docs/DOC-1733-the-blackboard-rest-api-framework to use
+        # https://developer.blackboard.com to register an application,
+        # recording the Application ID, Application Key, and Application Secret
 
-        # Prof. X saves the API Token in a file
+        # Prof. X uses the Application ID to register a REST API Integration
+        # with a Blackboard Learn server, associating the a user account having
+        # sufficient access priviledges to edit the gradebook for the intended
+        # class
 
         # Prof. X saves a gradebook xlsx file named with column headings and
         # one row per student grade record
@@ -128,23 +134,13 @@ class TAWorkflowTests(TestCase):
                 test_fp.read()
             )
 
-        # Prof. X initiates a BlackboardAccount object and then uses the
-        # set_api_token_from_file method to load their API Token
+        # Prof. X initiates a BlackboardClass object by providing server
+        # address, CourseID, Application Key, and Application Secret
         self.fail('Finish the test!')
 
-        # Note: Per https://community.blackboard.com/docs/DOC-1733 and
-        # https://community.blackboard.com/thread/3375-http-403-while-using
-        # -rest-api-patch-and-post-requests-through-ajax , it might
-        # not be possible to automate this process without having admin access
-        # to a Blackboard server in order to grant access to make patch/post
-        # requests from https://developer.blackboard.com/portal/displayApi
-
-        # Prof. X then checks the BlackboardAccount's API Token was loaded
-        # correctly
-
-        # Prof. X uses the BlackboardAccount update_gradebook method to
-        # send the assignment feedback in the dictionary to the indicated
-        # students
+        # Prof. X uses the BlackboardClass update_gradebook_column method to
+        # provide the assignment feedback in the dictionary to the indicated
+        # students for a specific column by providing a columnID
 
         # Prof. X verifies the assignment feedback was correctly added
 
