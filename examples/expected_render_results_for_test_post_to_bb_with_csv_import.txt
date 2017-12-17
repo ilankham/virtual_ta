@@ -2,11 +2,11 @@
 
 --------------------
 
-Message to uuser1
+Message to tuser1
 
 -----
 
-Assignment Feedback for user user1
+Assignment Feedback for test user1
 
 Team Assignment: team-1
 
@@ -29,11 +29,11 @@ Overall Feedback:
 
 --------------------
 
-Message to uuser2
+Message to tuser2
 
 -----
 
-Assignment Feedback for user user2
+Assignment Feedback for test user2
 
 Team Assignment: team-2
 
@@ -48,7 +48,4 @@ Release URL in #project2_repo_urls: Y
 
 Overall Feedback:
 
-- Submission incomplete
-
-- Please review directions and direct message me in Slack to discuss any questions or concerns. The resubmission deadline is 11:59 PM on Saturday.
-
+- Looks good; thanks!

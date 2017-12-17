@@ -46,7 +46,7 @@ account.direct_message_by_username(messages_to_send)
 # importing the CSV file, the values in the first column, Slack_User_Name
 # should be updated with actual user names from the Slack Workspace being used
 with open('example_feedback_template.txt') as template_fp:
-    with open('example_gradebook.csv') as gradebook_fp:
+    with open('example_gradebook-for_testing_slack.csv') as gradebook_fp:
         mail_merge_results = mail_merge_from_csv_file(
             template_fp, gradebook_fp, key='Slack_User_Name'
         )

@@ -16,7 +16,6 @@ from virtual_ta import (
     convert_csv_to_multimap,
     convert_xlsx_to_yaml_calendar,
     mail_merge_from_csv_file,
-    mail_merge_from_xlsx_file,
     mail_merge_from_yaml_file,
     SlackAccount,
 )
@@ -47,10 +46,12 @@ class TAWorkflowTests(TestCase):
                 open('examples/example_feedback_template.txt')
             )
             gradebook_fp = es.enter_context(
-                open('examples/example_gradebook.csv')
+                open('examples/example_gradebook-for_testing_slack.csv')
             )
             mail_merge_results = mail_merge_from_csv_file(
-                template_fp, gradebook_fp, key='Slack_User_Name'
+                template_fp,
+                gradebook_fp,
+                key='Slack_User_Name',
             )
 
         # Prof. X prints a flattened version of the dictionary to verify
@@ -85,7 +86,7 @@ class TAWorkflowTests(TestCase):
         # Prof. X verifies in the Slack Workspace corresponding to their API
         # Token direct messages have been send with themselves as the sender
 
-    def test_post_to_bb_with_xlsx_import(self):
+    def test_post_to_bb_with_csv_import(self):
         # Prof. X follows the instructions at https://community.blackboard.com/
         # docs/DOC-1733-the-blackboard-rest-api-framework to use
         # https://developer.blackboard.com to register an application,
@@ -93,16 +94,16 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the Application ID to register a REST API Integration
         # with a Blackboard Learn server, associating the a user account having
-        # sufficient access priviledges to edit the gradebook for the intended
+        # sufficient access privileges to edit the gradebook for the intended
         # class
 
-        # Prof. X saves a gradebook xlsx file named with column headings and
+        # Prof. X saves a gradebook csv file named with column headings and
         # one row per student grade record
 
         # Prof. X saves a template text file as a Jinja2 template, with each
-        # variable name a column heading in the gradebook xlsx file
+        # variable name a column heading in the gradebook csv file
 
-        # Prof. X uses the mail_merge_from_xlsx_file method to mail merge their
+        # Prof. X uses the mail_merge_from_csv_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
         # messages keyed by Blackboard account identifier
         with ExitStack() as es:
@@ -110,20 +111,19 @@ class TAWorkflowTests(TestCase):
                 open('examples/example_feedback_template.txt')
             )
             gradebook_fp = es.enter_context(
-                open('examples/example_gradebook.xlsx', 'rb')
+                open('examples/example_gradebook-for_testing_blackboard.csv')
             )
-            mail_merge_results = mail_merge_from_xlsx_file(
+            mail_merge_results = mail_merge_from_csv_file(
                 template_fp,
                 gradebook_fp,
-                key='Slack_User_Name',
-                worksheet='example_gradebook',
+                key='BB_User_Name',
             )
 
         # Prof. X prints a flattened version of the dictionary to verify
         # message contents are as intended
         with open(
-            'examples/expected_render_results_for_test_post_to_bb_with'
-            '_xlsx_import.txt'
+            'examples/expected_render_results_for_test_post_to_bb_with_csv'
+            '_import.txt'
         ) as test_fp:
             self.assertEqual(
                 flatten_dict(
@@ -212,7 +212,9 @@ class TAWorkflowTests(TestCase):
         # Prof. X reads in the gradebook and creates a dictionary keyed by
         # Team_Number and values comprising lists of corresponding
         # GitHub_User_Name values
-        with open('examples/example_gradebook2.csv') as gradebook_fp:
+        with open(
+            'examples/example_gradebook-for_testing_github.csv'
+        ) as gradebook_fp:
             team_assignments = convert_csv_to_multimap(
                 gradebook_fp,
                 key_column='Team_Number',
