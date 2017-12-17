@@ -1,11 +1,22 @@
 """Create functional tests for project using unittest module
 
-This module assumes the files tests/slack_test_token.ini and tests/
-github_test_token.ini exist and each have a single line of content comprising
-a valid Slack Web API Token and a valid GitHub API Token, respectively.
+This module assumes the file tests/test_config.ini exports the following:
+
+[Slack]
+api_token =
+
+[Blackboard]
+application_key =
+application_secret =
+server_address =
+course_id =
+
+[GitHub]
+api_token =
 
 """
 
+from configparser import ConfigParser
 from contextlib import ExitStack
 from datetime import date
 from io import StringIO
@@ -29,8 +40,6 @@ class TAWorkflowTests(TestCase):
         #     and generating a Legacy Token, or
         # (2) visiting https://api.slack.com/apps and creating a new app with
         #     permission scopes for chat:write:user, im:read, and users:read
-
-        # Prof. X saves the API Token in a text file
 
         # Prof. X saves a gradebook csv file named with column headings and one
         # row per student grade record; columns include Slack_User_Name
@@ -69,15 +78,10 @@ class TAWorkflowTests(TestCase):
                 test_fp.read()
             )
 
-        # Prof. X initiates a SlackAccount object and then uses the
-        # set_api_token_from_file method to load their API Token
-        test_bot = SlackAccount()
-        with open('tests/slack_test_token.ini') as fp:
-            test_bot.set_api_token_from_file(fp)
-
-        # Prof. X then checks the SlackAccount's API Token was loaded correctly
-        with open('tests/slack_test_token.ini') as fp:
-            self.assertEqual(fp.readline(), test_bot.api_token)
+        # Prof. X initiates a SlackAccount object using their API Token
+        config = ConfigParser()
+        config.read('tests/test_config.ini')
+        test_bot = SlackAccount(config['Slack']['api_token'])
 
         # Prof. X uses the SlackAccount direct_message_users method to send the
         # messages in the dictionary to the indicated students
@@ -134,8 +138,10 @@ class TAWorkflowTests(TestCase):
                 test_fp.read()
             )
 
-        # Prof. X initiates a BlackboardClass object by providing server
+        # Prof. X initiates a BlackboardClass object by providing their server
         # address, CourseID, Application Key, and Application Secret
+        config = ConfigParser()
+        config.read('tests/test_config.ini')
         self.fail('Finish the test!')
 
         # Prof. X uses the BlackboardClass update_gradebook_column method to
@@ -223,8 +229,10 @@ class TAWorkflowTests(TestCase):
             )
             print(team_assignments)
 
-        # Prof. X initiates a GitHubOrganization object associated with the
-        # GitHub Organization and then loads their API Token from the text file
+        # Prof. X initiates a GitHubOrganization object associated with their
+        # GitHub Organization and their API Token
+        config = ConfigParser()
+        config.read('tests/test_config.ini')
         self.fail('Finish the test!')
 
         # Prof. X uses the GitHubOrganization object to create teams within the
