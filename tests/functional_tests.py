@@ -109,7 +109,7 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the mail_merge_from_csv_file method to mail merge their
         # template file against their gradebook file, returning a dictionary of
-        # messages keyed by Blackboard account identifier
+        # assignment feedback keyed by Blackboard user name
         with ExitStack() as es:
             template_fp = es.enter_context(
                 open('examples/example_feedback_template.txt')
@@ -117,25 +117,36 @@ class TAWorkflowTests(TestCase):
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_blackboard.csv')
             )
-            mail_merge_results = mail_merge_from_csv_file(
+            assignment_feedback_mail_merge_results = mail_merge_from_csv_file(
                 template_fp,
                 gradebook_fp,
                 key='BB_User_Name',
             )
 
         # Prof. X prints a flattened version of the dictionary to verify
-        # message contents are as intended
+        # assignment feedback contents are as intended
         with open(
             'examples/expected_render_results_for_test_post_to_bb_with_csv'
             '_import.txt'
         ) as test_fp:
             self.assertEqual(
                 flatten_dict(
-                    mail_merge_results,
+                    assignment_feedback_mail_merge_results,
                     key_value_separator="\n\n-----\n\n",
                     items_separator="\n\n--------------------\n\nMessage to "
                 ),
                 test_fp.read()
+            )
+
+        # Prof. X repeats the same process for assignment grades
+        with open(
+            'examples/example_gradebook-for_testing_blackboard.csv'
+        ) as gradebook_fp:
+            assignment_grades_mail_merge_results = convert_csv_to_multimap(
+                gradebook_fp,
+                key_column='BB_User_Name',
+                values_column='Submission_Complete',
+                overwrite_values=True,
             )
 
         # Prof. X initiates a BlackboardClass object by providing their server
@@ -145,8 +156,8 @@ class TAWorkflowTests(TestCase):
         self.fail('Finish the test!')
 
         # Prof. X uses the BlackboardClass update_gradebook_column method to
-        # provide the assignment feedback in the dictionary to the indicated
-        # students for a specific column by providing a columnID
+        # provide the assignment grades and feedback to the indicated students
+        # for a specific column by providing a columnID number
 
         # Prof. X verifies the assignment feedback was correctly added
 
