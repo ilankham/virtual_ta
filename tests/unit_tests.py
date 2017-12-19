@@ -1,6 +1,6 @@
 """Creates unit tests for project using unittest module"""
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from io import StringIO
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
@@ -689,4 +689,100 @@ class TestBlackboardClasses(TestCase):
         self.assertEqual(test_server_address, test_class.server_address)
         self.assertEqual(test_course_id, test_class.course_id)
         self.assertEqual(test_application_key, test_class.application_key)
-        self.assertEqual(test_application_secret, test_class.application_secret)
+        self.assertEqual(
+            test_application_secret,
+            test_class.application_secret
+        )
+
+    def test_bb_class_api_token_property_with_new_token(self):
+        test_response_json = {
+            'access_token': 'Test Token Value',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test Course ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                f'https://{test_server_address}/learn/api/public/v1/oauth2'
+                f'/token',
+                json=test_response_json,
+            )
+
+            test_class = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_class.api_token,
+                test_response_json['access_token']
+            )
+
+            test_api_token_expiration_datetime = (
+                    datetime.now() +
+                    timedelta(
+                        seconds=test_response_json['expires_in']
+                    )
+            )
+            self.assertAlmostEqual(
+                test_class.api_token_expiration_datetime.timestamp(),
+                test_api_token_expiration_datetime.timestamp(),
+                places=0
+            )
+
+    def test_bb_class_api_token_property_with_old_token(self):
+        test_response_json1 = {
+            'access_token': 'Test Token Value',
+            'token_type': 'bearer',
+            'expires_in': 1,
+        }
+        test_response_json2 = {
+            'access_token': 'Test Token Value',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test Course ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                f'https://{test_server_address}/learn/api/public/v1/oauth2'
+                f'/token',
+                [{'json': test_response_json1}, {'json': test_response_json2}]
+            )
+
+            test_class = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_class.api_token,
+                test_response_json2['access_token']
+            )
+
+            test_api_token_expiration_datetime = (
+                    datetime.now() +
+                    timedelta(
+                        seconds=test_response_json2['expires_in']
+                    )
+            )
+            self.assertAlmostEqual(
+                test_class.api_token_expiration_datetime.timestamp(),
+                test_api_token_expiration_datetime.timestamp(),
+                places=0
+            )
