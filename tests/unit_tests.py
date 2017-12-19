@@ -8,6 +8,7 @@ from unittest.mock import patch, PropertyMock
 import requests_mock
 
 from virtual_ta import (
+    BlackboardClass,
     convert_csv_to_dict,
     convert_csv_to_multimap,
     convert_xlsx_to_dict,
@@ -668,3 +669,24 @@ class TestSlackAccounts(TestCase):
             )
 
         self.assertEqual(mock_requests.call_count, len(test_respond_dms))
+
+
+# noinspection SpellCheckingInspection
+class TestBlackboardClasses(TestCase):
+    def test_bb_class_init(self):
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test Course ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+
+        test_class = BlackboardClass(
+            test_server_address,
+            test_course_id,
+            test_application_key,
+            test_application_secret,
+        )
+
+        self.assertEqual(test_server_address, test_class.server_address)
+        self.assertEqual(test_course_id, test_class.course_id)
+        self.assertEqual(test_application_key, test_class.application_key)
+        self.assertEqual(test_application_secret, test_class.application_secret)
