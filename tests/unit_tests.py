@@ -590,6 +590,7 @@ class TestSlackAccounts(TestCase):
                     "Authorization": f"Bearer {test_token}",
                     "Content-type": "application/json",
                 },
+                status_code=200,
                 json={'members': test_json_user_ids},
             )
 
@@ -622,6 +623,7 @@ class TestSlackAccounts(TestCase):
                     "Authorization": f"Bearer {test_token}",
                     "Content-type": "application/json",
                 },
+                status_code=200,
                 json={'ims': test_json_dm_channels},
             )
 
@@ -660,6 +662,7 @@ class TestSlackAccounts(TestCase):
                     "Authorization": f"Bearer {test_token}",
                     "Content-type": "application/json",
                 },
+                status_code=200,
             )
 
             test_bot = SlackAccount(test_token)
@@ -711,6 +714,7 @@ class TestBlackboardClasses(TestCase):
                 'POST',
                 f'https://{test_server_address}/learn/api/public/v1/oauth2'
                 f'/token',
+                status_code=200,
                 json=test_response_json,
             )
 
@@ -760,7 +764,10 @@ class TestBlackboardClasses(TestCase):
                 'POST',
                 f'https://{test_server_address}/learn/api/public/v1/oauth2'
                 f'/token',
-                [{'json': test_response_json1}, {'json': test_response_json2}]
+                [
+                    {'json': test_response_json1, 'status_code': 200},
+                    {'json': test_response_json2, 'status_code': 200},
+                ]
             )
 
             test_class = BlackboardClass(
