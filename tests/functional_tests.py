@@ -23,6 +23,7 @@ from io import StringIO
 from unittest import TestCase
 
 from virtual_ta import (
+    BlackboardClass,
     flatten_dict,
     convert_csv_to_multimap,
     convert_xlsx_to_yaml_calendar,
@@ -52,7 +53,7 @@ class TAWorkflowTests(TestCase):
         # messages keyed by Slack user name
         with ExitStack() as es:
             template_fp = es.enter_context(
-                open('examples/example_feedback_template.txt')
+                open('examples/example_feedback_template-for_testing_slack.txt')
             )
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_slack.csv')
@@ -101,8 +102,11 @@ class TAWorkflowTests(TestCase):
         # sufficient access privileges to edit the gradebook for the intended
         # class
 
-        # Prof. X saves a gradebook csv file named with column headings and
-        # one row per student grade record
+        # Prof. X saves a gradebook specification csv file with column
+        # headings and one row per gradebook column
+
+        # Prof. X saves a gradebook csv file for one gradebook column with
+        # column headings and one row per student grade record
 
         # Prof. X saves a template text file as a Jinja2 template, with each
         # variable name a column heading in the gradebook csv file
@@ -112,7 +116,8 @@ class TAWorkflowTests(TestCase):
         # assignment feedback keyed by Blackboard user name
         with ExitStack() as es:
             template_fp = es.enter_context(
-                open('examples/example_feedback_template.txt')
+                open('examples/example_feedback_template-'
+                     'for_testing_blackboard.txt')
             )
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_blackboard.csv')
@@ -153,13 +158,31 @@ class TAWorkflowTests(TestCase):
         # address, CourseID, Application Key, and Application Secret
         config = ConfigParser()
         config.read('tests/test_config.ini')
+        test_bot = BlackboardClass(
+            config['Blackboard']['server_address'],
+            config['Blackboard']['course_id'],
+            config['Blackboard']['application_key'],
+            config['Blackboard']['application_secret'],
+        )
         self.fail('Finish the test!')
+
+        # Prof. X uses the BlackboardClass create_gradebook_columns method to
+        # setup the Blackboard gradebook using the prepared file
+
+        # Prof. X uses the BlackboardClass gradebook_columns property to verify
+        # the Blackboard gradebook was properly setup
 
         # Prof. X uses the BlackboardClass update_gradebook_column method to
         # provide the assignment grades and feedback to the indicated students
         # for a specific column by providing a columnID number
+        test_bot.update_gradebook_column_by_username(
+            column_id=config['Blackboard']['column_id'],
+            assignment_grades=assignment_grades_mail_merge_results,
+            assignment_feedback=assignment_feedback_mail_merge_results,
+        )
 
-        # Prof. X verifies the assignment feedback was correctly added
+        # Prof. X verifies the assignment feedback was correctly added by
+        # manually inspecting the corresponding BB Gradebook
 
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
