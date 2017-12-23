@@ -18,7 +18,7 @@ api_token =
 
 from configparser import ConfigParser
 from contextlib import ExitStack
-from datetime import date
+from datetime import date, datetime
 from io import StringIO
 from unittest import TestCase
 
@@ -102,9 +102,6 @@ class TAWorkflowTests(TestCase):
         # sufficient access privileges to edit the gradebook for the intended
         # class
 
-        # Prof. X saves a gradebook specification csv file with column
-        # headings and one row per gradebook column
-
         # Prof. X saves a gradebook csv file for one gradebook column with
         # column headings and one row per student grade record
 
@@ -122,7 +119,7 @@ class TAWorkflowTests(TestCase):
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_blackboard.csv')
             )
-            assignment_feedback_mail_merge_results = mail_merge_from_csv_file(
+            grade_feedback_mail_merge_results = mail_merge_from_csv_file(
                 template_fp,
                 gradebook_fp,
                 key='BB_User_Name',
@@ -136,21 +133,32 @@ class TAWorkflowTests(TestCase):
         ) as test_fp:
             self.assertEqual(
                 flatten_dict(
-                    assignment_feedback_mail_merge_results,
+                    grade_feedback_mail_merge_results,
                     key_value_separator="\n\n-----\n\n",
                     items_separator="\n\n--------------------\n\nMessage to "
                 ),
                 test_fp.read()
             )
 
-        # Prof. X repeats the same process for assignment grades
+        # Prof. X repeats the same process for grade scores
         with open(
             'examples/example_gradebook-for_testing_blackboard.csv'
         ) as gradebook_fp:
-            assignment_grades_mail_merge_results = convert_csv_to_multimap(
+            grade_scores_mail_merge_results = convert_csv_to_multimap(
                 gradebook_fp,
                 key_column='BB_User_Name',
                 values_column='Submission_Complete',
+                overwrite_values=True,
+            )
+
+        # Prof. X repeats the same process for grade text
+        with open(
+            'examples/example_gradebook-for_testing_blackboard.csv'
+        ) as gradebook_fp:
+            grade_text_mail_merge_results = convert_csv_to_multimap(
+                gradebook_fp,
+                key_column='BB_User_Name',
+                values_column='Feedback_Summary',
                 overwrite_values=True,
             )
 
@@ -166,19 +174,33 @@ class TAWorkflowTests(TestCase):
         )
         self.fail('Finish the test!')
 
-        # Prof. X uses the BlackboardClass create_gradebook_columns method to
-        # setup the Blackboard gradebook using the prepared file
+        # Prof. X uses the BlackboardClass create_gradebook_column method to
+        # create a column, providing a name, due_date and max_score_possible
+        test_column_due_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        test_column_name = 'test_column_created-'+test_column_datetime
+        test_bot.create_gradebook_column(
+            name=test_column_name,
+            due_date=test_column_due_date,
+            max_score_possible=0,
+        )
 
-        # Prof. X uses the BlackboardClass gradebook_columns property to verify
-        # the Blackboard gradebook was properly setup
+        # Prof. X uses the BlackboardClass gradebook_column_primary_ids
+        # property to verify the column was created
+        self.assertIn(
+            test_column_name,
+            test_bot.gradebook_column_primary_ids.keys()
+        )
 
         # Prof. X uses the BlackboardClass update_gradebook_column method to
         # provide the assignment grades and feedback to the indicated students
         # for a specific column by providing a columnID number
         test_bot.update_gradebook_column_by_username(
-            column_id=config['Blackboard']['column_id'],
-            assignment_grades=assignment_grades_mail_merge_results,
-            assignment_feedback=assignment_feedback_mail_merge_results,
+            primary_column_id=test_bot.gradebook_column_primary_ids[
+                test_column_name
+            ],
+            grade_scores=grade_scores_mail_merge_results,
+            grade_text=grade_text_mail_merge_results,
+            grade_feedack=grade_feedback_mail_merge_results,
         )
 
         # Prof. X verifies the assignment feedback was correctly added by
