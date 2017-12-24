@@ -195,13 +195,13 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the BlackboardClass update_gradebook_column method to
         # provide the assignment grades and feedback to the indicated students
         # for a specific column by providing a columnID number
-        test_bot.update_gradebook_column_by_username(
-            primary_column_id=test_bot.gradebook_column_primary_ids[
+        test_bot.update_gradebook_column(
+            column_primary_id=test_bot.gradebook_columns_primary_ids[
                 test_column_name
             ],
-            grade_scores=grade_scores_mail_merge_results,
-            grade_text=grade_text_mail_merge_results,
-            grade_feedack=grade_feedback_mail_merge_results,
+            grades_as_scores=grade_scores_mail_merge_results,
+            grades_as_text=grade_text_mail_merge_results,
+            grades_feedback=grade_feedback_mail_merge_results,
         )
 
         # Prof. X verifies the assignment feedback was correctly added by

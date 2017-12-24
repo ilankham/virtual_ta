@@ -1062,7 +1062,7 @@ class TestBlackboardClasses(TestCase):
                 'PATCH',
                 f'https://{test_server_address}/learn/api/public/v2/courses/'
                 f'courseId:{test_course_id}/gradebook/columns/'
-                f'externalId:{test_column_primary_id}/users/'
+                f'{test_column_primary_id}/users/'
                 f'userName:{test_user_id}',
                 status_code=200,
                 json=test_response_json,
@@ -1085,4 +1085,84 @@ class TestBlackboardClasses(TestCase):
             self.assertEqual(
                 test_response_json,
                 test_set_grade_response,
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_class_update_gradebook_column(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_grade_feedback1 = 'Test Grade Feedback 1'
+        test_grade_as_score1 = 'Test Grade as Score 1'
+        test_grade_as_text1 = 'Test Grade as Text 1'
+        test_user_id1 = 'Test-User-ID1'
+        test_response_json1 = {
+                'columnId': test_column_primary_id,
+                'feedback': test_grade_feedback1,
+                'score': test_grade_as_score1,
+                'text': test_grade_as_text1,
+                'userId': test_user_id1,
+        }
+        test_grade_feedback2 = 'Test Grade Feedback 2'
+        test_grade_as_score2 = 'Test Grade as Score 2'
+        test_grade_as_text2 = 'Test Grade as Text 2'
+        test_user_id2 = 'Test-User-ID2'
+        test_response_json2 = {
+                'columnId': test_column_primary_id,
+                'feedback': test_grade_feedback2,
+                'score': test_grade_as_score2,
+                'text': test_grade_as_text2,
+                'userId': test_user_id2,
+        }
+        test_response = [test_response_json1, test_response_json2]
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'PATCH',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id1}',
+                status_code=200,
+                json=test_response_json1,
+            )
+            mock_requests.register_uri(
+                'PATCH',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id2}',
+                status_code=200,
+                json=test_response_json2,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+            test_update_gradebook_response = test_bot.update_gradebook_column(
+                column_primary_id=test_column_primary_id,
+                grades_as_scores={
+                    test_user_id1: test_grade_as_score1,
+                    test_user_id2: test_grade_as_score2,
+                },
+                grades_as_text={
+                    test_user_id1: test_grade_as_text1,
+                    test_user_id2: test_grade_as_text2,
+                },
+                grades_feedback={
+                    test_user_id1: test_grade_feedback1,
+                    test_user_id2: test_grade_feedback2,
+                },
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_update_gradebook_response),
             )

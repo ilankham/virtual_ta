@@ -139,7 +139,7 @@ class BlackboardClass(object):
             'https://' +
             self.server_address +
             f'/learn/api/public/v2/courses/courseId:{self.course_id}'
-            f'/gradebook/columns/externalId:{column_primary_id}'
+            f'/gradebook/columns/{column_primary_id}'
             f'/users/userName:{user_name}'
         )
         return_value = requests.patch(
@@ -156,3 +156,24 @@ class BlackboardClass(object):
             verify=False,
         ).json()
         return return_value
+
+    def update_gradebook_column(
+        self,
+        column_primary_id,
+        grades_as_scores,
+        grades_as_text=None,
+        grades_feedback=None,
+    ):
+        if grades_as_text is None:
+            grades_as_text = {}
+        if grades_feedback is None:
+            grades_feedback = {}
+
+        for username, score in grades_as_scores.items():
+            yield self.set_grade(
+                column_primary_id=column_primary_id,
+                user_name=username,
+                grade_as_score=score,
+                grade_as_text=grades_as_text.get(username, ''),
+                grade_feedback=grades_feedback.get(username, ''),
+            )
