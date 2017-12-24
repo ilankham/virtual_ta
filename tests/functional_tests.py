@@ -53,7 +53,9 @@ class TAWorkflowTests(TestCase):
         # messages keyed by Slack user name
         with ExitStack() as es:
             template_fp = es.enter_context(
-                open('examples/example_feedback_template-for_testing_slack.txt')
+                open(
+                    'examples/example_feedback_template-for_testing_slack.txt'
+                )
             )
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_slack.csv')
@@ -71,12 +73,12 @@ class TAWorkflowTests(TestCase):
             '_with_csv_import.txt'
         ) as test_fp:
             self.assertEqual(
+                test_fp.read(),
                 flatten_dict(
                     mail_merge_results,
                     key_value_separator="\n\n-----\n\n",
                     items_separator="\n\n--------------------\n\nMessage to "
                 ),
-                test_fp.read()
             )
 
         # Prof. X initiates a SlackAccount object using their API Token
@@ -132,12 +134,12 @@ class TAWorkflowTests(TestCase):
             '_import.txt'
         ) as test_fp:
             self.assertEqual(
+                test_fp.read(),
                 flatten_dict(
                     grade_feedback_mail_merge_results,
                     key_value_separator="\n\n-----\n\n",
                     items_separator="\n\n--------------------\n\nMessage to "
                 ),
-                test_fp.read()
             )
 
         # Prof. X repeats the same process for grade scores
@@ -172,12 +174,11 @@ class TAWorkflowTests(TestCase):
             config['Blackboard']['application_key'],
             config['Blackboard']['application_secret'],
         )
-        self.fail('Finish the test!')
 
         # Prof. X uses the BlackboardClass create_gradebook_column method to
         # create a column, providing a name, due_date and max_score_possible
         test_column_due_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-        test_column_name = 'test_column_created-'+test_column_datetime
+        test_column_name = 'test_column_created-'+test_column_due_date
         test_bot.create_gradebook_column(
             name=test_column_name,
             due_date=test_column_due_date,
@@ -188,7 +189,7 @@ class TAWorkflowTests(TestCase):
         # property to verify the column was created
         self.assertIn(
             test_column_name,
-            test_bot.gradebook_column_primary_ids.keys()
+            test_bot.gradebook_columns_primary_ids.keys()
         )
 
         # Prof. X uses the BlackboardClass update_gradebook_column method to
@@ -214,7 +215,7 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the generate_calendar_yaml function to create an ordered
         # sequence of nested YAML statements organized by week
         with open('examples/example_calendar_data.xlsx', 'rb') as calendar_fp:
-            yaml_calendar = convert_xlsx_to_yaml_calendar(
+            test_yaml_calendar = convert_xlsx_to_yaml_calendar(
                 data_xlsx_fp=calendar_fp,
                 start_date=date(2018, 1, 1),
                 item_delimiter='|',
@@ -228,20 +229,20 @@ class TAWorkflowTests(TestCase):
             'yaml_calendar.yaml'
         ) as test_fp:
             self.assertEqual(
-                yaml_calendar,
-                test_fp.read()
+                test_fp.read(),
+                test_yaml_calendar,
             )
 
         # Prof. X saves calendar_yaml to a file for manual editing/updating,
         # including adding comments or additional content
-        data_yaml_fp = StringIO(yaml_calendar)
+        test_yaml_calendar_fp = StringIO(test_yaml_calendar)
 
         # Prof. X uses the mail_merge_from_yaml function to create a LaTeX
         # table representation of data_yaml_fp as a dictionary
         with open('examples/example_latex_table_template.tex') as template_fp:
-            latex_results = mail_merge_from_yaml_file(
+            test_latex_results = mail_merge_from_yaml_file(
                 template_fp=template_fp,
-                data_yaml_fp=data_yaml_fp,
+                data_yaml_fp=test_yaml_calendar_fp,
             )
 
         # Prof. X prints a flattened version of the dictionary to verify
@@ -251,13 +252,13 @@ class TAWorkflowTests(TestCase):
             'latex_table.tex'
         ) as test_fp:
             self.assertEqual(
+                test_fp.read(),
                 flatten_dict(
-                    latex_results,
+                    test_latex_results,
                     key_value_separator="",
                     items_separator='\n'+('%'*80+'\n')*3,
                     suppress_keys=True
                 ),
-                test_fp.read()
             )
 
     def test_github_setup_with_csv_import(self):
