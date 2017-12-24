@@ -101,7 +101,7 @@ class TestDataConversions(TestCase):
             reverse=True
         )
 
-        self.assertEqual(test_results, test_expectations)
+        self.assertEqual(test_expectations, test_results)
 
     def test_flatten_dict_without_options_passed_through(self):
         test_expectations = "auser1a user1buser2b user2"
@@ -119,7 +119,7 @@ class TestDataConversions(TestCase):
             test_items_separator,
         )
 
-        self.assertEqual(test_results, test_expectations)
+        self.assertEqual(test_expectations, test_results)
 
     def test_convert_xlsx_to_yaml_calendar_after_start_date(self):
         test_expectations_list = [
@@ -581,7 +581,6 @@ class TestSlackAccounts(TestCase):
             {'name': 'auser1', 'id': 'userid-auser1'},
             {'name': 'buser1', 'id': 'userid-buser1'}
         ]
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -596,7 +595,7 @@ class TestSlackAccounts(TestCase):
 
             test_bot = SlackAccount(test_token)
 
-            self.assertEqual(test_bot.user_ids, test_response_user_ids)
+            self.assertEqual(test_response_user_ids, test_bot.user_ids)
 
     @patch('virtual_ta.SlackAccount.user_ids', new_callable=PropertyMock)
     def test_slack_account_user_dm_channels_property(self, mock_user_ids):
@@ -605,16 +604,16 @@ class TestSlackAccounts(TestCase):
             'buser1': 'userid-buser1'
         }
 
-        test_token = "Test Token Value"
-        test_json_dm_channels = [
-            {'user': 'userid-auser1', 'id': 'dmid-auser1'},
-            {'user': 'userid-buser1', 'id': 'dmid-buser1'}
-        ]
         test_response_dm_channels = {
             'auser1': 'dmid-auser1',
             'buser1': 'dmid-buser1',
         }
 
+        test_token = "Test Token Value"
+        test_json_dm_channels = [
+            {'user': 'userid-auser1', 'id': 'dmid-auser1'},
+            {'user': 'userid-buser1', 'id': 'dmid-buser1'}
+        ]
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -630,8 +629,8 @@ class TestSlackAccounts(TestCase):
             test_bot = SlackAccount(test_token)
 
             self.assertEqual(
-                test_bot.user_dm_channels,
-                test_response_dm_channels
+                test_response_dm_channels,
+                test_bot.user_dm_channels
             )
 
     @patch(
@@ -647,16 +646,16 @@ class TestSlackAccounts(TestCase):
             'buser1': 'dmid-buser1',
         }
 
-        test_token = "Test Token Value"
-        test_dms = {
-            'auser1': 'a user1',
-            'buser1': 'b user1',
-        }
         test_respond_dms = {
             'dmid-auser1': 'a user1',
             'dmid-buser1': 'b user1',
         }
 
+        test_token = "Test Token Value"
+        test_dms = {
+            'auser1': 'a user1',
+            'buser1': 'b user1',
+        }
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -669,9 +668,10 @@ class TestSlackAccounts(TestCase):
             )
 
             test_bot = SlackAccount(test_token)
+
             self.assertEqual(
+                test_respond_dms,
                 test_bot.direct_message_by_username(test_dms),
-                test_respond_dms
             )
 
         self.assertEqual(mock_requests.call_count, len(test_respond_dms))
@@ -685,20 +685,17 @@ class TestBlackboardClasses(TestCase):
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
 
-        test_class = BlackboardClass(
+        test_bot = BlackboardClass(
             test_server_address,
             test_course_id,
             test_application_key,
             test_application_secret,
         )
 
-        self.assertEqual(test_server_address, test_class.server_address)
-        self.assertEqual(test_course_id, test_class.course_id)
-        self.assertEqual(test_application_key, test_class.application_key)
-        self.assertEqual(
-            test_application_secret,
-            test_class.application_secret
-        )
+        self.assertEqual(test_server_address, test_bot.server_address)
+        self.assertEqual(test_course_id, test_bot.course_id)
+        self.assertEqual(test_application_key, test_bot.application_key)
+        self.assertEqual(test_application_secret, test_bot.application_secret)
 
     def test_bb_class_api_token_property_with_new_token(self):
         test_response_json = {
@@ -711,7 +708,6 @@ class TestBlackboardClasses(TestCase):
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -721,7 +717,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_class = BlackboardClass(
+            test_bot = BlackboardClass(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -729,19 +725,19 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                test_class.api_token,
-                test_response_json['access_token']
+                test_response_json['access_token'],
+                test_bot.api_token,
             )
 
             test_api_token_expiration_datetime = (
-                    datetime.now() +
-                    timedelta(
-                        seconds=test_response_json['expires_in']
-                    )
+                datetime.now() +
+                timedelta(
+                    seconds=test_response_json['expires_in']
+                )
             )
             self.assertAlmostEqual(
-                test_class.api_token_expiration_datetime.timestamp(),
                 test_api_token_expiration_datetime.timestamp(),
+                test_bot.api_token_expiration_datetime.timestamp(),
                 places=0
             )
 
@@ -761,7 +757,6 @@ class TestBlackboardClasses(TestCase):
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -773,7 +768,7 @@ class TestBlackboardClasses(TestCase):
                 ]
             )
 
-            test_class = BlackboardClass(
+            test_bot = BlackboardClass(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -781,8 +776,8 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                test_class.api_token,
-                test_response_json2['access_token']
+                test_response_json2['access_token'],
+                test_bot.api_token,
             )
 
             test_api_token_expiration_datetime = (
@@ -792,8 +787,8 @@ class TestBlackboardClasses(TestCase):
                     )
             )
             self.assertAlmostEqual(
-                test_class.api_token_expiration_datetime.timestamp(),
                 test_api_token_expiration_datetime.timestamp(),
+                test_bot.api_token_expiration_datetime.timestamp(),
                 places=0
             )
 
@@ -818,7 +813,6 @@ class TestBlackboardClasses(TestCase):
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'POST',
@@ -828,21 +822,21 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_class = BlackboardClass(
+            test_bot = BlackboardClass(
                 test_server_address,
                 test_course_id,
                 test_application_key,
                 test_application_secret,
             )
 
-            test_create_column_response = test_class.create_gradebook_column(
+            test_create_column_response = test_bot.create_gradebook_column(
                 name=test_column_name,
                 due_date=test_column_due_date,
             )
 
             self.assertEqual(
+                test_response_json,
                 test_create_column_response,
-                test_response_json
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
@@ -884,7 +878,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_class = BlackboardClass(
+            test_bot = BlackboardClass(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -892,8 +886,8 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                list(test_class.gradebook_columns),
-                test_response
+                test_response,
+                list(test_bot.gradebook_columns),
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
@@ -966,7 +960,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json2,
             )
 
-            test_class = BlackboardClass(
+            test_bot = BlackboardClass(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -974,6 +968,6 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                list(test_class.gradebook_columns),
-                test_response
+                test_response,
+                list(test_bot.gradebook_columns),
             )
