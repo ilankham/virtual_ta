@@ -681,7 +681,7 @@ class TestSlackAccounts(TestCase):
 class TestBlackboardClasses(TestCase):
     def test_bb_class_init(self):
         test_server_address = 'test.server.address'
-        test_course_id = 'Test Course ID'
+        test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
 
@@ -708,7 +708,7 @@ class TestBlackboardClasses(TestCase):
         }
 
         test_server_address = 'test.server.address'
-        test_course_id = 'Test Course ID'
+        test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
 
@@ -758,7 +758,7 @@ class TestBlackboardClasses(TestCase):
         }
 
         test_server_address = 'test.server.address'
-        test_course_id = 'Test Course ID'
+        test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
 
@@ -795,4 +795,52 @@ class TestBlackboardClasses(TestCase):
                 test_class.api_token_expiration_datetime.timestamp(),
                 test_api_token_expiration_datetime.timestamp(),
                 places=0
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_class_create_gradebook_column(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_name = 'Test Column Name'
+        test_column_due_date = 'Test Column Due Date'
+        test_response_json = {
+            'availability': {'available': 'Yes'},
+            'externalId': '',
+            'grading': {
+                'due': test_column_due_date,
+                'type': 'Manual'
+            },
+            'name': test_column_name,
+            'score': {'possible': 0.0}
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_class = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            test_create_column_response = test_class.create_gradebook_column(
+                name=test_column_name,
+                due_date=test_column_due_date,
+            )
+
+            self.assertEqual(
+                test_create_column_response,
+                test_response_json
             )
