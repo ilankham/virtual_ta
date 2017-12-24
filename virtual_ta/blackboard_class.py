@@ -98,3 +98,26 @@ class BlackboardClass(object):
             verify=False,
         ).json()
         return return_value
+
+    @property
+    def gradebook_columns(self):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            '/gradebook/columns'
+        )
+
+        return_value = []
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={'Authorization': 'Bearer ' + self.api_token},
+                verify=False
+            ).json()
+            return_value.extend(api_response['results'])
+            try:
+                api_request_url = api_response['paging']['nextPage']
+            except KeyError:
+                api_request_url = None
+        return return_value
