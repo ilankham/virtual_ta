@@ -554,14 +554,14 @@ class TestMailMerging(TestCase):
 
 # noinspection SpellCheckingInspection
 class TestSlackAccounts(TestCase):
-    def test_slack_bot_class_init(self):
+    def test_slack_account_class_init(self):
         test_token = "Test Token Value"
 
         test_bot = SlackAccount(test_token)
 
         self.assertEqual(test_token, test_bot.api_token)
 
-    def test_set_api_token_from_file(self):
+    def test_slack_account_set_api_token_from_file(self):
         test_token = "Test Token Value"
 
         test_fp = StringIO(test_token)
@@ -570,7 +570,7 @@ class TestSlackAccounts(TestCase):
 
         self.assertEqual(test_token, test_bot.api_token)
 
-    def test_user_ids_property(self):
+    def test_slack_account_user_ids_property(self):
         test_response_user_ids = {
             'auser1': 'userid-auser1',
             'buser1': 'userid-buser1',
@@ -599,7 +599,7 @@ class TestSlackAccounts(TestCase):
             self.assertEqual(test_bot.user_ids, test_response_user_ids)
 
     @patch('virtual_ta.SlackAccount.user_ids', new_callable=PropertyMock)
-    def test_user_dm_channels_property(self, mock_user_ids):
+    def test_slack_account_user_dm_channels_property(self, mock_user_ids):
         mock_user_ids.return_value = {
             'auser1': 'userid-auser1',
             'buser1': 'userid-buser1'
@@ -638,7 +638,10 @@ class TestSlackAccounts(TestCase):
         'virtual_ta.SlackAccount.user_dm_channels',
         new_callable=PropertyMock
     )
-    def test_direct_message_by_username(self, mock_user_dm_channels):
+    def test_slack_account_direct_message_by_username(
+            self,
+            mock_user_dm_channels
+    ):
         mock_user_dm_channels.return_value = {
             'auser1': 'dmid-auser1',
             'buser1': 'dmid-buser1',
