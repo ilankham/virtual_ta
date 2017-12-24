@@ -108,16 +108,14 @@ class BlackboardClass(object):
             '/gradebook/columns'
         )
 
-        return_value = []
         while api_request_url:
             api_response = requests.get(
                 api_request_url,
                 headers={'Authorization': 'Bearer ' + self.api_token},
                 verify=False
             ).json()
-            return_value.extend(api_response['results'])
+            yield from api_response['results']
             try:
                 api_request_url = api_response['paging']['nextPage']
             except KeyError:
                 api_request_url = None
-        return return_value

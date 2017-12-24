@@ -892,7 +892,7 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                test_class.gradebook_columns,
+                list(test_class.gradebook_columns),
                 test_response
             )
 
@@ -974,6 +974,6 @@ class TestBlackboardClasses(TestCase):
             )
 
             self.assertEqual(
-                test_class.gradebook_columns,
+                list(test_class.gradebook_columns),
                 test_response
             )
