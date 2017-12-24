@@ -125,3 +125,34 @@ class BlackboardClass(object):
         return {
             column['name']: column['id'] for column in self.gradebook_columns
         }
+
+    def set_grade(
+        self,
+        column_primary_id,
+        user_name,
+        grade_as_score,
+        *,
+        grade_as_text='',
+        grade_feedback='',
+    ):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            f'/gradebook/columns/externalId:{column_primary_id}'
+            f'/users/userName:{user_name}'
+        )
+        return_value = requests.patch(
+            api_request_url,
+            data=json.dumps({
+                'score': grade_as_score,
+                'text': grade_as_text,
+                'feedback': grade_feedback,
+            }),
+            headers={
+                'Authorization': 'Bearer ' + self.api_token,
+                'Content-Type': 'application/json'
+            },
+            verify=False,
+        ).json()
+        return return_value
