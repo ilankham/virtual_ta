@@ -119,3 +119,9 @@ class BlackboardClass(object):
                 api_request_url = api_response['paging']['nextPage']
             except KeyError:
                 api_request_url = None
+
+    @property
+    def gradebook_columns_primary_ids(self):
+        return {
+            column['name']: column['id'] for column in self.gradebook_columns
+        }

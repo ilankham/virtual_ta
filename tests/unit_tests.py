@@ -971,3 +971,67 @@ class TestBlackboardClasses(TestCase):
                 test_response,
                 list(test_bot.gradebook_columns),
             )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch(
+        'virtual_ta.BlackboardClass.gradebook_columns',
+        new_callable=PropertyMock
+    )
+    def test_bb_class_gradebook_columns_primary_ids_property(
+        self,
+        mock_gradebook_columns,
+        mock_api_token,
+    ):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_name1 = 'Test Column Name 1'
+        test_column_due_date1 = 'Test Column Due Date 1'
+        test_column_primary_id1 = 'Test Primary ID 1'
+        test_column_name2 = 'Test Column Name 2'
+        test_column_due_date2 = 'Test Column Due Date 2'
+        test_column_primary_id2 = 'Test Primary ID 2'
+        mock_gradebook_columns.return_value = (
+            {
+                'availability': {'available': 'Yes'},
+                'externalId': '',
+                'grading': {
+                    'due': test_column_due_date1,
+                    'type': 'Manual'
+                },
+                'id': test_column_primary_id1,
+                'name': test_column_name1,
+                'score': {'possible': 0.0},
+            },
+            {
+                'availability': {'available': 'Yes'},
+                'externalId': '',
+                'grading': {
+                    'due': test_column_due_date2,
+                    'type': 'Manual'
+                },
+                'id': test_column_primary_id2,
+                'name': test_column_name2,
+                'score': {'possible': 0.0},
+            }
+        )
+
+        test_response = {
+            test_column_name1: test_column_primary_id1,
+            test_column_name2: test_column_primary_id2,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        test_bot = BlackboardClass(
+            test_server_address,
+            test_course_id,
+            test_application_key,
+            test_application_secret,
+        )
+
+        self.assertEqual(
+            test_response,
+            test_bot.gradebook_columns_primary_ids,
+        )
