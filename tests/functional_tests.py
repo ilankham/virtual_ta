@@ -204,8 +204,22 @@ class TAWorkflowTests(TestCase):
             grades_feedback=grade_feedback_mail_merge_results,
         )
 
-        # Prof. X verifies the assignment feedback was correctly added by
-        # manually inspecting the corresponding BB Gradebook
+        # Prof. X uses the BlackboardClasses get_gradebook_column_grades method
+        # to verifies assignment grade scores and feedback were correctly added
+        test_grades = test_bot.get_grades_by_user_name(
+            column_primary_id=test_bot.gradebook_columns_primary_ids[
+                test_column_name
+            ],
+        )
+        for username in grade_scores_mail_merge_results:
+            self.assertEqual(
+                grade_scores_mail_merge_results[username],
+                test_grades[username]['score']
+            )
+            self.assertEqual(
+                grade_feedback_mail_merge_results[username],
+                test_grades[username]['feedback']
+            )
 
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
