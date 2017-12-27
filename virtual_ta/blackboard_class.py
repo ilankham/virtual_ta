@@ -169,11 +169,16 @@ class BlackboardClass(object):
         if grades_feedback is None:
             grades_feedback = {}
 
+        return_value = []
         for username, score in grades_as_scores.items():
-            yield self.set_grade(
-                column_primary_id=column_primary_id,
-                user_name=username,
-                grade_as_score=score,
-                grade_as_text=grades_as_text.get(username, ''),
-                grade_feedback=grades_feedback.get(username, ''),
+            return_value.append(
+                self.set_grade(
+                    column_primary_id=column_primary_id,
+                    user_name=username,
+                    grade_as_score=score,
+                    grade_as_text=grades_as_text.get(username, ''),
+                    grade_feedback=grades_feedback.get(username, ''),
+                )
             )
+
+        return return_value
