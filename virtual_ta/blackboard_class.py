@@ -182,3 +182,33 @@ class BlackboardClass(object):
             )
 
         return return_value
+
+    def get_grades(self, column_primary_id):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            f'/gradebook/columns/{column_primary_id}/users'
+        )
+
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={'Authorization': 'Bearer ' + self.api_token},
+                verify=False
+            ).json()
+            yield from api_response['results']
+            try:
+                api_request_url = api_response['paging']['nextPage']
+            except KeyError:
+                api_request_url = None
+
+    def get_grades_by_primary_user_id(self, column_primary_id):
+        return_value = {
+            grade['userId']: {
+                'score': grade.get('score', ''),
+                'text': grade.get('text', ''),
+                'feedback': grade.get('feedback', ''),
+            } for grade in self.get_grades(column_primary_id)
+        }
+        return return_value
