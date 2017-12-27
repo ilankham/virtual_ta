@@ -226,3 +226,21 @@ class BlackboardClass(object):
             verify=False
         ).json()
         return return_value.get('userId', '')
+
+    def get_grade(self, column_primary_id, user_name):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            f'/gradebook/columns/{column_primary_id}'
+            f'/users/userName:{user_name}'
+        )
+        return_value = requests.get(
+            api_request_url,
+            headers={
+                'Authorization': 'Bearer ' + self.api_token,
+                'Content-Type': 'application/json'
+            },
+            verify=False,
+        ).json()
+        return return_value

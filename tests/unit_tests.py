@@ -1405,3 +1405,51 @@ class TestBlackboardClasses(TestCase):
                 test_response_json['userId'],
                 test_bot.get_primary_user_id(test_user_name),
             )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_class_get_grade(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_grade_feedback = 'Test Grade Feedback'
+        test_grade_as_score = 'Test Grade as Score'
+        test_grade_as_text = 'Test Grade as Text'
+        test_user_id = 'Test-User-ID'
+        test_response_json = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback,
+            'score': test_grade_as_score,
+            'text': test_grade_as_text,
+            'userId': test_user_id,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+            test_set_grade_response = test_bot.get_grade(
+                column_primary_id=test_column_primary_id,
+                user_name=test_user_id,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_set_grade_response,
+            )
