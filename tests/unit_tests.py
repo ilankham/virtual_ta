@@ -1037,7 +1037,7 @@ class TestBlackboardClasses(TestCase):
         )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_set_grade(self, mock_api_token):
+    def test_bb_class_set_grade_with_overwrite(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
         test_column_primary_id = 'Test-Primary-ID'
@@ -1080,10 +1080,92 @@ class TestBlackboardClasses(TestCase):
                 grade_as_score=test_grade_as_score,
                 grade_as_text=test_grade_as_text,
                 grade_feedback=test_grade_feedback,
+                overwrite=True
             )
 
             self.assertEqual(
                 test_response_json,
+                test_set_grade_response,
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_class_set_grade_without_overwrite(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_user_id = 'Test-User-ID'
+        test_grade_feedback1 = 'Test Grade Feedback 1'
+        test_grade_as_score1 = 'Test Grade as Score 1'
+        test_grade_as_text1 = 'Test Grade as Text 1'
+        test_response_json1 = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback1,
+            'score': test_grade_as_score1,
+            'text': test_grade_as_text1,
+            'userId': test_user_id,
+        }
+        test_grade_feedback2 = 'Test Grade Feedback 2'
+        test_grade_as_score2 = 'Test Grade as Score 2'
+        test_grade_as_text2 = 'Test Grade as Text 2'
+        test_response_json2 = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback2,
+            'score': test_grade_as_score2,
+            'text': test_grade_as_text2,
+            'userId': test_user_id,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'PATCH',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id}',
+                [
+                    {'json': test_response_json1, 'status_code': 200},
+                    {'json': test_response_json2, 'status_code': 200},
+                ]
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id}',
+                status_code=200,
+                json=test_response_json1,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+            test_bot.set_grade(
+                column_primary_id=test_column_primary_id,
+                user_name=test_user_id,
+                grade_as_score=test_grade_as_score1,
+                grade_as_text=test_grade_as_text1,
+                grade_feedback=test_grade_feedback1,
+                overwrite=False
+            )
+            test_set_grade_response = test_bot.set_grade(
+                column_primary_id=test_column_primary_id,
+                user_name=test_user_id,
+                grade_as_score=test_grade_as_score2,
+                grade_as_text=test_grade_as_text2,
+                grade_feedback=test_grade_feedback2,
+                overwrite=False
+            )
+
+            self.assertEqual(
+                test_response_json1,
                 test_set_grade_response,
             )
 

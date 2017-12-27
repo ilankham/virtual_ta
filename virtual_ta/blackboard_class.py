@@ -134,6 +134,7 @@ class BlackboardClass(object):
         *,
         grade_as_text='',
         grade_feedback='',
+        overwrite=True,
     ):
         api_request_url = (
             'https://' +
@@ -142,19 +143,25 @@ class BlackboardClass(object):
             f'/gradebook/columns/{column_primary_id}'
             f'/users/userName:{user_name}'
         )
-        return_value = requests.patch(
-            api_request_url,
-            data=json.dumps({
-                'score': grade_as_score,
-                'text': grade_as_text,
-                'feedback': grade_feedback,
-            }),
-            headers={
-                'Authorization': 'Bearer ' + self.api_token,
-                'Content-Type': 'application/json'
-            },
-            verify=False,
-        ).json()
+        current_grade = {}
+        if not overwrite:
+            current_grade = self.get_grade(column_primary_id, user_name)
+        if overwrite or current_grade.get('score', None) is None:
+            return_value = requests.patch(
+                api_request_url,
+                data=json.dumps({
+                    'score': grade_as_score,
+                    'text': grade_as_text,
+                    'feedback': grade_feedback,
+                }),
+                headers={
+                    'Authorization': 'Bearer ' + self.api_token,
+                    'Content-Type': 'application/json'
+                },
+                verify=False,
+            ).json()
+        else:
+            return_value = current_grade
         return return_value
 
     def update_gradebook_column(
