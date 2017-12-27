@@ -1373,3 +1373,35 @@ class TestBlackboardClasses(TestCase):
                     test_column_primary_id
                 ),
             )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_class_get_grades_by_primary_id(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_response_json = {'userId': 'Test-User-ID'}
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        test_user_name = 'Test-User-Name'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v1/courses/'
+                f'courseId:{test_course_id}/users/userName:{test_user_name}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_response_json['userId'],
+                test_bot.get_primary_user_id(test_user_name),
+            )

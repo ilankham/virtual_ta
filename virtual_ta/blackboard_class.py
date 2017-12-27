@@ -212,3 +212,17 @@ class BlackboardClass(object):
             } for grade in self.get_grades(column_primary_id)
         }
         return return_value
+
+    def get_primary_user_id(self, user_name):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v1/courses/courseId:{self.course_id}'
+            f'/users/userName:{user_name}'
+        )
+        return_value = requests.get(
+            api_request_url,
+            headers={'Authorization': 'Bearer ' + self.api_token},
+            verify=False
+        ).json()
+        return return_value.get('userId', '')
