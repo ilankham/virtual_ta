@@ -206,19 +206,20 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the BlackboardClasses get_gradebook_column_grades method
         # to verifies assignment grade scores and feedback were correctly added
-        test_grades = test_bot.get_grades_by_user_name(
-            column_primary_id=test_bot.gradebook_columns_primary_ids[
-                test_column_name
-            ],
-        )
-        for username in grade_scores_mail_merge_results:
-            self.assertEqual(
-                grade_scores_mail_merge_results[username],
-                test_grades[username]['score']
+        for test_user_name in grade_scores_mail_merge_results:
+            test_user_grade = test_bot.get_grade(
+                column_primary_id=test_bot.gradebook_columns_primary_ids[
+                    test_column_name
+                ],
+                user_name=test_user_name,
             )
             self.assertEqual(
-                grade_feedback_mail_merge_results[username],
-                test_grades[username]['feedback']
+                float(grade_scores_mail_merge_results[test_user_name]),
+                float(test_user_grade['score']),
+            )
+            self.assertEqual(
+                grade_feedback_mail_merge_results[test_user_name].strip(),
+                test_user_grade['feedback'].strip(),
             )
 
     def test_render_calendar_table(self):

@@ -6,25 +6,24 @@ Message to tuser1
 
 -----
 
-Assignment Feedback for test user1<br />
-<br />
-Team Assignment: team-1<br />
-<br />
-Specified Repo Names/Structure: Y<br />
-<br />
-Use of GitHub Flow Evident: Y<br />
-<br />
-Specified File Contents: N (data-analysis file does not follow style guide)<br />
-<br />
-Release URL in #project2_repo_urls: Y (please use v1.1 or later for resubmission)<br />
-<br />
-<br />
-Overall Feedback:<br />
-<br />
-- Submission incomplete<br />
-<br />
-- Please review directions and direct message me in Slack to discuss any questions or concerns. The resubmission deadline is 11:59 PM on Saturday.<br />
-
+Assignment Feedback for test user1 
+<br> 
+<br> Team Assignment: team-1 
+<br> 
+<br> Specified Repo Names/Structure: Y 
+<br> 
+<br> Use of GitHub Flow Evident: Y 
+<br> 
+<br> Specified File Contents: N (data-analysis file does not follow style guide) 
+<br> 
+<br> Release URL in #project2_repo_urls: Y (please use v1.1 or later for resubmission) 
+<br> 
+<br> Overall Feedback: 
+<br> 
+<br> - Submission incomplete 
+<br> 
+<br> - Please review directions and direct message me in Slack to discuss any questions or concerns. The resubmission deadline is 11:59 PM on Saturday. 
+<br>
 
 
 --------------------
@@ -33,19 +32,20 @@ Message to tuser2
 
 -----
 
-Assignment Feedback for test user2<br />
-<br />
-Team Assignment: team-2<br />
-<br />
-Specified Repo Names/Structure: Y<br />
-<br />
-Use of GitHub Flow Evident: Y<br />
-<br />
-Specified File Contents: Y<br />
-<br />
-Release URL in #project2_repo_urls: Y<br />
-<br />
-<br />
-Overall Feedback:<br />
-<br />
-- Looks good; thanks!<br />
+Assignment Feedback for test user2 
+<br> 
+<br> Team Assignment: team-2 
+<br> 
+<br> Specified Repo Names/Structure: Y 
+<br> 
+<br> Use of GitHub Flow Evident: Y 
+<br> 
+<br> Specified File Contents: Y 
+<br> 
+<br> Release URL in #project2_repo_urls: Y 
+<br> 
+<br> Overall Feedback: 
+<br> 
+<br> - Looks good; thanks! 
+<br> 
+<br> 

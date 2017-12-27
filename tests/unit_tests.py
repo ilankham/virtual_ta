@@ -1375,7 +1375,7 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_grades_by_primary_id(self, mock_api_token):
+    def test_bb_class_get_primary_id(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
         test_response_json = {'userId': 'Test-User-ID'}
