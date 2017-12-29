@@ -15,9 +15,9 @@ FileIO = Union[BinaryIO, BytesIO, FileIO, StringIO, TextIO, TextIOWrapper]
 
 
 def convert_csv_to_dict(
-        data_csv_fp: FileIO,
-        *,
-        key: str = None,
+    data_csv_fp: FileIO,
+    *,
+    key: str = None,
 ) -> dict:
     """Convert CSV file to dictionary of dictionaries
 
@@ -51,11 +51,11 @@ def convert_csv_to_dict(
 
 
 def convert_csv_to_multimap(
-        data_csv_fp: FileIO,
-        *,
-        key_column: str = None,
-        values_column: str = None,
-        overwrite_values: bool = False,
+    data_csv_fp: FileIO,
+    *,
+    key_column: str = None,
+    values_column: str = None,
+    overwrite_values: bool = False,
 ) -> dict:
     """Convert CSV file to dictionary of dictionaries
 
@@ -103,10 +103,10 @@ def convert_csv_to_multimap(
 
 
 def convert_xlsx_to_dict(
-        data_xlsx_fp: FileIO,
-        *,
-        key: str = None,
-        worksheet: str = None,
+    data_xlsx_fp: FileIO,
+    *,
+    key: str = None,
+    worksheet: str = None,
 ) -> dict:
     """Convert XLSX file to dictionary of dictionaries
 
@@ -160,12 +160,12 @@ def convert_xlsx_to_dict(
 
 
 def convert_xlsx_to_yaml_calendar(
-        data_xlsx_fp: FileIO,
-        start_date: date,
-        *,
-        item_delimiter: str = "|",
-        week_number_column: str = None,
-        worksheet: str = None,
+    data_xlsx_fp: FileIO,
+    start_date: date,
+    *,
+    item_delimiter: str = "|",
+    week_number_column: str = None,
+    worksheet: str = None,
 ) -> str:
     """Convert XLSX file to YAML file representing calendar data by week number
 
@@ -224,12 +224,12 @@ def convert_xlsx_to_yaml_calendar(
                 continue
             if weekday.lower() in weekdays_lookup_dict:
                 weekday_date = (
-                        start_date_adjusted
-                        +
-                        timedelta(
-                            days=7 * (int(week_number) - 1) +
-                            int(weekdays_lookup_dict[weekday.lower()])
-                        )
+                    start_date_adjusted
+                    +
+                    timedelta(
+                        days=7 * (int(week_number) - 1) +
+                        int(weekdays_lookup_dict[weekday.lower()])
+                    )
                 ).strftime('%d%b%Y').upper()
                 calendar_dict[week_number][weekday] = CommentedMap()
                 calendar_dict[week_number][weekday]['Date'] = weekday_date
@@ -251,12 +251,12 @@ def convert_xlsx_to_yaml_calendar(
 
 
 def flatten_dict(
-        data_items: dict,
-        key_value_separator: str = '\n',
-        items_separator: str = '\n',
-        *,
-        suppress_keys: bool = False,
-        **kwargs
+    data_items: dict,
+    key_value_separator: str = '\n',
+    items_separator: str = '\n',
+    *,
+    suppress_keys: bool = False,
+    **kwargs
 ) -> str:
     """Convert dictionary to string with specified separators
 

@@ -403,7 +403,6 @@ class TestDataConversions(TestCase):
         }
         test_key_value_separator = ""
         test_items_separator = ""
-
         test_results = flatten_dict(
             test_dict,
             test_key_value_separator,
@@ -422,7 +421,6 @@ class TestDataConversions(TestCase):
         }
         test_key_value_separator = ""
         test_items_separator = ""
-
         test_results = flatten_dict(
             test_dict,
             test_key_value_separator,
@@ -735,6 +733,7 @@ class TestBlackboardCourses(TestCase):
                     seconds=test_response_json['expires_in']
                 )
             )
+
             self.assertAlmostEqual(
                 test_api_token_expiration_datetime.timestamp(),
                 test_bot.api_token_expiration_datetime.timestamp(),
@@ -821,7 +820,6 @@ class TestBlackboardCourses(TestCase):
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'GET',
@@ -896,7 +894,6 @@ class TestBlackboardCourses(TestCase):
 
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
                 'GET',
@@ -936,7 +933,6 @@ class TestBlackboardCourses(TestCase):
         mock_api_token,
     ):
         mock_api_token.return_value = 'Test Token Value'
-
         test_column_name1 = 'Test Column Name 1'
         test_column_due_date1 = 'Test Column Due Date 1'
         test_column_primary_id1 = 'Test Primary ID 1'
@@ -1457,7 +1453,6 @@ class TestBlackboardCourses(TestCase):
                 test_application_key,
                 test_application_secret,
             )
-
             test_create_column_response = test_bot.create_gradebook_column(
                 name=test_column_name,
                 due_date=test_column_due_date,

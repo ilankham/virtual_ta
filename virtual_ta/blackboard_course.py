@@ -215,19 +215,19 @@ class BlackboardCourse(object):
         )
 
         request_data = {
-                    "name": name,
-                    "description": description,
-                    "score": {
-                        "possible": max_score_possible,
-                    },
-                    "availability": {
-                        "available": available_to_students
-                    },
-                    "grading": {
-                        "type": grading_type,
-                        "due": due_date,
-                    },
-            }
+            "name": name,
+            "description": description,
+            "score": {
+                "possible": max_score_possible,
+            },
+            "availability": {
+                "available": available_to_students
+            },
+            "grading": {
+                "type": grading_type,
+                "due": due_date,
+            },
+        }
         if external_id:
             request_data["externalId"] = external_id
 

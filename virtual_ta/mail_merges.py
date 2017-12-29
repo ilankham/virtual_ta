@@ -12,8 +12,8 @@ FileIO = Union[BinaryIO, BytesIO, FileIO, StringIO, TextIO, TextIOWrapper]
 
 
 def mail_merge_from_dict(
-        template_fp: FileIO,
-        data_dict: dict,
+    template_fp: FileIO,
+    data_dict: dict,
 ) -> dict:
     """Mail merges a Jinja2 template against a dictionary of dictionaries
 
@@ -46,10 +46,10 @@ def mail_merge_from_dict(
 
 
 def mail_merge_from_csv_file(
-        template_fp: FileIO,
-        data_csv_fp: FileIO,
-        *,
-        key: str = None,
+    template_fp: FileIO,
+    data_csv_fp: FileIO,
+    *,
+    key: str = None,
 ) -> dict:
     """Mail merges a Jinja2 template against a CSV file
 
@@ -82,11 +82,11 @@ def mail_merge_from_csv_file(
 
 
 def mail_merge_from_xlsx_file(
-        template_fp: FileIO,
-        data_xlsx_fp: FileIO,
-        *,
-        key: str = None,
-        worksheet: str = None,
+    template_fp: FileIO,
+    data_xlsx_fp: FileIO,
+    *,
+    key: str = None,
+    worksheet: str = None,
 ) -> dict:
     """Mail merges a Jinja2 template against an XLSX file
 
@@ -126,8 +126,8 @@ def mail_merge_from_xlsx_file(
 
 
 def mail_merge_from_yaml_file(
-        template_fp: FileIO,
-        data_yaml_fp: Union[FileIO, str],
+    template_fp: FileIO,
+    data_yaml_fp: Union[FileIO, str],
 ) -> dict:
 
     yaml = YAML()
