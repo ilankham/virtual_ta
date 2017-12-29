@@ -53,52 +53,6 @@ class BlackboardClass(object):
 
         return self.__api_token
 
-    def create_gradebook_column(
-        self,
-        name,
-        due_date,
-        *,
-        external_id='',
-        description='',
-        max_score_possible=0,
-        available_to_students='Yes',
-        grading_type='Manual',
-    ):
-        api_request_url = (
-            'https://' +
-            self.server_address +
-            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
-            f'/gradebook/columns'
-        )
-
-        request_data = {
-                    "name": name,
-                    "description": description,
-                    "score": {
-                        "possible": max_score_possible,
-                    },
-                    "availability": {
-                        "available": available_to_students
-                    },
-                    "grading": {
-                        "type": grading_type,
-                        "due": due_date,
-                    },
-            }
-        if external_id:
-            request_data["externalId"] = external_id
-
-        return_value = requests.post(
-            api_request_url,
-            data=json.dumps(request_data),
-            headers={
-                'Authorization': 'Bearer ' + self.api_token,
-                'Content-Type': 'application/json'
-            },
-            verify=False,
-        ).json()
-        return return_value
-
     @property
     def gradebook_columns(self):
         api_request_url = (
@@ -125,6 +79,58 @@ class BlackboardClass(object):
         return {
             column['name']: column['id'] for column in self.gradebook_columns
         }
+
+    def get_user_primary_id(self, user_name):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v1/courses/courseId:{self.course_id}'
+            f'/users/userName:{user_name}'
+        )
+        return_value = requests.get(
+            api_request_url,
+            headers={'Authorization': 'Bearer ' + self.api_token},
+            verify=False
+        ).json()
+        return return_value.get('userId', '')
+
+    def get_grade(self, column_primary_id, user_name):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            f'/gradebook/columns/{column_primary_id}'
+            f'/users/userName:{user_name}'
+        )
+        return_value = requests.get(
+            api_request_url,
+            headers={
+                'Authorization': 'Bearer ' + self.api_token,
+                'Content-Type': 'application/json'
+            },
+            verify=False,
+        ).json()
+        return return_value
+
+    def get_grades_in_column(self, column_primary_id):
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
+            f'/gradebook/columns/{column_primary_id}/users'
+        )
+
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={'Authorization': 'Bearer ' + self.api_token},
+                verify=False
+            ).json()
+            yield from api_response['results']
+            try:
+                api_request_url = api_response['paging']['nextPage']
+            except KeyError:
+                api_request_url = None
 
     def set_grade(
         self,
@@ -164,7 +170,7 @@ class BlackboardClass(object):
             return_value = current_grade
         return return_value
 
-    def update_gradebook_column(
+    def set_grades_in_column(
         self,
         column_primary_id,
         grades_as_scores,
@@ -190,60 +196,44 @@ class BlackboardClass(object):
 
         return return_value
 
-    def get_grades(self, column_primary_id):
+    def create_gradebook_column(
+        self,
+        name,
+        due_date,
+        *,
+        external_id='',
+        description='',
+        max_score_possible=0,
+        available_to_students='Yes',
+        grading_type='Manual',
+    ):
         api_request_url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v2/courses/courseId:{self.course_id}'
-            f'/gradebook/columns/{column_primary_id}/users'
+            f'/gradebook/columns'
         )
 
-        while api_request_url:
-            api_response = requests.get(
-                api_request_url,
-                headers={'Authorization': 'Bearer ' + self.api_token},
-                verify=False
-            ).json()
-            yield from api_response['results']
-            try:
-                api_request_url = api_response['paging']['nextPage']
-            except KeyError:
-                api_request_url = None
+        request_data = {
+                    "name": name,
+                    "description": description,
+                    "score": {
+                        "possible": max_score_possible,
+                    },
+                    "availability": {
+                        "available": available_to_students
+                    },
+                    "grading": {
+                        "type": grading_type,
+                        "due": due_date,
+                    },
+            }
+        if external_id:
+            request_data["externalId"] = external_id
 
-    def get_grades_by_primary_user_id(self, column_primary_id):
-        return_value = {
-            grade['userId']: {
-                'score': grade.get('score', ''),
-                'text': grade.get('text', ''),
-                'feedback': grade.get('feedback', ''),
-            } for grade in self.get_grades(column_primary_id)
-        }
-        return return_value
-
-    def get_primary_user_id(self, user_name):
-        api_request_url = (
-            'https://' +
-            self.server_address +
-            f'/learn/api/public/v1/courses/courseId:{self.course_id}'
-            f'/users/userName:{user_name}'
-        )
-        return_value = requests.get(
+        return_value = requests.post(
             api_request_url,
-            headers={'Authorization': 'Bearer ' + self.api_token},
-            verify=False
-        ).json()
-        return return_value.get('userId', '')
-
-    def get_grade(self, column_primary_id, user_name):
-        api_request_url = (
-            'https://' +
-            self.server_address +
-            f'/learn/api/public/v2/courses/courseId:{self.course_id}'
-            f'/gradebook/columns/{column_primary_id}'
-            f'/users/userName:{user_name}'
-        )
-        return_value = requests.get(
-            api_request_url,
+            data=json.dumps(request_data),
             headers={
                 'Authorization': 'Bearer ' + self.api_token,
                 'Content-Type': 'application/json'

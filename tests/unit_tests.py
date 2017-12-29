@@ -52,6 +52,37 @@ class TestDataConversions(TestCase):
 
         self.assertEqual(test_expectations, test_results)
 
+    def test_convert_csv_to_multimap(self):
+        test_expectations = {
+            "team-1": [
+                "uuser1-virtual_ta_testing",
+                "uuser4-virtual_ta_testing",
+            ],
+            "team-2": [
+                "uuser2-virtual_ta_testing",
+                "uuser3-virtual_ta_testing",
+            ],
+        }
+
+        test_csv_entries = [
+            "GitHub_User_Name,Team_Number",
+            "uuser1-virtual_ta_testing,team-1",
+            "uuser2-virtual_ta_testing,team-2",
+            "uuser3-virtual_ta_testing,team-2",
+            "uuser4-virtual_ta_testing,team-1",
+        ]
+        test_csv = StringIO("\n".join(test_csv_entries))
+        test_key_column = 'Team_Number'
+        test_values_column = 'GitHub_User_Name'
+        test_results = convert_csv_to_multimap(
+            test_csv,
+            key_column=test_key_column,
+            values_column=test_values_column,
+            overwrite_values=False,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
     def test_convert_xlsx_to_dict(self):
         test_expectations = {
             "auser1": {
@@ -80,136 +111,6 @@ class TestDataConversions(TestCase):
             test_workbook.as_file,
             key="User_Name",
             worksheet='test1',
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_flatten_dict_with_options_passed_through(self):
-        test_expectations = "buser2b user2auser1a user1"
-
-        test_dict = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-        test_key_value_separator = ""
-        test_items_separator = ""
-
-        test_results = flatten_dict(
-            test_dict,
-            test_key_value_separator,
-            test_items_separator,
-            reverse=True
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_flatten_dict_without_options_passed_through(self):
-        test_expectations = "auser1a user1buser2b user2"
-
-        test_dict = {
-            "auser1": "a user1",
-            "buser2": "b user2",
-        }
-        test_key_value_separator = ""
-        test_items_separator = ""
-
-        test_results = flatten_dict(
-            test_dict,
-            test_key_value_separator,
-            test_items_separator,
-        )
-
-        self.assertEqual(test_expectations, test_results)
-
-    def test_convert_xlsx_to_yaml_calendar_after_start_date(self):
-        test_expectations_list = [
-            "1:",
-            "  Tuesday:",
-            "    Date: 02JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 2",
-            "    - Week 1 Activity 3",
-            "  Wednesday:",
-            "    Date: 03JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 4",
-            "  Thursday:",
-            "    Date: 04JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 5",
-            "  Friday:",
-            "    Date: 05JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 6",
-            "  Saturday:",
-            "    Date: 06JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 7",
-            "  Sunday:",
-            "    Date: 07JAN2018",
-            "    Activities:",
-            "    - Week 1 Activity 8",
-            "3:",
-            "  Tuesday:",
-            "    Date: 16JAN2018",
-            "    Activities:",
-            "    - Week 3 Activity 1",
-            "  Friday:",
-            "    Date: 19JAN2018",
-            "    Activities:",
-            "    - Week 3 Activity 2",
-            "    - Week 3 Activity 3",
-            "",
-        ]
-        test_expectations = '\n'.join(test_expectations_list)
-
-        test_start_date = date(2018, 1, 3)
-        test_item_delimiter = '|'
-        test_week_number_column = 'Week'
-        test_worksheet_name = 'Assessments'
-        test_xlsx_entries = [
-            [
-                "Week",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
-            ],
-            [
-                "1",
-                "",
-                "Week 1 Activity 2|Week 1 Activity 3",
-                "Week 1 Activity 4",
-                "Week 1 Activity 5",
-                "Week 1 Activity 6",
-                "Week 1 Activity 7",
-                "Week 1 Activity 8",
-            ],
-            [
-                "3",
-                "",
-                "Week 3 Activity 1",
-                "",
-                "",
-                "Week 3 Activity 2|Week 3 Activity 3",
-                "",
-                "",
-            ],
-        ]
-        test_workbook = XlsxMock()
-        test_workbook.create_sheet('test0')
-        test_worksheet = test_workbook.create_sheet(test_worksheet_name)
-        test_workbook.load_data(test_worksheet, test_xlsx_entries)
-        test_workbook.create_sheet('test2')
-        test_results = convert_xlsx_to_yaml_calendar(
-            data_xlsx_fp=test_workbook.as_file,
-            start_date=test_start_date,
-            item_delimiter=test_item_delimiter,
-            week_number_column=test_week_number_column,
-            worksheet=test_worksheet_name,
         )
 
         self.assertEqual(test_expectations, test_results)
@@ -400,33 +301,132 @@ class TestDataConversions(TestCase):
 
         self.assertEqual(test_expectations, test_results)
 
-    def test_convert_csv_to_multimap(self):
-        test_expectations = {
-            "team-1": [
-                "uuser1-virtual_ta_testing",
-                "uuser4-virtual_ta_testing",
-            ],
-            "team-2": [
-                "uuser2-virtual_ta_testing",
-                "uuser3-virtual_ta_testing",
-            ],
-        }
-
-        test_csv_entries = [
-            "GitHub_User_Name,Team_Number",
-            "uuser1-virtual_ta_testing,team-1",
-            "uuser2-virtual_ta_testing,team-2",
-            "uuser3-virtual_ta_testing,team-2",
-            "uuser4-virtual_ta_testing,team-1",
+    def test_convert_xlsx_to_yaml_calendar_after_start_date(self):
+        test_expectations_list = [
+            "1:",
+            "  Tuesday:",
+            "    Date: 02JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 2",
+            "    - Week 1 Activity 3",
+            "  Wednesday:",
+            "    Date: 03JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 4",
+            "  Thursday:",
+            "    Date: 04JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 5",
+            "  Friday:",
+            "    Date: 05JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 6",
+            "  Saturday:",
+            "    Date: 06JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 7",
+            "  Sunday:",
+            "    Date: 07JAN2018",
+            "    Activities:",
+            "    - Week 1 Activity 8",
+            "3:",
+            "  Tuesday:",
+            "    Date: 16JAN2018",
+            "    Activities:",
+            "    - Week 3 Activity 1",
+            "  Friday:",
+            "    Date: 19JAN2018",
+            "    Activities:",
+            "    - Week 3 Activity 2",
+            "    - Week 3 Activity 3",
+            "",
         ]
-        test_csv = StringIO("\n".join(test_csv_entries))
-        test_key_column = 'Team_Number'
-        test_values_column = 'GitHub_User_Name'
-        test_results = convert_csv_to_multimap(
-            test_csv,
-            key_column=test_key_column,
-            values_column=test_values_column,
-            overwrite_values=False,
+        test_expectations = '\n'.join(test_expectations_list)
+
+        test_start_date = date(2018, 1, 3)
+        test_item_delimiter = '|'
+        test_week_number_column = 'Week'
+        test_worksheet_name = 'Assessments'
+        test_xlsx_entries = [
+            [
+                "Week",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ],
+            [
+                "1",
+                "",
+                "Week 1 Activity 2|Week 1 Activity 3",
+                "Week 1 Activity 4",
+                "Week 1 Activity 5",
+                "Week 1 Activity 6",
+                "Week 1 Activity 7",
+                "Week 1 Activity 8",
+            ],
+            [
+                "3",
+                "",
+                "Week 3 Activity 1",
+                "",
+                "",
+                "Week 3 Activity 2|Week 3 Activity 3",
+                "",
+                "",
+            ],
+        ]
+        test_workbook = XlsxMock()
+        test_workbook.create_sheet('test0')
+        test_worksheet = test_workbook.create_sheet(test_worksheet_name)
+        test_workbook.load_data(test_worksheet, test_xlsx_entries)
+        test_workbook.create_sheet('test2')
+        test_results = convert_xlsx_to_yaml_calendar(
+            data_xlsx_fp=test_workbook.as_file,
+            start_date=test_start_date,
+            item_delimiter=test_item_delimiter,
+            week_number_column=test_week_number_column,
+            worksheet=test_worksheet_name,
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_flatten_dict_with_options_passed_through(self):
+        test_expectations = "buser2b user2auser1a user1"
+
+        test_dict = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+        test_key_value_separator = ""
+        test_items_separator = ""
+
+        test_results = flatten_dict(
+            test_dict,
+            test_key_value_separator,
+            test_items_separator,
+            reverse=True
+        )
+
+        self.assertEqual(test_expectations, test_results)
+
+    def test_flatten_dict_without_options_passed_through(self):
+        test_expectations = "auser1a user1buser2b user2"
+
+        test_dict = {
+            "auser1": "a user1",
+            "buser2": "b user2",
+        }
+        test_key_value_separator = ""
+        test_items_separator = ""
+
+        test_results = flatten_dict(
+            test_dict,
+            test_key_value_separator,
+            test_items_separator,
         )
 
         self.assertEqual(test_expectations, test_results)
@@ -679,7 +679,7 @@ class TestSlackAccounts(TestCase):
 
 # noinspection SpellCheckingInspection
 class TestBlackboardClasses(TestCase):
-    def test_bb_class_init(self):
+    def test_bb_course_init(self):
         test_server_address = 'test.server.address'
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
@@ -697,7 +697,7 @@ class TestBlackboardClasses(TestCase):
         self.assertEqual(test_application_key, test_bot.application_key)
         self.assertEqual(test_application_secret, test_bot.application_secret)
 
-    def test_bb_class_api_token_property_with_new_token(self):
+    def test_bb_course_api_token_property_with_new_token(self):
         test_response_json = {
             'access_token': 'Test Token Value',
             'token_type': 'bearer',
@@ -741,7 +741,7 @@ class TestBlackboardClasses(TestCase):
                 places=0
             )
 
-    def test_bb_class_api_token_property_with_old_token(self):
+    def test_bb_course_api_token_property_with_old_token(self):
         test_response_json1 = {
             'access_token': 'Test Token Value',
             'token_type': 'bearer',
@@ -793,54 +793,7 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_create_gradebook_column(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_column_name = 'Test Column Name'
-        test_column_due_date = 'Test Column Due Date'
-        test_response_json = {
-            'availability': {'available': 'Yes'},
-            'externalId': '',
-            'grading': {
-                'due': test_column_due_date,
-                'type': 'Manual'
-            },
-            'name': test_column_name,
-            'score': {'possible': 0.0}
-        }
-
-        test_server_address = 'test.server.address'
-        test_course_id = 'Test-Course-ID'
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'POST',
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns',
-                status_code=200,
-                json=test_response_json,
-            )
-
-            test_bot = BlackboardClass(
-                test_server_address,
-                test_course_id,
-                test_application_key,
-                test_application_secret,
-            )
-
-            test_create_column_response = test_bot.create_gradebook_column(
-                name=test_column_name,
-                due_date=test_column_due_date,
-            )
-
-            self.assertEqual(
-                test_response_json,
-                test_create_column_response,
-            )
-
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_gradebook_columns_property_without_paging(
+    def test_bb_course_gradebook_columns_property_without_paging(
         self,
         mock_api_token
     ):
@@ -891,7 +844,7 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_gradebook_columns_property_with_paging(
+    def test_bb_course_gradebook_columns_property_with_paging(
         self,
         mock_api_token
     ):
@@ -977,7 +930,7 @@ class TestBlackboardClasses(TestCase):
         'virtual_ta.BlackboardClass.gradebook_columns',
         new_callable=PropertyMock
     )
-    def test_bb_class_gradebook_columns_primary_ids_property(
+    def test_bb_course_gradebook_columns_primary_ids_property(
         self,
         mock_gradebook_columns,
         mock_api_token,
@@ -1037,7 +990,226 @@ class TestBlackboardClasses(TestCase):
         )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_set_grade_with_overwrite(self, mock_api_token):
+    def test_bb_course_get_user_primary_id(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_response_json = {'userId': 'Test-User-ID'}
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        test_user_name = 'Test-User-Name'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v1/courses/'
+                f'courseId:{test_course_id}/users/userName:{test_user_name}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_response_json['userId'],
+                test_bot.get_user_primary_id(test_user_name),
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_course_get_grade(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_grade_feedback = 'Test Grade Feedback'
+        test_grade_as_score = 'Test Grade as Score'
+        test_grade_as_text = 'Test Grade as Text'
+        test_user_id = 'Test-User-ID'
+        test_response_json = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback,
+            'score': test_grade_as_score,
+            'text': test_grade_as_text,
+            'userId': test_user_id,
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users/'
+                f'userName:{test_user_id}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+            test_set_grade_response = test_bot.get_grade(
+                column_primary_id=test_column_primary_id,
+                user_name=test_user_id,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_set_grade_response,
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_course_get_grades_in_column_without_paging(
+        self,
+        mock_api_token
+    ):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_grade_feedback1 = 'Test Grade Feedback 1'
+        test_grade_as_score1 = 'Test Grade as Score 1'
+        test_grade_as_text1 = 'Test Grade as Text 1'
+        test_user_id1 = 'Test-User-ID1'
+        test_response_json1 = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback1,
+            'score': test_grade_as_score1,
+            'text': test_grade_as_text1,
+            'userId': test_user_id1,
+        }
+        test_grade_feedback2 = 'Test Grade Feedback 2'
+        test_grade_as_score2 = 'Test Grade as Score 2'
+        test_grade_as_text2 = 'Test Grade as Text 2'
+        test_user_id2 = 'Test-User-ID2'
+        test_response_json2 = {
+            'columnId': test_column_primary_id,
+            'feedback': test_grade_feedback2,
+            'score': test_grade_as_score2,
+            'text': test_grade_as_text2,
+            'userId': test_user_id2,
+        }
+        test_response_json = {
+            'results': [test_response_json1, test_response_json2]
+        }
+
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_response_json['results'],
+                list(test_bot.get_grades_in_column(test_column_primary_id)),
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_course_get_grades_in_column_with_paging(self, mock_api_token):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_column_primary_id = 'Test-Primary-ID'
+        test_grade_feedback1 = 'Test Grade Feedback 1'
+        test_grade_as_score1 = 'Test Grade as Score 1'
+        test_grade_as_text1 = 'Test Grade as Text 1'
+        test_user_id1 = 'Test-User-ID1'
+        test_server_address = 'test.server.address'
+        test_course_id = 'Test-Course-ID'
+        test_response_json1 = {
+            'results': [
+                {
+                    'columnId': test_column_primary_id,
+                    'feedback': test_grade_feedback1,
+                    'score': test_grade_as_score1,
+                    'text': test_grade_as_text1,
+                    'userId': test_user_id1,
+                }
+            ],
+            'paging': {
+                'nextPage':
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users?next=101',
+            }
+        }
+        test_grade_feedback2 = 'Test Grade Feedback 2'
+        test_grade_as_score2 = 'Test Grade as Score 2'
+        test_grade_as_text2 = 'Test Grade as Text 2'
+        test_user_id2 = 'Test-User-ID2'
+        test_response_json2 = {
+            'results': [
+                {
+                    'columnId': test_column_primary_id,
+                    'feedback': test_grade_feedback2,
+                    'score': test_grade_as_score2,
+                    'text': test_grade_as_text2,
+                    'userId': test_user_id2,
+                }
+            ],
+        }
+        test_response = (
+            test_response_json1['results'] + test_response_json2['results']
+        )
+
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users',
+                status_code=200,
+                json=test_response_json1,
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v2/courses/'
+                f'courseId:{test_course_id}/gradebook/columns/'
+                f'{test_column_primary_id}/users?next=101',
+                status_code=200,
+                json=test_response_json2,
+            )
+
+            test_bot = BlackboardClass(
+                test_server_address,
+                test_course_id,
+                test_application_key,
+                test_application_secret,
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.get_grades_in_column(test_column_primary_id)),
+            )
+
+    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    def test_bb_course_set_grade_with_overwrite(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
         test_column_primary_id = 'Test-Primary-ID'
@@ -1089,7 +1261,7 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_set_grade_without_overwrite(self, mock_api_token):
+    def test_bb_course_set_grade_without_overwrite(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
         test_column_primary_id = 'Test-Primary-ID'
@@ -1170,7 +1342,7 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_update_gradebook_column(self, mock_api_token):
+    def test_bb_course_set_grades_in_column(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
         test_column_primary_id = 'Test-Primary-ID'
@@ -1228,7 +1400,7 @@ class TestBlackboardClasses(TestCase):
                 test_application_key,
                 test_application_secret,
             )
-            test_update_gradebook_response = test_bot.update_gradebook_column(
+            test_update_gradebook_response = test_bot.set_grades_in_column(
                 column_primary_id=test_column_primary_id,
                 grades_as_scores={
                     test_user_id1: test_grade_as_score1,
@@ -1250,182 +1422,20 @@ class TestBlackboardClasses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_grades_without_paging(self, mock_api_token):
+    def test_bb_course_create_gradebook_column(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
-        test_column_primary_id = 'Test-Primary-ID'
-        test_grade_feedback1 = 'Test Grade Feedback 1'
-        test_grade_as_score1 = 'Test Grade as Score 1'
-        test_grade_as_text1 = 'Test Grade as Text 1'
-        test_user_id1 = 'Test-User-ID1'
-        test_response_json1 = {
-            'columnId': test_column_primary_id,
-            'feedback': test_grade_feedback1,
-            'score': test_grade_as_score1,
-            'text': test_grade_as_text1,
-            'userId': test_user_id1,
-        }
-        test_grade_feedback2 = 'Test Grade Feedback 2'
-        test_grade_as_score2 = 'Test Grade as Score 2'
-        test_grade_as_text2 = 'Test Grade as Text 2'
-        test_user_id2 = 'Test-User-ID2'
-        test_response_json2 = {
-            'columnId': test_column_primary_id,
-            'feedback': test_grade_feedback2,
-            'score': test_grade_as_score2,
-            'text': test_grade_as_text2,
-            'userId': test_user_id2,
-        }
+        test_column_name = 'Test Column Name'
+        test_column_due_date = 'Test Column Due Date'
         test_response_json = {
-            'results': [test_response_json1, test_response_json2]
-        }
-
-        test_server_address = 'test.server.address'
-        test_course_id = 'Test-Course-ID'
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users',
-                status_code=200,
-                json=test_response_json,
-            )
-
-            test_bot = BlackboardClass(
-                test_server_address,
-                test_course_id,
-                test_application_key,
-                test_application_secret,
-            )
-
-            self.assertEqual(
-                test_response_json['results'],
-                list(test_bot.get_grades(test_column_primary_id)),
-            )
-
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_grades_with_paging(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_column_primary_id = 'Test-Primary-ID'
-        test_grade_feedback1 = 'Test Grade Feedback 1'
-        test_grade_as_score1 = 'Test Grade as Score 1'
-        test_grade_as_text1 = 'Test Grade as Text 1'
-        test_user_id1 = 'Test-User-ID1'
-        test_server_address = 'test.server.address'
-        test_course_id = 'Test-Course-ID'
-        test_response_json1 = {
-            'results': [
-                {
-                    'columnId': test_column_primary_id,
-                    'feedback': test_grade_feedback1,
-                    'score': test_grade_as_score1,
-                    'text': test_grade_as_text1,
-                    'userId': test_user_id1,
-                }
-            ],
-            'paging': {
-                'nextPage':
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users?next=101',
-            }
-        }
-        test_grade_feedback2 = 'Test Grade Feedback 2'
-        test_grade_as_score2 = 'Test Grade as Score 2'
-        test_grade_as_text2 = 'Test Grade as Text 2'
-        test_user_id2 = 'Test-User-ID2'
-        test_response_json2 = {
-            'results': [
-                {
-                    'columnId': test_column_primary_id,
-                    'feedback': test_grade_feedback2,
-                    'score': test_grade_as_score2,
-                    'text': test_grade_as_text2,
-                    'userId': test_user_id2,
-                }
-            ],
-        }
-        test_response = (
-            test_response_json1['results'] + test_response_json2['results']
-        )
-
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users',
-                status_code=200,
-                json=test_response_json1,
-            )
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users?next=101',
-                status_code=200,
-                json=test_response_json2,
-            )
-
-            test_bot = BlackboardClass(
-                test_server_address,
-                test_course_id,
-                test_application_key,
-                test_application_secret,
-            )
-
-            self.assertEqual(
-                test_response,
-                list(test_bot.get_grades(test_column_primary_id)),
-            )
-
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_grades_by_primary_id(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_column_primary_id = 'Test-Primary-ID'
-        test_grade_feedback1 = 'Test Grade Feedback 1'
-        test_grade_as_score1 = 'Test Grade as Score 1'
-        test_grade_as_text1 = 'Test Grade as Text 1'
-        test_user_id1 = 'Test-User-ID1'
-        test_response_json1 = {
-            'columnId': test_column_primary_id,
-            'feedback': test_grade_feedback1,
-            'score': test_grade_as_score1,
-            'text': test_grade_as_text1,
-            'userId': test_user_id1,
-        }
-        test_grade_feedback2 = 'Test Grade Feedback 2'
-        test_grade_as_score2 = 'Test Grade as Score 2'
-        test_grade_as_text2 = 'Test Grade as Text 2'
-        test_user_id2 = 'Test-User-ID2'
-        test_response_json2 = {
-            'columnId': test_column_primary_id,
-            'feedback': test_grade_feedback2,
-            'score': test_grade_as_score2,
-            'text': test_grade_as_text2,
-            'userId': test_user_id2,
-        }
-        test_response_json = {
-            'results': [test_response_json1, test_response_json2]
-        }
-        test_response = {
-            test_user_id1: {
-                'score': test_grade_as_score1,
-                'text': test_grade_as_text1,
-                'feedback': test_grade_feedback1,
+            'availability': {'available': 'Yes'},
+            'externalId': '',
+            'grading': {
+                'due': test_column_due_date,
+                'type': 'Manual'
             },
-            test_user_id2: {
-                'score': test_grade_as_score2,
-                'text': test_grade_as_text2,
-                'feedback': test_grade_feedback2,
-            }
+            'name': test_column_name,
+            'score': {'possible': 0.0}
         }
 
         test_server_address = 'test.server.address'
@@ -1434,10 +1444,9 @@ class TestBlackboardClasses(TestCase):
         test_application_secret = 'Test Application Secret'
         with requests_mock.Mocker() as mock_requests:
             mock_requests.register_uri(
-                'GET',
+                'POST',
                 f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users',
+                f'courseId:{test_course_id}/gradebook/columns',
                 status_code=200,
                 json=test_response_json,
             )
@@ -1449,89 +1458,12 @@ class TestBlackboardClasses(TestCase):
                 test_application_secret,
             )
 
-            self.assertEqual(
-                test_response,
-                test_bot.get_grades_by_primary_user_id(
-                    test_column_primary_id
-                ),
-            )
-
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_primary_id(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_response_json = {'userId': 'Test-User-ID'}
-
-        test_server_address = 'test.server.address'
-        test_course_id = 'Test-Course-ID'
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        test_user_name = 'Test-User-Name'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v1/courses/'
-                f'courseId:{test_course_id}/users/userName:{test_user_name}',
-                status_code=200,
-                json=test_response_json,
-            )
-
-            test_bot = BlackboardClass(
-                test_server_address,
-                test_course_id,
-                test_application_key,
-                test_application_secret,
-            )
-
-            self.assertEqual(
-                test_response_json['userId'],
-                test_bot.get_primary_user_id(test_user_name),
-            )
-
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
-    def test_bb_class_get_grade(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_column_primary_id = 'Test-Primary-ID'
-        test_grade_feedback = 'Test Grade Feedback'
-        test_grade_as_score = 'Test Grade as Score'
-        test_grade_as_text = 'Test Grade as Text'
-        test_user_id = 'Test-User-ID'
-        test_response_json = {
-            'columnId': test_column_primary_id,
-            'feedback': test_grade_feedback,
-            'score': test_grade_as_score,
-            'text': test_grade_as_text,
-            'userId': test_user_id,
-        }
-
-        test_server_address = 'test.server.address'
-        test_course_id = 'Test-Course-ID'
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses/'
-                f'courseId:{test_course_id}/gradebook/columns/'
-                f'{test_column_primary_id}/users/'
-                f'userName:{test_user_id}',
-                status_code=200,
-                json=test_response_json,
-            )
-
-            test_bot = BlackboardClass(
-                test_server_address,
-                test_course_id,
-                test_application_key,
-                test_application_secret,
-            )
-            test_set_grade_response = test_bot.get_grade(
-                column_primary_id=test_column_primary_id,
-                user_name=test_user_id,
+            test_create_column_response = test_bot.create_gradebook_column(
+                name=test_column_name,
+                due_date=test_column_due_date,
             )
 
             self.assertEqual(
                 test_response_json,
-                test_set_grade_response,
+                test_create_column_response,
             )
