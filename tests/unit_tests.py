@@ -8,7 +8,7 @@ from unittest.mock import patch, PropertyMock
 import requests_mock
 
 from virtual_ta import (
-    BlackboardClass,
+    BlackboardCourse,
     convert_csv_to_dict,
     convert_csv_to_multimap,
     convert_xlsx_to_dict,
@@ -678,14 +678,14 @@ class TestSlackAccounts(TestCase):
 
 
 # noinspection SpellCheckingInspection
-class TestBlackboardClasses(TestCase):
+class TestBlackboardCourses(TestCase):
     def test_bb_course_init(self):
         test_server_address = 'test.server.address'
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
 
-        test_bot = BlackboardClass(
+        test_bot = BlackboardCourse(
             test_server_address,
             test_course_id,
             test_application_key,
@@ -717,7 +717,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -768,7 +768,7 @@ class TestBlackboardClasses(TestCase):
                 ]
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -792,7 +792,7 @@ class TestBlackboardClasses(TestCase):
                 places=0
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_gradebook_columns_property_without_paging(
         self,
         mock_api_token
@@ -831,7 +831,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -843,7 +843,7 @@ class TestBlackboardClasses(TestCase):
                 list(test_bot.gradebook_columns),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_gradebook_columns_property_with_paging(
         self,
         mock_api_token
@@ -913,7 +913,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json2,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -925,9 +925,9 @@ class TestBlackboardClasses(TestCase):
                 list(test_bot.gradebook_columns),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     @patch(
-        'virtual_ta.BlackboardClass.gradebook_columns',
+        'virtual_ta.BlackboardCourse.gradebook_columns',
         new_callable=PropertyMock
     )
     def test_bb_course_gradebook_columns_primary_ids_property(
@@ -977,7 +977,7 @@ class TestBlackboardClasses(TestCase):
         test_course_id = 'Test-Course-ID'
         test_application_key = 'Test Application Key'
         test_application_secret = 'Test Application Secret'
-        test_bot = BlackboardClass(
+        test_bot = BlackboardCourse(
             test_server_address,
             test_course_id,
             test_application_key,
@@ -989,7 +989,7 @@ class TestBlackboardClasses(TestCase):
             test_bot.gradebook_columns_primary_ids,
         )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_get_user_primary_id(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1009,7 +1009,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1021,7 +1021,7 @@ class TestBlackboardClasses(TestCase):
                 test_bot.get_user_primary_id(test_user_name),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_get_grade(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1053,7 +1053,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1069,7 +1069,7 @@ class TestBlackboardClasses(TestCase):
                 test_set_grade_response,
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_get_grades_in_column_without_paging(
         self,
         mock_api_token
@@ -1117,7 +1117,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1129,7 +1129,7 @@ class TestBlackboardClasses(TestCase):
                 list(test_bot.get_grades_in_column(test_column_primary_id)),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_get_grades_in_column_with_paging(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1196,7 +1196,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json2,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1208,7 +1208,7 @@ class TestBlackboardClasses(TestCase):
                 list(test_bot.get_grades_in_column(test_column_primary_id)),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_set_grade_with_overwrite(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1240,7 +1240,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1260,7 +1260,7 @@ class TestBlackboardClasses(TestCase):
                 test_set_grade_response,
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_set_grade_without_overwrite(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1313,7 +1313,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json1,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1341,7 +1341,7 @@ class TestBlackboardClasses(TestCase):
                 test_set_grade_response,
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_set_grades_in_column(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1394,7 +1394,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json2,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,
@@ -1421,7 +1421,7 @@ class TestBlackboardClasses(TestCase):
                 list(test_update_gradebook_response),
             )
 
-    @patch('virtual_ta.BlackboardClass.api_token', new_callable=PropertyMock)
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_create_gradebook_column(self, mock_api_token):
         mock_api_token.return_value = 'Test Token Value'
 
@@ -1451,7 +1451,7 @@ class TestBlackboardClasses(TestCase):
                 json=test_response_json,
             )
 
-            test_bot = BlackboardClass(
+            test_bot = BlackboardCourse(
                 test_server_address,
                 test_course_id,
                 test_application_key,

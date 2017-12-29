@@ -23,7 +23,7 @@ from io import StringIO
 from unittest import TestCase
 
 from virtual_ta import (
-    BlackboardClass,
+    BlackboardCourse,
     flatten_dict,
     convert_csv_to_multimap,
     convert_xlsx_to_yaml_calendar,
@@ -102,7 +102,7 @@ class TAWorkflowTests(TestCase):
         # Prof. X uses the Application ID to register a REST API Integration
         # with a Blackboard Learn server, associating the a user account having
         # sufficient access privileges to edit the gradebook for the intended
-        # class
+        # course
 
         # Prof. X saves a gradebook csv file for one gradebook column with
         # column headings and one row per student grade record
@@ -164,18 +164,18 @@ class TAWorkflowTests(TestCase):
                 overwrite_values=True,
             )
 
-        # Prof. X initiates a BlackboardClass object by providing their server
+        # Prof. X initiates a BlackboardCourse object by providing their server
         # address, CourseID, Application Key, and Application Secret
         config = ConfigParser()
         config.read('tests/test_config.ini')
-        test_bot = BlackboardClass(
+        test_bot = BlackboardCourse(
             config['Blackboard']['server_address'],
             config['Blackboard']['course_id'],
             config['Blackboard']['application_key'],
             config['Blackboard']['application_secret'],
         )
 
-        # Prof. X uses the BlackboardClass create_gradebook_column method to
+        # Prof. X uses the BlackboardCourse create_gradebook_column method to
         # create a column, providing a name, due_date and max_score_possible
         test_column_due_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
         test_column_name = 'test_column_created-'+test_column_due_date
@@ -185,14 +185,14 @@ class TAWorkflowTests(TestCase):
             max_score_possible=0,
         )
 
-        # Prof. X uses the BlackboardClass gradebook_column_primary_ids
+        # Prof. X uses the BlackboardCourse gradebook_column_primary_ids
         # property to verify the column was created
         self.assertIn(
             test_column_name,
             test_bot.gradebook_columns_primary_ids.keys()
         )
 
-        # Prof. X uses the BlackboardClass update_gradebook_column method to
+        # Prof. X uses the BlackboardCourse update_gradebook_column method to
         # provide the assignment grades and feedback to the indicated students
         # for a specific column by providing a columnID number
         test_bot.set_grades_in_column(
@@ -204,7 +204,7 @@ class TAWorkflowTests(TestCase):
             grades_feedback=grade_feedback_mail_merge_results,
         )
 
-        # Prof. X uses the BlackboardClasses get_gradebook_column_grades method
+        # Prof. X uses the BlackboardCourse get_gradebook_column_grades method
         # to verifies assignment grade scores and feedback were correctly added
         for test_user_name in grade_scores_mail_merge_results:
             test_user_grade = test_bot.get_grade(

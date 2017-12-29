@@ -1,4 +1,4 @@
-from .blackboard_class import BlackboardClass
+from .blackboard_course import BlackboardCourse
 
 from .data_conversions import (
     convert_csv_to_dict,

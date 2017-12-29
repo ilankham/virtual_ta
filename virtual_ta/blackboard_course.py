@@ -5,7 +5,7 @@ from time import sleep
 import requests
 
 
-class BlackboardClass(object):
+class BlackboardCourse(object):
     def __init__(
         self,
         server_address,
