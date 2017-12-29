@@ -1,17 +1,19 @@
-"""Create functional tests for project using unittest module
+"""Creates functional tests for project using unittest module
 
-This module assumes the file tests/test_config.ini exports the following:
-
-[Slack]
-api_token =
+This module assumes the file tests/test_config.ini exists with the following
+structure:
 
 [Blackboard]
+course_id =
+server_address =
 application_key =
 application_secret =
-server_address =
-course_id =
 
 [GitHub]
+api_token =
+organization =
+
+[Slack]
 api_token =
 
 """
@@ -34,64 +36,6 @@ from virtual_ta import (
 
 
 class TAWorkflowTests(TestCase):
-    def test_send_slack_messages_with_csv_import(self):
-        # For the intended Slack Workspace and the user account from which they
-        # wish to have messages originate, Prof. X creates an API Token by
-        # (1) visiting https://api.slack.com/custom-integrations/legacy-tokens
-        #     and generating a Legacy Token, or
-        # (2) visiting https://api.slack.com/apps and creating a new app with
-        #     permission scopes for chat:write:user, im:read, and users:read
-
-        # Prof. X saves a gradebook csv file named with column headings and one
-        # row per student grade record; columns include Slack_User_Name
-
-        # Prof. X saves a template text file as a Jinja2 template, with each
-        # variable name a column heading in the gradebook csv file
-
-        # Prof. X uses the mail_merge_from_csv_file method to mail merge their
-        # template file against their gradebook file, returning a dictionary of
-        # messages keyed by Slack user name
-        with ExitStack() as es:
-            template_fp = es.enter_context(
-                open(
-                    'examples/example_feedback_template-for_testing_slack.txt'
-                )
-            )
-            gradebook_fp = es.enter_context(
-                open('examples/example_gradebook-for_testing_slack.csv')
-            )
-            mail_merge_results = mail_merge_from_csv_file(
-                template_fp,
-                gradebook_fp,
-                key='Slack_User_Name',
-            )
-
-        # Prof. X prints a flattened version of the dictionary to verify
-        # message contents are as intended
-        with open(
-            'examples/expected_render_results_for_test_send_slack_messages'
-            '_with_csv_import.txt'
-        ) as test_fp:
-            self.assertEqual(
-                test_fp.read(),
-                flatten_dict(
-                    mail_merge_results,
-                    key_value_separator="\n\n-----\n\n",
-                    items_separator="\n\n--------------------\n\nMessage to "
-                ),
-            )
-
-        # Prof. X initiates a SlackAccount object using their API Token
-        config = ConfigParser()
-        config.read('tests/test_config.ini')
-        test_bot = SlackAccount(config['Slack']['api_token'])
-
-        # Prof. X uses the SlackAccount direct_message_users method to send the
-        # messages in the dictionary to the indicated students
-        test_bot.direct_message_by_username(mail_merge_results)
-
-        # Prof. X verifies in the Slack Workspace corresponding to their API
-        # Token direct messages have been send with themselves as the sender
 
     def test_post_to_bb_with_csv_import(self):
         # Prof. X follows the instructions at https://community.blackboard.com/
@@ -137,8 +81,8 @@ class TAWorkflowTests(TestCase):
                 test_fp.read(),
                 flatten_dict(
                     grade_feedback_mail_merge_results,
-                    key_value_separator="\n\n-----\n\n",
-                    items_separator="\n\n--------------------\n\nMessage to "
+                    key_value_separator='\n\n-----\n\n',
+                    items_separator='\n\n--------------------\n\nMessage to '
                 ),
             )
 
@@ -169,8 +113,8 @@ class TAWorkflowTests(TestCase):
         config = ConfigParser()
         config.read('tests/test_config.ini')
         test_bot = BlackboardCourse(
-            config['Blackboard']['server_address'],
             config['Blackboard']['course_id'],
+            config['Blackboard']['server_address'],
             config['Blackboard']['application_key'],
             config['Blackboard']['application_secret'],
         )
@@ -182,7 +126,6 @@ class TAWorkflowTests(TestCase):
         test_bot.create_gradebook_column(
             name=test_column_name,
             due_date=test_column_due_date,
-            max_score_possible=0,
         )
 
         # Prof. X uses the BlackboardCourse gradebook_column_primary_ids
@@ -222,6 +165,102 @@ class TAWorkflowTests(TestCase):
                 test_user_grade['feedback'].strip(),
             )
 
+    def test_github_setup_with_csv_import(self):
+        # Prof. X sets up a GitHub Organization and follows the instructions at
+        # https://github.com/blog/1509-personal-api-tokens to create a Personal
+        # API Token with scopes admin:org and public_repo
+
+        # Prof. X saves the API Token in a text file
+
+        # Prof. X saves a gradebook csv file named with column headings and
+        # one row per student grade record; columns include GitHub_User_Name
+        # and Team_Number
+
+        # Prof. X reads in the gradebook and creates a dictionary keyed by
+        # Team_Number and values comprising lists of corresponding
+        # GitHub_User_Name values
+        with open(
+                'examples/example_gradebook-for_testing_github.csv'
+        ) as gradebook_fp:
+            team_assignments = convert_csv_to_multimap(
+                gradebook_fp,
+                key_column='Team_Number',
+                values_column='GitHub_User_Name',
+                overwrite_values=False,
+            )
+            print(team_assignments)
+
+        # Prof. X initiates a GitHubOrganization object associated with their
+        # GitHub Organization and their API Token
+        config = ConfigParser()
+        config.read('tests/test_config.ini')
+        self.fail('Finish the test!')
+
+        # Prof. X uses the GitHubOrganization object to create teams within the
+        # GitHub Organization
+
+        # Prof. X uses the GitHubOrganization object to create project repos
+        # for each team
+
+    def test_send_slack_messages_with_csv_import(self):
+        # For the intended Slack Workspace and the user account from which they
+        # wish to have messages originate, Prof. X creates an API Token by
+        # (1) visiting https://api.slack.com/custom-integrations/legacy-tokens
+        #     and generating a Legacy Token, or
+        # (2) visiting https://api.slack.com/apps and creating a new app with
+        #     permission scopes for chat:write:user, im:read, and users:read
+
+        # Prof. X saves a gradebook csv file named with column headings and one
+        # row per student grade record; columns include Slack_User_Name
+
+        # Prof. X saves a template text file as a Jinja2 template, with each
+        # variable name a column heading in the gradebook csv file
+
+        # Prof. X uses the mail_merge_from_csv_file method to mail merge their
+        # template file against their gradebook file, returning a dictionary of
+        # messages keyed by Slack user name
+        with ExitStack() as es:
+            template_fp = es.enter_context(
+                open(
+                    'examples/example_feedback_template-for_testing_slack.txt'
+                )
+            )
+            gradebook_fp = es.enter_context(
+                open('examples/example_gradebook-for_testing_slack.csv')
+            )
+            mail_merge_results = mail_merge_from_csv_file(
+                template_fp,
+                gradebook_fp,
+                key='Slack_User_Name',
+            )
+
+        # Prof. X prints a flattened version of the dictionary to verify
+        # message contents are as intended
+        with open(
+            'examples/expected_render_results_for_test_send_slack_messages'
+            '_with_csv_import.txt'
+        ) as test_fp:
+            self.assertEqual(
+                test_fp.read(),
+                flatten_dict(
+                    mail_merge_results,
+                    key_value_separator='\n\n-----\n\n',
+                    items_separator='\n\n--------------------\n\nMessage to '
+                ),
+            )
+
+        # Prof. X initiates a SlackAccount object using their API Token
+        config = ConfigParser()
+        config.read('tests/test_config.ini')
+        test_bot = SlackAccount(config['Slack']['api_token'])
+
+        # Prof. X uses the SlackAccount direct_message_users method to send the
+        # messages in the dictionary to the indicated students
+        test_bot.direct_message_by_username(mail_merge_results)
+
+        # Prof. X verifies in the Slack Workspace corresponding to their API
+        # Token direct messages have been send with themselves as the sender
+
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
         # each day of the week (Monday through Sunday, following ISO 8601),
@@ -234,7 +273,7 @@ class TAWorkflowTests(TestCase):
                 data_xlsx_fp=calendar_fp,
                 start_date=date(2018, 1, 1),
                 item_delimiter='|',
-                week_number_column='Week',
+                relative_week_number_column='Week',
                 worksheet='Assessments',
             )
 
@@ -270,45 +309,8 @@ class TAWorkflowTests(TestCase):
                 test_fp.read(),
                 flatten_dict(
                     test_latex_results,
-                    key_value_separator="",
+                    key_value_separator='',
                     items_separator='\n'+('%'*80+'\n')*3,
                     suppress_keys=True
                 ),
             )
-
-    def test_github_setup_with_csv_import(self):
-        # Prof. X sets up a GitHub Organization and follows the instructions at
-        # https://github.com/blog/1509-personal-api-tokens to create a Personal
-        # API Token with scopes admin:org and public_repo
-
-        # Prof. X saves the API Token in a text file
-
-        # Prof. X saves a gradebook csv file named with column headings and
-        # one row per student grade record; columns include GitHub_User_Name
-        # and Team_Number
-
-        # Prof. X reads in the gradebook and creates a dictionary keyed by
-        # Team_Number and values comprising lists of corresponding
-        # GitHub_User_Name values
-        with open(
-            'examples/example_gradebook-for_testing_github.csv'
-        ) as gradebook_fp:
-            team_assignments = convert_csv_to_multimap(
-                gradebook_fp,
-                key_column='Team_Number',
-                values_column='GitHub_User_Name',
-                overwrite_values=False,
-            )
-            print(team_assignments)
-
-        # Prof. X initiates a GitHubOrganization object associated with their
-        # GitHub Organization and their API Token
-        config = ConfigParser()
-        config.read('tests/test_config.ini')
-        self.fail('Finish the test!')
-
-        # Prof. X uses the GitHubOrganization object to create teams within the
-        # GitHub Organization
-
-        # Prof. X uses the GitHubOrganization object to create project repos
-        # for each team

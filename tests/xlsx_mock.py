@@ -1,11 +1,11 @@
 """Creates a class for mocking an XLSX file
 
-This module creates a class for encapsulating an in-memory XLSX file by
-inheriting from openpyxl.Workbook, including a method for loading data into a
-worksheet from an iterable of iterables and a property for using a Workbook
-object as if it were a file
+This module encapsulates an in-memory XLSX file by inheriting from
+openpyxl.Workbook, including a method for loading data into a worksheet from an
+iterable of iterables and a property for using a Workbook object as if it were
+a file
 
-See https://openpyxl.readthedocs.io/ for more information about Openpyxl.
+See https://openpyxl.readthedocs.io/ for more information about Openpyxl
 
 """
 
@@ -20,13 +20,16 @@ class XlsxMock(Workbook):
     """Class for mocking an XLSX file"""
 
     def __init__(self, *args, **kwargs):
-        """Initializes XlsxMock object, passing arguments to Workbook.__init__
+        """Initializes an XlsxMock object, passing args to Workbook.__init__
 
         Args:
-            args: options passed through to openpyxl.Workbook.__init__
-            kwargs: options passed through to openpyxl.Workbook.__init__
+            args: positional arguments passed through to
+                openpyxl.Workbook.__init__
+            kwargs: keyword arguments passed through to
+                openpyxl.Workbook.__init__
 
         """
+
         super().__init__(*args, **kwargs)
 
     @staticmethod

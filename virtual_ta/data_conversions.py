@@ -4,7 +4,7 @@ from calendar import day_name
 from csv import DictReader
 from datetime import date, timedelta
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
-from typing import BinaryIO, TextIO, Union
+from typing import BinaryIO, Dict, List, TextIO, Union
 
 from openpyxl import load_workbook
 from ruamel.yaml import YAML
@@ -18,19 +18,19 @@ def convert_csv_to_dict(
     data_csv_fp: FileIO,
     *,
     key: str = None,
-) -> dict:
-    """Convert CSV file to dictionary of dictionaries
+) -> Dict[str, Dict[str, str]]:
+    """Converts a CSV file to a dictionary of dictionaries
 
-    This function inputs a CSV file and an optional key column (defaulting to
-    the left-most column, if not specified) and outputs a dictionary keyed by
-    the specified key column and having as values dictionaries encoding the row
+    This function inputs a CSV file and a key column (defaulting to the
+    left-most column, if not specified) and outputs a dictionary keyed by the
+    specified key column and having as values dictionaries encoding the row
     from the CSV file corresponding to the key value
 
     Args:
-        data_csv_fp: pointer to file or file-like object that is ready to read
-            from and contains a CSV file with columns headers in its first row
+        data_csv_fp: pointer to CSV file or file-like object with columns
+            headers in its first row and ready to be read from
         key: a column header from data_csv_fp, whose values should be used as
-            key values in the dictionary generated
+            keys in the dictionary generated
 
     Returns:
         A dictionary keyed by the specified key column and having as values
@@ -56,31 +56,34 @@ def convert_csv_to_multimap(
     key_column: str = None,
     values_column: str = None,
     overwrite_values: bool = False,
-) -> dict:
-    """Convert CSV file to dictionary of dictionaries
+) -> Dict[str, Union[str, List[str]]]:
+    """Converts a CSV file to a dictionary of dictionaries
 
-    This function inputs a CSV file and an optional key column (defaulting to
-    the left-most column, if not specified) and outputs a dictionary keyed by
-    the specified key_column and having as values the entries in
-    overwrite_values corresponding to each key, with values collected into a
-    list if overwrite_values == False, and the last value in the file otherwise
+    This function inputs a CSV file, a key column (defaulting to the
+    left-most column, if not specified), a values column (defaulting to the
+    second column from the left, if not specified), and a flag for whether
+    values should be overwritten (defaulting to False), and outputs a
+    dictionary keyed by the specified key column and having as values the
+    entries from the specified values column, with values collected into a
+    list if overwrite_values is False, and the last value found when reading
+    the file otherwise
 
     Args:
-        data_csv_fp: pointer to file or file-like object that is ready to read
-            from and contains a CSV file with columns headers in its first row
+        data_csv_fp: pointer to CSV file or file-like object with columns
+            headers in its first row and ready to be read from
         key_column: a column header from data_csv_fp, whose values should be
-            used as key values in the dictionary generated
+            used as keys in the dictionary generated
         values_column: a column header from data_csv_fp, whose values should be
-            used as item values in the dictionary generated
+            used as values in the dictionary generated
         overwrite_values: determines where the last-appearing value
             corresponding to each key is returned; if False, then a list of
             values is returned for each key
 
     Returns:
-        A dictionary keyed by the specified key_column and having as values the
-        entries in overwrite_values corresponding to each key, with values
-        collected into a list if overwrite_values == False, and the last value
-        in the file otherwise
+        A dictionary keyed by the specified key column and having as values the
+        entries from the specified values column, with values collected into a
+        list if overwrite_values == False, and the last value found when
+        reading the file otherwise
 
     """
 
@@ -107,22 +110,23 @@ def convert_xlsx_to_dict(
     *,
     key: str = None,
     worksheet: str = None,
-) -> dict:
-    """Convert XLSX file to dictionary of dictionaries
+) -> Dict[str, Dict[str, str]]:
+    """Converts an XLSX file to dictionary of dictionaries
 
-    This function inputs an XLSX file, an optional key column (defaulting to
-    the left-most column, if not specified), and an optional worksheet name
-    column (defaulting to the first worksheet, if not specified), and outputs a
-    dictionary keyed by the specified key column and having as values
-    dictionaries encoding the row from the specified worksheet of the XLSX file
-    corresponding to the key value
+    This function inputs an XLSX file, a key column (defaulting to the
+    left-most column, if not specified), and a worksheet name (defaulting to
+    the first worksheet, if not specified), and outputs a dictionary keyed by
+    the specified key column and having as values dictionaries encoding the row
+    from the specified worksheet of the XLSX file corresponding to the key
+    value
 
     Args:
-        data_xlsx_fp: pointer to file or file-like object that is ready to read
-            from and contains an XLSX file with columns headers in first rows
+        data_xlsx_fp: pointer to an XLSX file or file-like object with columns
+            headers in its first row and ready to be read from
         key: a column header from data_xlsx_fp, whose values should be used as
-            key values in the dictionary generated
-        worksheet: a worksheet name from data_xlsx_fp
+            keys in the dictionary generated
+        worksheet: a worksheet name from data_xlsx_fp, whose values should be
+            used in the dictionary generated
 
     Returns:
         A dictionary keyed by the specified key column and having as values
@@ -163,51 +167,52 @@ def convert_xlsx_to_yaml_calendar(
     data_xlsx_fp: FileIO,
     start_date: date,
     *,
-    item_delimiter: str = "|",
-    week_number_column: str = None,
+    item_delimiter: str = '|',
+    relative_week_number_column: str = None,
     worksheet: str = None,
 ) -> str:
-    """Convert XLSX file to YAML file representing calendar data by week number
+    """Converts an XLSX file to a YAML string representing a weekly calendar
 
-    This function inputs an XLSX file, a start date, an optional item delimiter
-    for decomposing cell values into lists (defaulting to a vertical pipe), an
-    optional key column for week numbers (defaulting to the left-most column,
-    if not specified), and an optional worksheet name column (defaulting to the
-    first worksheet, if not specified), and outputs a string containing a YAML
-    representation keyed by the specified key column and having as values
-    dictionaries encoding the row from the specified worksheet of the XLSX file
-    corresponding
-    to the key value
+    This function inputs an XLSX file, a start date, an item delimiter for
+    decomposing Excel-file cell values into lists (defaulting to a vertical
+    pipe), a key column for week numbers (defaulting to the left-most column,
+    if not specified), and a worksheet name (defaulting to the first worksheet,
+    if not specified), and outputs a string containing a YAML representation
+    of the XLSX file as a dictionary keyed by the specified key column and
+    having as values dictionaries encoding the row from the specified worksheet
+    of the XLSX file corresponding to the key value
 
     Args:
-        data_xlsx_fp: pointer to file or file-like object that is ready to read
-            from and contains an XLSX file with columns headers in first rows;
-            any column names in data_xlsx_fp corresponding to day names in the
-            current locale, as identified by the calendar module, are treated
-            as providing activities for the corresponding calendar date and
-            will be ordered according to ISO 8601 in output; all other columns
-            are treated as providing information about the week itself
+        data_xlsx_fp: pointer to an XLSX file or file-like object with columns
+            headers in its first row and ready to be read from; any column
+            names in data_xlsx_fp corresponding to day names in the current
+            locale, as identified by the calendar module, are treated as
+            providing activities for the corresponding calendar date and will
+            be ordered according to ISO 8601 in output; all other columns are
+            treated as providing information about the week itself
         start_date: specifies the start date for the calendar, which is
             adjusted to the Monday of the week that the start_date appears in,
-            where weeks are defined as running from Monday to Sunday
+            per ISO 8601's specification that weeks run from Monday to Sunday
         item_delimiter: a string whose values will be used to split item values
             into lists
-        week_number_column: a column header from data_xlsx_fp, whose values
-            should be used as key values in the YAML string generated; the
-            values of the column in data_xlsx_fp should be integers, with the
-            integer one (1) representing the week that start_date appears in
-        worksheet: a worksheet name from data_xlsx_fp
+        relative_week_number_column: a column header from data_xlsx_fp, whose
+            values should be used as key values in the YAML string generated;
+            the values of relative_week_number_column should be integers, with
+            the value one (1) representing the week that start_date appears in
+        worksheet: a worksheet name from data_xlsx_fp, whose values should be
+            used in the dictionary generated
 
     Returns:
-         A string containing a YAML representation keyed by the specified key
-         column and having as values dictionaries encoding the row from the
-         specified worksheet of the XLSX file corresponding to the key value
+         A string containing a YAML representation of the XLSX file as a
+         dictionary keyed by the specified key column and having as values
+         dictionaries encoding the row from the specified worksheet of the XLSX
+         file corresponding to the key value
 
     """
 
     data_dict = convert_xlsx_to_dict(
         data_xlsx_fp,
-        key=week_number_column,
+        key=relative_week_number_column,
         worksheet=worksheet
     )
 
@@ -220,7 +225,10 @@ def convert_xlsx_to_yaml_calendar(
         week_number = int(week_number)
         calendar_dict[week_number] = CommentedMap()
         for weekday in week_data:
-            if weekday == week_number_column or week_data[weekday] is None:
+            if (
+                weekday == relative_week_number_column or
+                week_data[weekday] is None
+            ):
                 continue
             if weekday.lower() in weekdays_lookup_dict:
                 weekday_date = (
@@ -258,25 +266,26 @@ def flatten_dict(
     suppress_keys: bool = False,
     **kwargs
 ) -> str:
-    """Convert dictionary to string with specified separators
+    """Converts a dictionary to a string with specified separators
 
     This function converts dictionary data_items to a string, with
     key_value_separator used to separate keys from values and items_separator
-    used to separate items; in addition, options can be passed to the builtin
-    function sorted
+    used to separate items; in addition, keyword arguments can be passed to the
+    builtin function sorted
 
     Args:
         data_items: a dictionary whose keys and items will be treated as or
             converted to strings
-        key_value_separator: used to separate keys from values
-        items_separator: used to separate items
+        key_value_separator: used to separate keys from values in the output
+            string
+        items_separator: used to separate items in the output string
         suppress_keys: Boolean for determining whether to include keys in the
             returned string
         **kwargs: options passed through to the builtin function sorted
 
     Returns:
-        A string with key_value_separator used to separate keys from values and
-        items_separator used to separate items
+        A string representation of data_items with key_value_separator used to
+        separate keys from values and items_separator used to separate items
 
     """
 
