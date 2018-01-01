@@ -8,6 +8,8 @@ from .data_conversions import (
     flatten_dict,
 )
 
+from .github_organization import GitHubOrganization
+
 from .mail_merges import (
     mail_merge_from_csv_file,
     mail_merge_from_dict,

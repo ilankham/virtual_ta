@@ -13,11 +13,12 @@ from virtual_ta import (
     convert_csv_to_multimap,
     convert_xlsx_to_dict,
     convert_xlsx_to_yaml_calendar,
+    flatten_dict,
+    GitHubOrganization,
     mail_merge_from_csv_file,
     mail_merge_from_dict,
     mail_merge_from_xlsx_file,
     mail_merge_from_yaml_file,
-    flatten_dict,
     SlackAccount,
 )
 from .xlsx_mock import XlsxMock
@@ -822,6 +823,24 @@ class TestBlackboardCourses(TestCase):
                 test_response,
                 list(test_update_gradebook_response),
             )
+
+
+# noinspection SpellCheckingInspection
+class TestGitHubOrganizations(TestCase):
+    def test_github_org_init(self):
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+
+        test_bot = GitHubOrganization(
+            test_org_name,
+            test_personal_access_token,
+        )
+
+        self.assertEqual(test_org_name, test_bot.org_name)
+        self.assertEqual(
+            test_personal_access_token,
+            test_bot.personal_access_token
+        )
 
 
 # noinspection SpellCheckingInspection
