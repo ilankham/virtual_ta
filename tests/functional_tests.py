@@ -10,8 +10,9 @@ application_key =
 application_secret =
 
 [GitHub]
-api_token =
 organization =
+api_token =
+user_name =
 
 [Slack]
 api_token =
@@ -26,9 +27,10 @@ from unittest import TestCase
 
 from virtual_ta import (
     BlackboardCourse,
-    flatten_dict,
     convert_csv_to_multimap,
     convert_xlsx_to_yaml_calendar,
+    flatten_dict,
+    GitHubOrganization,
     mail_merge_from_csv_file,
     mail_merge_from_yaml_file,
     SlackAccount,
@@ -168,39 +170,64 @@ class TAWorkflowTests(TestCase):
     def test_github_setup_with_csv_import(self):
         # Prof. X sets up a GitHub Organization and follows the instructions at
         # https://github.com/blog/1509-personal-api-tokens to create a Personal
-        # API Token with scopes admin:org and public_repo
-
-        # Prof. X saves the API Token in a text file
-
-        # Prof. X saves a gradebook csv file named with column headings and
-        # one row per student grade record; columns include GitHub_User_Name
-        # and Team_Number
-
-        # Prof. X reads in the gradebook and creates a dictionary keyed by
-        # Team_Number and values comprising lists of corresponding
-        # GitHub_User_Name values
-        with open(
-                'examples/example_gradebook-for_testing_github.csv'
-        ) as gradebook_fp:
-            team_assignments = convert_csv_to_multimap(
-                gradebook_fp,
-                key_column='Team_Number',
-                values_column='GitHub_User_Name',
-                overwrite_values=False,
-            )
-            print(team_assignments)
+        # Access Token with scopes admin:org and public_repo
 
         # Prof. X initiates a GitHubOrganization object associated with their
-        # GitHub Organization and their API Token
+        # GitHub Organization and their Personal Access Token
         config = ConfigParser()
         config.read('tests/test_config.ini')
-        self.fail('Finish the test!')
+        test_bot = GitHubOrganization(
+            org_name=config['GitHub']['organization'],
+            personal_access_token=config['GitHub']['api_token'],
+        )
 
-        # Prof. X uses the GitHubOrganization object to create teams within the
-        # GitHub Organization
+        # Prof. X uses the GitHubOrganization object to a create team
+        test_team_name = 'team-'+datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
+        test_team_description = test_team_name+' description'
+        test_bot.create_org_team(
+            team_name=test_team_name,
+            team_description=test_team_description,
+            team_privacy='closed'
+        )
 
-        # Prof. X uses the GitHubOrganization object to create project repos
-        # for each team
+        # Prof. X checks that the team was created
+        self.assertIn(test_team_name, test_bot.org_team_ids.keys())
+
+        # Prof. X uses the GitHubOrganization object adds a member to the team
+        test_bot.set_team_membership(
+            team_id=test_bot.org_team_ids[test_team_name],
+            user_name=config['GitHub']['user_name'],
+        )
+
+        # Prof. X checks that the team membership was created
+        self.assertIn(
+            test_team_name,
+            (
+                member['login'] for member in test_bot.get_team_membership(
+                    test_bot.org_team_ids[test_team_name]
+                )
+            )
+        )
+
+        # Prof. X uses the GitHubOrganization object to create a team repo
+        test_repo_name = 'repo-'+datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
+        test_repo_description = test_repo_name+' description'
+        test_bot.create_team_repo(
+            repo_name=test_repo_name,
+            team_id=test_bot.org_team_ids[test_team_name],
+            repo_permission='push',
+            repo_description=test_repo_description,
+        )
+
+        # Prof. X checks that the team repo was created
+        self.assertIn(
+            test_team_name,
+            (
+                member['name'] for member in test_bot.get_repo_teams(
+                    test_bot.org_team_ids[test_team_name]
+                )
+            )
+        )
 
     def test_send_slack_messages_with_csv_import(self):
         # For the intended Slack Workspace and the user account from which they
