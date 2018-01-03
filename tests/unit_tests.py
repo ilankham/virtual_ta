@@ -842,6 +842,91 @@ class TestGitHubOrganizations(TestCase):
             test_bot.personal_access_token
         )
 
+    def test_github_org_teams_property_without_paging(self):
+        test_team_name = 'Test Team Name'
+        test_team_id = 'Test Team ID'
+        test_team_description = 'Test Team Description'
+        test_response_json = {
+            'name': test_team_name,
+            'id': test_team_id,
+            'description': test_team_description,
+        }
+        test_response = [test_response_json]
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/orgs/{test_org_name}/teams',
+                status_code=200,
+                json=test_response,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.org_teams),
+            )
+
+    def test_github_org_teams_property_with_paging(self):
+        test_team_name1 = 'Test Team Name 1'
+        test_team_id1 = 'Test Team ID 1'
+        test_team_description1 = 'Test Team Description 1'
+        test_response_json1 = {
+            'name': test_team_name1,
+            'id': test_team_id1,
+            'description': test_team_description1,
+        }
+        test_team_name2 = 'Test Team Name 2'
+        test_team_id2 = 'Test Team ID 2'
+        test_team_description2 = 'Test Team Description 2'
+        test_response_json2 = {
+            'name': test_team_name2,
+            'id': test_team_id2,
+            'description': test_team_description2,
+        }
+        test_response = [
+            test_response_json1,
+            test_response_json2
+        ]
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/orgs/{test_org_name}/teams',
+                headers={
+                    'Link':
+                        f'<https://api.github.com/organizations'
+                        f'/{test_org_name}/teams?page=2>; rel="next"'
+                },
+                status_code=200,
+                json=[test_response_json1],
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/organizations/{test_org_name}/'
+                f'teams?page=2',
+                status_code=200,
+                json=[test_response_json2],
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.org_teams),
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
