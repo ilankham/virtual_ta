@@ -968,6 +968,43 @@ class TestGitHubOrganizations(TestCase):
             test_bot.org_team_ids,
         )
 
+    def test_github_org_create_org_team(self):
+        test_team_name = 'Test Team Name'
+        test_team_id = 'Test Team ID'
+        test_team_description = 'Test Team Description'
+        team_team_privacy = 'Test Team Privacy Setting'
+        test_response_json = {
+            'name': test_team_name,
+            'id': test_team_id,
+            'description': test_team_description,
+            'privacy': team_team_privacy,
+        }
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                f'https://api.github.com/orgs/{test_org_name}/teams',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+            test_create_org_team_results = test_bot.create_org_team(
+                team_name=test_team_name,
+                team_description=test_team_description,
+                team_privacy=team_team_privacy,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_create_org_team_results,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):

@@ -11,7 +11,12 @@ API v3
 
 import re
 import requests
-from typing import Dict, Generator, Union
+from typing import Dict, Generator, List, Union
+
+NestedDict = Dict[
+    str,
+    Union[bool, Dict[str, Union[bool, int, None, str]], int, None, str]
+]
 
 
 class GitHubOrganization(object):
@@ -69,3 +74,54 @@ class GitHubOrganization(object):
         return {
             team['name']: team['id'] for team in self.org_teams
         }
+
+    def create_org_team(
+            self,
+            team_name: str,
+            team_description: str = '',
+            team_maintainers: List[str] = None,
+            team_repo_names: List[str] = None,
+            team_privacy: str = 'secret',
+    ) -> NestedDict:
+        """Creates GitHub organization team with specified properties
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/orgs/{self.org_name}/teams'
+        with no caching
+
+        Args:
+            team_name: display name of team to create
+            team_description: display description of team to create
+            team_maintainers: list of login names for team maintainers
+            team_repo_names: list of repo names to add to team in the format
+                'org_name/repo_name'
+            team_privacy: if 'secret', then the team is visible to organization
+                owners and team members; if 'closed', then the team is visible
+                to all organization members; defaults to 'secret'
+
+        Returns:
+            A dictionary describing the resulting gradebook column
+
+        """
+
+        if team_maintainers is None:
+            team_maintainers = []
+        if team_repo_names is None:
+            team_repo_names = []
+
+        return_value = requests.post(
+            url=f'https://api.github.com/orgs/{self.org_name}/teams',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+                'Content-type': 'application/json',
+            },
+            json={
+                'name': team_name,
+                'description': team_description,
+                'maintainers': team_maintainers,
+                'repo_names': team_repo_names,
+                'privacy': team_privacy
+                if team_privacy == 'closed' else 'secret',
+            }
+        ).json()
+        return return_value
