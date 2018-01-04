@@ -57,3 +57,15 @@ class GitHubOrganization(object):
                 ).group()[1:-1]
             else:
                 api_request_url = None
+
+    @property
+    def org_team_ids(self) -> Dict[str, int]:
+        """Returns a dict with team name -> team id
+
+        Uses the GitHub REST API v3 with no caching
+
+        """
+
+        return {
+            team['name']: team['id'] for team in self.org_teams
+        }

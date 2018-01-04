@@ -927,6 +927,47 @@ class TestGitHubOrganizations(TestCase):
                 list(test_bot.org_teams),
             )
 
+    @patch(
+        'virtual_ta.GitHubOrganization.org_teams',
+        new_callable=PropertyMock
+    )
+    def test_github_org_team_ids_property(self, mock_org_teams):
+        test_team_name1 = 'Test Team Name 1'
+        test_team_id1 = 'Test Team ID 1'
+        test_team_description1 = 'Test Team Description 1'
+        test_team_name2 = 'Test Team Name 2'
+        test_team_id2 = 'Test Team ID 2'
+        test_team_description2 = 'Test Team Description 2'
+        mock_org_teams.return_value = [
+            {
+                'name': test_team_name1,
+                'id': test_team_id1,
+                'description': test_team_description1,
+            },
+            {
+                'name': test_team_name2,
+                'id': test_team_id2,
+                'description': test_team_description2,
+            }
+        ]
+
+        test_response = {
+            test_team_name1: test_team_id1,
+            test_team_name2: test_team_id2,
+        }
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        test_bot = GitHubOrganization(
+            test_org_name,
+            test_personal_access_token,
+        )
+
+        self.assertEqual(
+            test_response,
+            test_bot.org_team_ids,
+        )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
