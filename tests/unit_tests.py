@@ -1085,6 +1085,40 @@ class TestGitHubOrganizations(TestCase):
                 list(test_bot.get_team_membership(test_team_id)),
             )
 
+    def test_github_org_set_team_membership(self):
+        test_user_name = 'Test-User-Name'
+        test_user_role = 'Test User Role'
+        test_response_json = {
+            'role': test_user_role,
+        }
+
+        test_team_id = 'Test-Team-ID'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'PUT',
+                f'https://api.github.com/teams/{test_team_id}/memberships'
+                f'/{test_user_name}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+            test_set_team_membership_response = test_bot.set_team_membership(
+                team_id=test_team_id,
+                user_name=test_user_name,
+                team_role=test_user_name,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_set_team_membership_response,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):

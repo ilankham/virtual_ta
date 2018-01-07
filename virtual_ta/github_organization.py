@@ -164,3 +164,43 @@ class GitHubOrganization(object):
                 print(api_request_url)
             else:
                 api_request_url = None
+
+    def set_team_membership(
+            self,
+            team_id: Union[int, str],
+            user_name: str,
+            team_role: str = 'member',
+    ) -> Dict[str, str]:
+        """Adds or updates membership for existing GitHub Organization team
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/teams/{team_id}/memberships/{user_name}'
+        with no caching
+
+        Args:
+            team_id: id of team within GitHub Organization
+            user_name: name of a user to associate with team; if the user is
+                not yet a member of the team, they will be invited to join
+            team_role: if 'member', then the user is a normal team member; if
+                'maintainer', then the user is granted permission to edit the
+                team's name/description, to add/remove team members, and to
+                promote other team members to team maintainer; defaults to
+                'member'
+
+        Returns:
+            A dictionary describing the resulting team membership
+
+        """
+
+        return_value = requests.put(
+            url=f'https://api.github.com/teams/{team_id}/memberships'
+                f'/{user_name}',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+                'Content-type': 'application/json',
+            },
+            json={
+                'role': team_role if team_role == 'maintainer' else 'member',
+            }
+        ).json()
+        return return_value
