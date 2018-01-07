@@ -1280,6 +1280,49 @@ class TestGitHubOrganizations(TestCase):
                 test_set_repo_team_response,
             )
 
+    @patch('virtual_ta.GitHubOrganization.create_org_repo')
+    @patch('virtual_ta.GitHubOrganization.set_repo_team')
+    def test_github_org_create_team_repo(
+        self,
+        mock_set_repo_team,
+        mock_create_org_repo,
+    ):
+        test_team_description = 'Test Team Description'
+        test_team_id = 'Test-Team-ID'
+        test_team_name = 'Test Team Name'
+        test_response_json = {
+            'description': test_team_description,
+            'id': test_team_id,
+            'name': test_team_name,
+        }
+        mock_set_repo_team.return_value = test_response_json
+
+        test_repo_name = 'Test Repo Name'
+        test_repo_id = 'Test Repo ID'
+        test_repo_description = 'Test Repo Description'
+        mock_create_org_repo.return_value = {
+            'description': test_repo_description,
+            'id': test_repo_id,
+            'name': test_repo_name,
+        }
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        test_bot = GitHubOrganization(
+            test_org_name,
+            test_personal_access_token,
+        )
+        test_create_team_repo_response = test_bot.create_team_repo(
+            repo_name=test_repo_name,
+            team_id=test_team_id,
+            repo_description=test_repo_description,
+        )
+
+        self.assertEqual(
+            test_response_json,
+            test_create_team_repo_response,
+        )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):

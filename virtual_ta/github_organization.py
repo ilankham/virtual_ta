@@ -372,3 +372,87 @@ class GitHubOrganization(object):
             return_value = []
 
         return return_value
+
+    def create_team_repo(
+            self,
+            repo_name: str,
+            team_id: Union[int, str],
+            repo_permission: str = 'pull',
+            repo_description: str = '',
+            repo_homepage: str = '',
+            repo_private: bool = False,
+            repo_has_issues: bool = True,
+            repo_has_projects: bool = True,
+            repo_has_wiki: bool = True,
+            repo_team_id: str = None,
+            repo_auto_init: bool = False,
+            repo_gitignore_template: str = '',
+            repo_license_template: str = '',
+            repo_allow_squash_merge: bool = True,
+            repo_allow_merge_commit: bool = True,
+            repo_allow_rebase_merge: bool = True,
+    ) -> Dict[str, Union[int, None, str]]:
+        """Creates GitHub organization repo with specified properties
+
+        Uses the GitHub REST API v3 with no caching
+
+        Args:
+            repo_name: name of repo to create
+            team_id: id of team within GitHub Organization
+            repo_permission: if 'pull', then the team will only have pull
+                access; if 'push', then the team will have pull and push
+                access; if 'admin', then the team will have admin access;
+                defaults to 'pull'
+            repo_description: description of repo to create
+            repo_homepage: homepage URL of repo to create
+            repo_private: determines whether repo is private; defaults to False
+            repo_has_issues: determines whether repo has issues enabled;
+                defaults to True
+            repo_has_projects: determines whether repo has projects enabled;
+                defaults to True
+            repo_has_wiki: determines whether repo has its wiki enabled;
+                defaults to True
+            repo_team_id: id of team within Organization to grant repo access
+            repo_auto_init: determines whether repo is initialized with a
+                README file; defaults to False
+            repo_gitignore_template: language name of .gitignore template to
+                include in repo; see https://github.com/github/gitignore for
+                language options
+            repo_license_template: keyword of license to include in repo; see
+                https://help.github.com/articles/licensing-a-repository
+                /#searching-github-by-license-type for license options
+            repo_allow_squash_merge: determines whether repo allows
+                squash-merging pull requests; defaults to True
+            repo_allow_merge_commit: determines whether repo allows
+                merging pull requests with a merge commit; defaults to True
+            repo_allow_rebase_merge: determines whether repo allows
+                rebase-merging pull requests; defaults to True
+
+        Returns:
+            A dictionary describing the resulting team membership
+
+        """
+
+        self.create_org_repo(
+            repo_name=repo_name,
+            repo_description=repo_description,
+            repo_homepage=repo_homepage,
+            repo_private=repo_private,
+            repo_has_issues=repo_has_issues,
+            repo_has_projects=repo_has_projects,
+            repo_has_wiki=repo_has_wiki,
+            repo_team_id=repo_team_id,
+            repo_auto_init=repo_auto_init,
+            repo_gitignore_template=repo_gitignore_template,
+            repo_license_template=repo_license_template,
+            repo_allow_squash_merge=repo_allow_squash_merge,
+            repo_allow_merge_commit=repo_allow_merge_commit,
+            repo_allow_rebase_merge=repo_allow_rebase_merge,
+        )
+
+        return_value = self.set_repo_team(
+            repo_name=repo_name,
+            team_id=team_id,
+            repo_permission=repo_permission,
+        )
+        return return_value
