@@ -283,3 +283,43 @@ class GitHubOrganization(object):
             }
         ).json()
         return return_value
+
+    def get_repo_teams(
+            self,
+            repo_name: str,
+    ) -> Generator[Dict[str, Union[int, str]], None, None]:
+        """Returns generator of dicts, each describing a repo team affiliation
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/repos/{self.org_name}/{repo_name}/teams'
+        with no caching and with handling for paging
+
+        Args:
+            repo_name: name of existing GitHub repo
+
+        Returns:
+            A generator of dictionaries, each describing a team affiliation of
+            the GitHub Organization repo
+
+        """
+
+        api_request_url = (
+            f'https://api.github.com/repos/{self.org_name}/{repo_name}/teams'
+        )
+
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={
+                    'Authorization': f'token {self.personal_access_token}',
+                },
+            )
+            yield from api_response.json()
+            paging_navigation_header = api_response.headers.get('Link', '')
+            if 'rel="next"' in paging_navigation_header:
+                api_request_url = re.search(
+                    '<.*?>',
+                    paging_navigation_header
+                ).group()[1:-1]
+            else:
+                api_request_url = None
