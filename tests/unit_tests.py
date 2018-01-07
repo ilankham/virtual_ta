@@ -1323,6 +1323,160 @@ class TestGitHubOrganizations(TestCase):
             test_create_team_repo_response,
         )
 
+    def test_github_org_remove_single_file_pr_deletions(self):
+        test_expectations = [
+            'Line 0',
+            'Line 1',
+            '',
+            '',
+            '',
+            'Line 2',
+            'Line 3',
+            'Line 3 trailer',
+            '',
+            '',
+            '',
+            'Line 4',
+            'Line 4 trailer',
+            'Line 5',
+            '',
+            '',
+            '',
+            'Line 6',
+            'Line 7',
+            'Line 7 trailer',
+            '',
+            '',
+            '',
+            'Line 8',
+            'Line 9',
+            'Line 9 trailer',
+            '',
+            '',
+            '',
+        ]
+        test_expectations_str = '\n'.join(test_expectations)
+
+        test_pr_details_base_ref = 'Test-PR-Details-Base-Ref'
+        test_pr_details_response_json = {
+            'base': {
+                'ref': test_pr_details_base_ref,
+            },
+            'changed_files': 1,
+        }
+        test_pr_details_raw_url = 'https://mock/test_pr_details_raw_url'
+        test_pr_file_changes_response_json = [{
+            'raw_url': test_pr_details_raw_url,
+        }]
+        test_pr_file_contents = [
+            'Line 0',
+            'Line 1',
+            '',
+            '',
+            '',
+            'Line 2',
+            'Line 3',
+            'Line 3 trailer',
+            '',
+            '',
+            '',
+            'Line 4',
+            'Line 4 trailer',
+            'Line 5',
+            '',
+            '',
+            '',
+            'Line 6',
+            'Line 7',
+            '',
+            'Line 7 trailer',
+            '',
+            '',
+            'Line 8',
+            'Line 9 trailer',
+            '',
+            '',
+            '',
+        ]
+        test_pr_file_contents_text = '\n'.join(test_pr_file_contents)
+        test_base_file_contents = [
+            'Line 0',
+            'Line 1',
+            '',
+            '',
+            '',
+            'Line 2',
+            'Line 3',
+            '',
+            '',
+            '',
+            'Line 4',
+            'Line 5',
+            '',
+            '',
+            '',
+            'Line 6',
+            'Line 7',
+            '',
+            '',
+            '',
+            'Line 8',
+            'Line 9',
+            '',
+            '',
+            '',
+        ]
+        test_base_file_contents_text = '\n'.join(test_base_file_contents)
+
+        test_repo_name = 'Test-Repo-Name'
+        test_pr_number = 'Test-PR-Number'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/repos/{test_org_name}'
+                f'/{test_repo_name}/pulls/{test_pr_number}',
+                status_code=200,
+                json=test_pr_details_response_json,
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/repos/{test_org_name}'
+                f'/{test_repo_name}/pulls/{test_pr_number}/files',
+                status_code=200,
+                json=test_pr_file_changes_response_json,
+            )
+            mock_requests.register_uri(
+                'GET',
+                test_pr_details_raw_url,
+                status_code=200,
+                text=test_pr_file_contents_text,
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://raw.githubusercontent.com/{test_org_name}'
+                f'/{test_repo_name}/{test_pr_details_base_ref}'
+                f'/{"/".join(test_pr_details_raw_url.split("/")[-2:])}',
+                status_code=200,
+                text=test_base_file_contents_text,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            test_method_response = test_bot.remove_single_file_pr_deletions(
+                repo_name=test_repo_name,
+                pr_number=test_pr_number,
+            )
+
+            self.assertEqual(
+                test_expectations_str,
+                test_method_response,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):

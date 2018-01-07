@@ -9,6 +9,7 @@ API v3
 
 """
 
+from difflib import unified_diff
 import re
 import requests
 from typing import Dict, Generator, List, Union
@@ -455,4 +456,88 @@ class GitHubOrganization(object):
             team_id=team_id,
             repo_permission=repo_permission,
         )
+        return return_value
+
+    def remove_single_file_pr_deletions(
+        self,
+        repo_name: str,
+        pr_number: Union[int, str],
+    ) -> str:
+        """Removes line deletions from a single-file Pull Request (PR)
+
+        Uses the GitHub REST API v3 with no caching
+
+        Args:
+            repo_name: name of repo within the GitHub Organization
+            pr_number: PR number for repo_name
+
+        Returns:
+            A string describing the resulting PR will no deletions
+
+        """
+
+        pr_details_response = requests.get(
+            url=f'https://api.github.com/repos/{self.org_name}/{repo_name}'
+                f'/pulls/{pr_number}',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+            },
+        ).json()
+
+        assert pr_details_response['changed_files'] == 1
+
+        pr_file_changes_response = requests.get(
+            url=f'https://api.github.com/repos/{self.org_name}/{repo_name}'
+                f'/pulls/{pr_number}/files',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+            },
+        ).json()
+
+        pr_file_url = pr_file_changes_response[0]['raw_url']
+        pr_file_contents = requests.get(
+            url=pr_file_url,
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+            },
+        ).text.split('\n')
+
+        pr_file_url_components = pr_file_url.split('/')
+        pr_branch = pr_details_response['base']['ref']
+        base_file_url = (
+            f'https://raw.githubusercontent.com/{self.org_name}/{repo_name}'
+            f'/{pr_branch}/{"/".join(pr_file_url_components[-2:])}'
+        )
+        base_file_contents = requests.get(
+            url=base_file_url,
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+            },
+        ).text.split('\n')
+
+        file_diffs = unified_diff(
+            a=base_file_contents,
+            b=pr_file_contents,
+            n=max(len(base_file_contents), len(pr_file_contents))
+        )
+
+        return_value = ''
+        consecutive_line_breaks = ''
+        insertion_text = ''
+        for line_index, line_contents in enumerate(file_diffs):
+            if line_index in range(0, 3):
+                continue
+            elif line_contents[1:] == '':
+                consecutive_line_breaks += '\n'
+            elif line_contents[0] == '+':
+                insertion_text += (line_contents[1:] + '\n')
+            else:
+                return_value += insertion_text
+                insertion_text = ''
+                return_value += consecutive_line_breaks
+                return_value += (line_contents[1:] + '\n')
+                consecutive_line_breaks = ''
+        return_value += insertion_text
+        return_value += consecutive_line_breaks[1:]
+
         return return_value
