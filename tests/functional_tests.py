@@ -12,7 +12,7 @@ application_secret =
 [GitHub]
 organization =
 api_token =
-user_name =
+org_member_user_name =
 
 [Slack]
 api_token =
@@ -194,14 +194,15 @@ class TAWorkflowTests(TestCase):
         self.assertIn(test_team_name, test_bot.org_team_ids.keys())
 
         # Prof. X uses the GitHubOrganization object adds a member to the team
+        test_org_member = config['GitHub']['org_member_user_name']
         test_bot.set_team_membership(
             team_id=test_bot.org_team_ids[test_team_name],
-            user_name=config['GitHub']['user_name'],
+            user_name=test_org_member,
         )
 
         # Prof. X checks that the team membership was created
         self.assertIn(
-            test_team_name,
+            test_org_member,
             (
                 member['login'] for member in test_bot.get_team_membership(
                     test_bot.org_team_ids[test_team_name]
@@ -224,7 +225,7 @@ class TAWorkflowTests(TestCase):
             test_team_name,
             (
                 member['name'] for member in test_bot.get_repo_teams(
-                    test_bot.org_team_ids[test_team_name]
+                    test_repo_name
                 )
             )
         )
