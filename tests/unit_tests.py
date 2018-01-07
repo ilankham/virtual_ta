@@ -1119,6 +1119,40 @@ class TestGitHubOrganizations(TestCase):
                 test_set_team_membership_response,
             )
 
+    def test_github_org_create_org_repo(self):
+        test_repo_name = 'Test Repo Name'
+        test_repo_id = 'Test Repo ID'
+        test_repo_description = 'Test Repo Description'
+        test_response_json = {
+            'description': test_repo_description,
+            'id': test_repo_id,
+            'name': test_repo_name,
+        }
+
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                f'https://api.github.com/orgs/{test_org_name}/repos',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+            test_create_org_repo_response = test_bot.create_org_repo(
+                repo_name=test_repo_name,
+                repo_description=test_repo_description,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_create_org_repo_response,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):

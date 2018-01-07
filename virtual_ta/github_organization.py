@@ -161,7 +161,6 @@ class GitHubOrganization(object):
                     '<.*?>',
                     paging_navigation_header
                 ).group()[1:-1]
-                print(api_request_url)
             else:
                 api_request_url = None
 
@@ -201,6 +200,86 @@ class GitHubOrganization(object):
             },
             json={
                 'role': team_role if team_role == 'maintainer' else 'member',
+            }
+        ).json()
+        return return_value
+
+    def create_org_repo(
+            self,
+            repo_name: str,
+            repo_description: str = '',
+            repo_homepage: str = '',
+            repo_private: bool = False,
+            repo_has_issues: bool = True,
+            repo_has_projects: bool = True,
+            repo_has_wiki: bool = True,
+            repo_team_id: str = None,
+            repo_auto_init: bool = False,
+            repo_gitignore_template: str = '',
+            repo_license_template: str = '',
+            repo_allow_squash_merge: bool = True,
+            repo_allow_merge_commit: bool = True,
+            repo_allow_rebase_merge: bool = True,
+    ) -> NestedDict:
+        """Creates GitHub organization repo with specified properties
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/orgs/{self.org_name}/repos'
+        with no caching
+
+        Args:
+            repo_name: name of repo to create
+            repo_description: description of repo to create
+            repo_homepage: homepage URL of repo to create
+            repo_private: determines whether repo is private; defaults to False
+            repo_has_issues: determines whether repo has issues enabled;
+                defaults to True
+            repo_has_projects: determines whether repo has projects enabled;
+                defaults to True
+            repo_has_wiki: determines whether repo has its wiki enabled;
+                defaults to True
+            repo_team_id: id of team within Organization to grant repo access
+            repo_auto_init: determines whether repo is initialized with a
+                README file; defaults to False
+            repo_gitignore_template: language name of .gitignore template to
+                include in repo; see https://github.com/github/gitignore for
+                language options
+            repo_license_template: keyword of license to include in repo; see
+                https://help.github.com/articles/licensing-a-repository
+                /#searching-github-by-license-type for license options
+            repo_allow_squash_merge: determines whether repo allows
+                squash-merging pull requests; defaults to True
+            repo_allow_merge_commit: determines whether repo allows
+                merging pull requests with a merge commit; defaults to True
+            repo_allow_rebase_merge: determines whether repo allows
+                rebase-merging pull requests; defaults to True
+
+        Returns:
+            A dictionary describing the resulting repo
+
+        """
+
+        return_value = requests.post(
+            url=f'https://api.github.com/orgs/{self.org_name}/repos',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+                'Content-type': 'application/json',
+            },
+            json={
+                'name': repo_name,
+                'description': repo_description,
+                'homepage': repo_homepage,
+                'private': repo_private,
+                'has_issues': repo_has_issues,
+                'has_projects': repo_has_projects,
+                'has_wiki': repo_has_wiki,
+                'team_id': repo_team_id,
+                'auto_init': repo_auto_init,
+                'gitignore_template': repo_gitignore_template,
+                'license_template': repo_license_template,
+                'allow_squash_merge': repo_allow_squash_merge,
+                'allow_merge_commit': repo_allow_merge_commit,
+                'allow_rebase_merge': repo_allow_rebase_merge,
             }
         ).json()
         return return_value
