@@ -323,3 +323,52 @@ class GitHubOrganization(object):
                 ).group()[1:-1]
             else:
                 api_request_url = None
+
+    def set_repo_team(
+            self,
+            repo_name: str,
+            team_id: Union[int, str],
+            repo_permission: str = 'pull',
+    ) -> Dict[str, Union[int, None, str]]:
+        """Adds or updates membership for existing GitHub Organization team
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/teams/{team_id}/repos/{self.org_name}'
+        f'/{repo_name}'
+        with no caching
+
+        Args:
+            repo_name: name of existing GitHub repo
+            team_id: id of team within GitHub Organization
+            repo_permission: if 'pull', then the team will only have pull
+                access; if 'push', then the team will have pull and push
+                access; if 'admin', then the team will have admin access;
+                defaults to 'pull'
+
+        Returns:
+            A dictionary describing the resulting team membership
+
+        """
+
+        response_status_code = requests.put(
+            url=f'https://api.github.com/teams/{team_id}/repos/{self.org_name}'
+                f'/{repo_name}',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+                'Content-type': 'application/json',
+            },
+            json={
+                'permission': repo_permission
+                if repo_permission in ('push', 'admin') else 'pull'
+            }
+        ).status_code
+
+        if response_status_code == 204:
+            return_value = [
+                team for team in self.get_repo_teams(repo_name)
+                if team['id'] == team_id
+            ][0]
+        else:
+            return_value = []
+
+        return return_value

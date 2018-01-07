@@ -1242,6 +1242,44 @@ class TestGitHubOrganizations(TestCase):
                 list(test_bot.get_repo_teams(test_repo_name)),
             )
 
+    @patch('virtual_ta.GitHubOrganization.get_repo_teams')
+    def test_github_org_set_repo_team(self, mock_get_repo_teams):
+        test_team_description = 'Test Team Description'
+        test_team_id = 'Test-Team-ID'
+        test_team_name = 'Test Team Name'
+        test_response_json = {
+            'description': test_team_description,
+            'id': test_team_id,
+            'name': test_team_name,
+        }
+        mock_get_repo_teams.return_value = [test_response_json]
+
+        test_repo_name = 'Test-Repo-Name'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'PUT',
+                f'https://api.github.com/teams/{test_team_id}/repos'
+                f'/{test_org_name}/{test_repo_name}',
+                status_code=204,
+                json=test_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+            test_set_repo_team_response = test_bot.set_repo_team(
+                repo_name=test_repo_name,
+                team_id=test_team_id,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_set_repo_team_response,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
