@@ -8,7 +8,7 @@ See https://api.slack.com/web for more information about the Slack Web API
 """
 
 import requests
-from typing import Dict
+from typing import Dict, Generator, Union
 
 
 class SlackAccount(object):
@@ -23,7 +23,8 @@ class SlackAccount(object):
                     create a legacy token with full permissions scopes or
                 (2) https://api.slack.com/apps to create an internal
                     integration app having at least the permission scopes of
-                    chat:write:user, im:read, and users:read
+                    chat:write:user, groups:read, groups:write, im:history,
+                    im:read, and users:read
 
         """
 
@@ -116,5 +117,43 @@ class SlackAccount(object):
             return_value[user_dm_channels[username]] = (
                 messages_by_username[username]
             )
+
+        return return_value
+
+    def get_most_recent_direct_messages(
+        self,
+        username: str,
+        message_count: Union[int, str] = 1,
+    ) -> Generator[str, None, None]:
+        """Gets most recent direct messages sent to username
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/im.history
+        with no caching or paging support
+
+        Args:
+            username: username of user in Slack Workspace
+            message_count: the number of most recent DMs to retrieve
+
+        Returns:
+            A generator of messages in reverse chronological order
+
+        """
+
+        most_recent_dms_response = requests.post(
+            url='https://slack.com/api/im.history',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/x-www-form-urlencoded',
+            },
+            data={
+                'channel': self.user_dm_channels[username],
+                'count': str(message_count),
+            }
+        ).json()
+
+        return_value = (
+            message['text'] for message in most_recent_dms_response['messages']
+        )
 
         return return_value

@@ -2124,3 +2124,49 @@ class TestSlackAccounts(TestCase):
             )
 
         self.assertEqual(mock_requests.call_count, len(test_respond_dms))
+
+    @patch(
+        'virtual_ta.SlackAccount.user_dm_channels',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_get_most_recent_direct_messages(
+            self,
+            mock_user_dm_channels
+    ):
+        test_username = 'Test User Name'
+        mock_user_dm_channels.return_value = {
+            test_username: 'Test User DM Channel',
+        }
+
+        test_response_json = {
+            'messages': [
+                {
+                    'text': 'Test Message',
+                },
+            ],
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/im.history',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                    'Content-type': 'application/x-www-form-urlencoded',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.get_most_recent_direct_messages(
+                username=test_username,
+                message_count=1,
+            )
+
+            self.assertEqual(
+                [test_response_json['messages'][0]['text']],
+                list(test_method_response),
+            )
