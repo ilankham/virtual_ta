@@ -8,7 +8,7 @@ See https://api.slack.com/web for more information about the Slack Web API
 """
 
 import requests
-from typing import Dict, Generator, Union
+from typing import Dict, Generator, List, Union
 
 
 class SlackAccount(object):
@@ -157,3 +157,38 @@ class SlackAccount(object):
         )
 
         return return_value
+
+    @property
+    def private_channels(self) -> Generator[
+        Dict[str, Union[Dict[str, str], List[str], str]],
+        None,
+        None
+    ]:
+        """Returns a generators of dicts, each describing a private channel
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/groups.list
+        with no caching
+
+        """
+
+        return_value = requests.post(
+            url='https://slack.com/api/groups.list',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+            },
+        ).json()
+
+        yield from return_value['groups']
+
+    @property
+    def private_channels_ids(self) -> Dict[str, str]:
+        """Returns a dict with private channel name -> channel id
+
+        Uses the Slack Web API call with no caching
+
+        """
+
+        return {
+            channel['name']: channel['id'] for channel in self.private_channels
+        }
