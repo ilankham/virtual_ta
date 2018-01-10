@@ -2244,3 +2244,50 @@ class TestSlackAccounts(TestCase):
             test_expectations,
             test_bot.private_channels_ids,
         )
+
+    @patch(
+        'virtual_ta.SlackAccount.private_channels_ids',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_get_private_channel_info(
+            self,
+            mock_private_channels_ids
+    ):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_name2 = 'test-channel-name-2'
+        test_channel_id1 = 'Test Private Channel ID 1'
+        test_channel_id2 = 'Test Private Channel ID 2'
+        mock_private_channels_ids.return_value = {
+            test_channel_name1: test_channel_id1,
+            test_channel_name2: test_channel_id2,
+        }
+
+        test_response_json = {
+            'group': {
+                'id': test_channel_id1,
+                'name': test_channel_name1,
+            }
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/groups.info',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.get_private_channel_info(
+                channel_name=test_channel_name1,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_method_response,
+            )
