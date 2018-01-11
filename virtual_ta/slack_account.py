@@ -223,3 +223,32 @@ class SlackAccount(object):
                 'channel': self.private_channels_ids[channel_name.lower()],
             }
         ).json()
+
+    def create_private_channel(
+        self,
+        channel_name,
+    ) -> Dict[str, Union[Dict[str, Union[List[str], str]], str]]:
+        """Creates a private channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/groups.create
+        with no caching
+
+        Args:
+            channel_name: name of private channel to create
+
+        Returns:
+            A dictionary describing the channel creation results
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/groups.create',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'name': channel_name,
+            }
+        ).json()

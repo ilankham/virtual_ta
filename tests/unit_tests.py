@@ -2291,3 +2291,36 @@ class TestSlackAccounts(TestCase):
                 test_response_json,
                 test_method_response,
             )
+
+    def test_slack_account_create_private_channel(self):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_id1 = 'Test Private Channel ID 1'
+        test_response_json = {
+            'group': {
+                'id': test_channel_id1,
+                'name': test_channel_name1,
+            }
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/groups.create',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.create_private_channel(
+                channel_name=test_channel_name1,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_method_response,
+            )
