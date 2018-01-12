@@ -252,3 +252,37 @@ class SlackAccount(object):
                 'name': channel_name,
             }
         ).json()
+
+    def invite_to_private_channel(
+        self,
+        channel_name: str,
+        user_name: str,
+    ) -> Dict[
+        str, Union[Dict[str, Union[Dict[str, str], List[str], str]], str]
+    ]:
+        """Invites user to join private channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/groups.invite
+        with no caching
+
+        Args:
+            channel_name: name of private channel in Slack Workspace
+            user_name: user name of user to invite to private channel
+
+        Returns:
+            A dictionary describing the channel-invitation results
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/groups.invite',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'channel': self.private_channels_ids[channel_name.lower()],
+                'user': self.user_ids[user_name],
+            }
+        ).json()

@@ -2324,3 +2324,68 @@ class TestSlackAccounts(TestCase):
                 test_response_json,
                 test_method_response,
             )
+
+    @patch(
+        'virtual_ta.SlackAccount.user_ids',
+        new_callable=PropertyMock
+    )
+    @patch(
+        'virtual_ta.SlackAccount.private_channels_ids',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_invite_to_private_channel(
+        self,
+        mock_private_channels_ids,
+        mock_user_ids,
+    ):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_name2 = 'test-channel-name-2'
+        test_channel_id1 = 'Test Private Channel ID 1'
+        test_channel_id2 = 'Test Private Channel ID 2'
+        mock_private_channels_ids.return_value = {
+            test_channel_name1: test_channel_id1,
+            test_channel_name2: test_channel_id2,
+        }
+
+        test_user_name1 = 'test-user-name-1'
+        test_user_name2 = 'test-user-name-2'
+        test_user_id1 = 'test-user-id-1'
+        test_user_id2 = 'test-user-id-2'
+        mock_user_ids.return_value = {
+            test_user_name1: test_user_id1,
+            test_user_name2: test_user_id2,
+        }
+
+        test_expectations = test_response_json = {
+            'group': {
+                'id': test_channel_id1,
+                'name': test_channel_name1,
+                'latest': {
+                    'user': test_user_name1,
+                },
+            },
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/groups.invite',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.invite_to_private_channel(
+                channel_name=test_channel_name1,
+                user_name=test_user_name1,
+            )
+
+            self.assertEqual(
+                test_expectations,
+                test_method_response,
+            )
