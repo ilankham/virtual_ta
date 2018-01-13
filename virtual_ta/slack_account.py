@@ -286,3 +286,67 @@ class SlackAccount(object):
                 'user': self.user_ids[user_name],
             }
         ).json()
+
+    def set_private_channel_purpose(
+        self,
+        channel_name: str,
+        channel_purpose: str,
+    ) -> Dict[str, str]:
+        """Sets purpose for private channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/groups.setPurpose
+        with no caching
+
+        Args:
+            channel_name: name of private channel in Slack Workspace
+            channel_purpose: purpose to set for private channel
+
+        Returns:
+            A dictionary describing the results of setting the channel purpose
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/groups.setPurpose',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'channel': self.private_channels_ids[channel_name.lower()],
+                'purpose': channel_purpose,
+            }
+        ).json()
+
+    def set_private_channel_topic(
+        self,
+        channel_name: str,
+        channel_topic: str,
+    ) -> Dict[str, str]:
+        """Sets purpose for private channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/groups.setTopic
+        with no caching
+
+        Args:
+            channel_name: name of private channel in Slack Workspace
+            channel_topic: topic to set for private channel
+
+        Returns:
+            A dictionary describing the results of setting the channel topic
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/groups.setTopic',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'channel': self.private_channels_ids[channel_name.lower()],
+                'topic': channel_topic,
+            }
+        ).json()

@@ -2389,3 +2389,95 @@ class TestSlackAccounts(TestCase):
                 test_expectations,
                 test_method_response,
             )
+
+    @patch(
+        'virtual_ta.SlackAccount.private_channels_ids',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_set_private_channel_purpose(
+        self,
+        mock_private_channels_ids,
+    ):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_name2 = 'test-channel-name-2'
+        test_channel_id1 = 'Test Private Channel ID 1'
+        test_channel_id2 = 'Test Private Channel ID 2'
+        mock_private_channels_ids.return_value = {
+            test_channel_name1: test_channel_id1,
+            test_channel_name2: test_channel_id2,
+        }
+
+        test_purpose = "Test Channel Purpose"
+        test_expectations = test_response_json = {
+            'purpose': test_purpose,
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/groups.setPurpose',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.set_private_channel_purpose(
+                channel_name=test_channel_name1,
+                channel_purpose=test_purpose,
+            )
+
+            self.assertEqual(
+                test_expectations,
+                test_method_response,
+            )
+
+    @patch(
+        'virtual_ta.SlackAccount.private_channels_ids',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_set_private_channel_topic(
+        self,
+        mock_private_channels_ids,
+    ):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_name2 = 'test-channel-name-2'
+        test_channel_id1 = 'Test Private Channel ID 1'
+        test_channel_id2 = 'Test Private Channel ID 2'
+        mock_private_channels_ids.return_value = {
+            test_channel_name1: test_channel_id1,
+            test_channel_name2: test_channel_id2,
+        }
+
+        test_topic = "Test Channel Topic"
+        test_expectations = test_response_json = {
+            'topic': test_topic,
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/groups.setTopic',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.set_private_channel_topic(
+                channel_name=test_channel_name1,
+                channel_topic=test_topic,
+            )
+
+            self.assertEqual(
+                test_expectations,
+                test_method_response,
+            )
