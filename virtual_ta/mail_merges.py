@@ -1,5 +1,6 @@
 """Creates functions for mail merging from various data formats"""
 
+from collections import OrderedDict
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
 from typing import BinaryIO, Dict, TextIO, Union
 
@@ -38,7 +39,7 @@ def mail_merge_from_dict(
 
     template_text = Template(template_fp.read())
 
-    return_value = {}
+    return_value = OrderedDict()
     for k in data_dict:
         return_value[k] = template_text.render(data_dict[k])
 
