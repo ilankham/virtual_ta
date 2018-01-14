@@ -1,6 +1,7 @@
 """Creates functions for converting between data formats"""
 
 from calendar import day_name
+from collections import OrderedDict
 from csv import DictReader
 from datetime import date, timedelta
 from io import BytesIO, FileIO, StringIO, TextIOWrapper
@@ -43,7 +44,7 @@ def convert_csv_to_dict(
     if key is None:
         key = csv_file_reader.fieldnames[0]
 
-    return_value = {}
+    return_value = OrderedDict()
     for row in csv_file_reader:
         return_value[row[key]] = row
 
@@ -264,6 +265,7 @@ def flatten_dict(
     items_separator: str = '\n',
     *,
     suppress_keys: bool = False,
+    sort_keys: bool = True,
     **kwargs
 ) -> str:
     """Converts a dictionary to a string with specified separators
@@ -281,7 +283,9 @@ def flatten_dict(
         items_separator: used to separate items in the output string
         suppress_keys: Boolean for determining whether to include keys in the
             returned string
-        **kwargs: options passed through to the builtin function sorted
+        sort_keys: Boolean for determining whether to sort keys
+        **kwargs: options passed through to the builtin function sorted if
+            sort_keys is True
 
     Returns:
         A string representation of data_items with key_value_separator used to
@@ -289,9 +293,14 @@ def flatten_dict(
 
     """
 
+    if sort_keys:
+        enumeration_order = enumerate(sorted(data_items.keys(), **kwargs))
+    else:
+        enumeration_order = enumerate(data_items, **kwargs)
+
     return_value = items_separator
     last_record_number = len(data_items)
-    for n, k in enumerate(sorted(data_items.keys(), **kwargs)):
+    for n, k in enumeration_order:
         if not suppress_keys:
             return_value += str(k)
             return_value += key_value_separator
