@@ -8,7 +8,7 @@ See https://api.slack.com/web for more information about the Slack Web API
 """
 
 import requests
-from typing import Dict, Generator, List, Union
+from typing import Dict, Generator, Iterable, List, Union
 
 
 class SlackAccount(object):
@@ -350,3 +350,47 @@ class SlackAccount(object):
                 'topic': channel_topic,
             }
         ).json()
+
+    def create_and_setup_private_channel(
+        self,
+        channel_name: str,
+        users_to_invite: Iterable[str],
+        channel_purpose: str,
+        channel_topic: str,
+    ) -> Dict[str, Union[Dict[str, Union[List[str], str]], str]]:
+        """Creates and sets up a private channel in the Slack Workspace
+
+        Uses the Slack Web API call with no caching
+
+        Args:
+            channel_name: name of private channel to create
+            users_to_invite: iterable of user names to invite to channel
+            channel_purpose: purpose to set for private channel
+            channel_topic: topic to set for private channel
+
+        Returns:
+            A dictionary describing the channel creation results
+
+        """
+
+        self.create_private_channel(
+            channel_name=channel_name
+        )
+
+        for user_name in users_to_invite:
+            self.invite_to_private_channel(
+                channel_name=channel_name,
+                user_name=user_name,
+            )
+
+        self.set_private_channel_purpose(
+            channel_name=channel_name,
+            channel_purpose=channel_purpose,
+        )
+
+        self.set_private_channel_topic(
+            channel_name=channel_name,
+            channel_topic=channel_topic,
+        )
+
+        return self.get_private_channel_info(channel_name)
