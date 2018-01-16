@@ -236,7 +236,8 @@ class TAWorkflowTests(TestCase):
         # (1) visiting https://api.slack.com/custom-integrations/legacy-tokens
         #     and generating a Legacy Token, or
         # (2) visiting https://api.slack.com/apps and creating a new app with
-        #     permission scopes for chat:write:user, im:read, and users:read
+        #     permission scopes of chat:write:user, groups:read, groups:write,
+        # im:history, im:read, and users:read
 
         # Prof. X saves a gradebook csv file named with column headings and one
         # row per student grade record; columns include Slack_User_Name
@@ -256,7 +257,7 @@ class TAWorkflowTests(TestCase):
             gradebook_fp = es.enter_context(
                 open('examples/example_gradebook-for_testing_slack.csv')
             )
-            mail_merge_results = mail_merge_from_csv_file(
+            test_mail_merge_results = mail_merge_from_csv_file(
                 template_fp,
                 gradebook_fp,
                 key='Slack_User_Name',
@@ -271,7 +272,7 @@ class TAWorkflowTests(TestCase):
             self.assertEqual(
                 test_fp.read(),
                 flatten_dict(
-                    mail_merge_results,
+                    test_mail_merge_results,
                     key_value_separator='\n\n-----\n\n',
                     items_separator='\n\n--------------------\n\nMessage to '
                 ),
@@ -284,10 +285,53 @@ class TAWorkflowTests(TestCase):
 
         # Prof. X uses the SlackAccount direct_message_users method to send the
         # messages in the dictionary to the indicated students
-        test_bot.direct_message_by_username(mail_merge_results)
+        test_bot.direct_message_by_username(test_mail_merge_results)
 
-        # Prof. X verifies in the Slack Workspace corresponding to their API
-        # Token direct messages have been send with themselves as the sender
+        # Prof. X verifies each direct message was sent
+        for test_users, test_message_sent in test_mail_merge_results.items():
+            test_message_received = test_bot.get_most_recent_direct_messages(
+                username=test_users,
+                message_count=1,
+            )
+            self.assertEqual(
+                test_message_sent,
+                list(test_message_received)[0],
+            )
+
+        # Prof. X then creates a new private channel, inviting the users to
+        # join and settings the channel's purpose and topic
+        test_channel_name = datetime.now().strftime('channel%Y%m%d%H%M%S')
+        test_users_to_invite = test_mail_merge_results.keys()
+        test_channel_purpose = datetime.now().strftime('Test Channel Purpose')
+        test_channel_topic = datetime.now().strftime('Test Channel Topic')
+        test_bot.create_and_setup_private_channel(
+            channel_name=test_channel_name,
+            users_to_invite=test_users_to_invite,
+            channel_purpose=test_channel_purpose,
+            channel_topic=test_channel_topic,
+        )
+
+        # Prof. X verifies the channel was created as expected
+        test_channel_info = test_bot.get_private_channel_info(
+            channel_name=test_channel_name,
+        )
+        self.assertEqual(
+            test_channel_name,
+            test_channel_info['group']['name'],
+        )
+        for test_users in test_mail_merge_results.keys():
+            self.assertIn(
+                test_bot.user_ids[test_users],
+                test_channel_info['group']['members']
+            )
+        self.assertEqual(
+            test_channel_purpose,
+            test_channel_info['group']['purpose']['value'],
+        )
+        self.assertEqual(
+            test_channel_topic,
+            test_channel_info['group']['topic']['value'],
+        )
 
     def test_render_calendar_table(self):
         # Prof. X creates an Excel file with column labels for week number and
