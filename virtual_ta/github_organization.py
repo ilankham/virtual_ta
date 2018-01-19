@@ -9,6 +9,7 @@ API v3
 
 """
 
+from collections import defaultdict
 from difflib import unified_diff
 import re
 import requests
@@ -541,3 +542,59 @@ class GitHubOrganization(object):
         return_value += consecutive_line_breaks[1:]
 
         return return_value
+
+    def summarize_prs_by_author(
+        self,
+        repo_name: str,
+    ) -> Dict[str, List[str]]:
+
+        """Returns dict summarizing all Pull Requests (PRs) for an Org repo
+
+        Uses the GitHub REST API v3 with no caching and with handling for
+        paging
+
+        Args:
+            repo_name: name of repo within the GitHub Organization
+
+        Returns:
+            A dict keyed by PR author and having as values lists of all PRs for
+            repo_name by author, summarizing each PR's number, title, and
+            number of files changed
+
+        """
+
+        api_request_url = (
+            f'https://api.github.com/repos/{self.org_name}/{repo_name}/pulls'
+        )
+
+        return_value = defaultdict(list)
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={
+                    'Authorization': f'token {self.personal_access_token}',
+                },
+            )
+            for pr in api_response.json():
+
+                pr_details_response = requests.get(
+                    url=f'https://api.github.com/repos/{self.org_name}'
+                        f'/{repo_name}/pulls/{pr["number"]}',
+                    headers={
+                        'Authorization': f'token {self.personal_access_token}',
+                    },
+                ).json()
+                return_value[pr['user']['login']].append(
+                    f'PR {pr["number"]}: {pr["title"]}'
+                    f' (files changed: {pr_details_response["changed_files"]})'
+                )
+            paging_navigation_header = api_response.headers.get('Link', '')
+            if 'rel="next"' in paging_navigation_header:
+                api_request_url = re.search(
+                    '<.*?>',
+                    paging_navigation_header
+                ).group()[1:-1]
+            else:
+                api_request_url = None
+
+        return dict(return_value)
