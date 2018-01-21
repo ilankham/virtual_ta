@@ -386,7 +386,6 @@ class GitHubOrganization(object):
             repo_has_issues: bool = True,
             repo_has_projects: bool = True,
             repo_has_wiki: bool = True,
-            repo_team_id: str = None,
             repo_auto_init: bool = False,
             repo_gitignore_template: str = '',
             repo_license_template: str = '',
@@ -414,7 +413,6 @@ class GitHubOrganization(object):
                 defaults to True
             repo_has_wiki: determines whether repo has its wiki enabled;
                 defaults to True
-            repo_team_id: id of team within Organization to grant repo access
             repo_auto_init: determines whether repo is initialized with a
                 README file; defaults to False
             repo_gitignore_template: language name of .gitignore template to
@@ -443,7 +441,6 @@ class GitHubOrganization(object):
             repo_has_issues=repo_has_issues,
             repo_has_projects=repo_has_projects,
             repo_has_wiki=repo_has_wiki,
-            repo_team_id=repo_team_id,
             repo_auto_init=repo_auto_init,
             repo_gitignore_template=repo_gitignore_template,
             repo_license_template=repo_license_template,
