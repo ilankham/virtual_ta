@@ -62,6 +62,22 @@ class TestBlackboardCourses(TestCase):
         self.assertEqual(test_application_key, test_bot.application_key)
         self.assertEqual(test_application_secret, test_bot.application_secret)
 
+    def test_bb_course_repr(self):
+        test_course_id = 'Test-Course-ID'
+        test_server_address = 'test.server.address'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+
+        test_bot = BlackboardCourse(
+            test_course_id,
+            test_server_address,
+            test_application_key,
+            test_application_secret
+        )
+
+        self.assertIn(test_course_id, repr(test_bot))
+        self.assertIn(test_server_address, repr(test_bot))
+
     def test_bb_course_api_token_property_with_new_token(self):
         test_response_json = {
             'access_token': 'Test Token Value',

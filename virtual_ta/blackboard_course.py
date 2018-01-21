@@ -59,6 +59,14 @@ class BlackboardCourse(object):
         self.__api_token: str = None
         self.api_token_expiration_datetime: datetime = None
 
+    def __repr__(self) -> str:
+        """Returns string representation of Blackboard Course"""
+
+        return (
+            f'{self.__class__.__name__}(course_id={self.course_id}, '
+            f'server_address={self.server_address})'
+        )
+
     @property
     def api_token(self) -> str:
         """Returns a Blackboard Learn REST API Token for the associated Course
