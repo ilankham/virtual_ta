@@ -858,6 +858,17 @@ class TestGitHubOrganizations(TestCase):
             test_bot.personal_access_token
         )
 
+    def test_github_org_repr(self):
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+
+        test_bot = GitHubOrganization(
+            test_org_name,
+            test_personal_access_token,
+        )
+
+        self.assertIn(test_org_name, repr(test_bot))
+
     def test_github_org_teams_property_without_paging(self):
         test_team_name = 'Test Team Name'
         test_team_id = 'Test Team ID'

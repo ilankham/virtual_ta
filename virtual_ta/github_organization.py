@@ -36,6 +36,13 @@ class GitHubOrganization(object):
         self.org_name = org_name
         self.personal_access_token = personal_access_token
 
+    def __repr__(self) -> str:
+        """Returns string representation of GitHub Organization"""
+
+        return (
+            f'{self.__class__.__name__}(org_name={self.org_name})'
+        )
+
     @property
     def org_teams(self) -> Generator[Dict[str, Union[int, str]], None, None]:
         """Returns a generator of dicts, each describing an organization team
