@@ -2360,10 +2360,20 @@ class TestMailMerging(TestCase):
 class TestSlackAccounts(TestCase):
     def test_slack_account_class_init(self):
         test_token = 'Test Token Value'
+        test_user_name = 'Test User Name'
 
-        test_bot = SlackAccount(test_token)
+        test_bot = SlackAccount(test_token, user_name=test_user_name)
 
         self.assertEqual(test_token, test_bot.api_token)
+        self.assertEqual(test_user_name, test_bot.user_name)
+
+    def test_slack_account_repr(self):
+        test_token = 'Test Token Value'
+        test_user_name = 'Test User Name'
+
+        test_bot = SlackAccount(test_token, user_name=test_user_name)
+
+        self.assertIn(test_user_name, repr(test_bot))
 
     def test_slack_account_user_ids_property(self):
         test_response_user_ids = {

@@ -14,7 +14,7 @@ from typing import Dict, Generator, Iterable, List, Union
 class SlackAccount(object):
     """Class for interfacing with the Slack Web API"""
 
-    def __init__(self, api_token: str) -> None:
+    def __init__(self, api_token: str, user_name: str = '') -> None:
         """Initializes a SlackAccount object
 
         Args:
@@ -25,10 +25,19 @@ class SlackAccount(object):
                     integration app having at least the permission scopes of
                     chat:write:user, groups:read, groups:write, im:history,
                     im:read, and users:read
+            user_name: optional user name associated with Slack Account
 
         """
 
         self.api_token = api_token
+        self.user_name = user_name
+
+    def __repr__(self) -> str:
+        """Returns string representation of Slack Account"""
+
+        return (
+            f'{self.__class__.__name__}(user_name={self.user_name})'
+        )
 
     @property
     def user_ids(self) -> Dict[str, str]:
