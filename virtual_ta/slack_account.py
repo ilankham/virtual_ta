@@ -177,7 +177,7 @@ class SlackAccount(object):
 
         Uses the Slack Web API call
         https://api.slack.com/methods/groups.list
-        with no caching
+        with no caching; limited to private channels in the API Token's scope
 
         """
 
@@ -194,7 +194,8 @@ class SlackAccount(object):
     def private_channels_ids(self) -> Dict[str, str]:
         """Returns a dict with private channel name -> channel id
 
-        Uses the Slack Web API call with no caching
+        Uses the Slack Web API call with no caching; limited to private
+        channels in the API Token's scope
 
         """
 
@@ -212,7 +213,7 @@ class SlackAccount(object):
 
         Uses the Slack Web API call
         https://api.slack.com/methods/groups.info
-        with no caching
+        with no caching; limited to private channels in the API Token's scope
 
         Args:
             channel_name: name of private channel in Slack Workspace
@@ -273,7 +274,7 @@ class SlackAccount(object):
 
         Uses the Slack Web API call
         https://api.slack.com/methods/groups.invite
-        with no caching
+        with no caching; limited to private channels in the API Token's scope
 
         Args:
             channel_name: name of private channel in Slack Workspace
@@ -305,7 +306,7 @@ class SlackAccount(object):
 
         Uses the Slack Web API call
         https://api.slack.com/methods/groups.setPurpose
-        with no caching
+        with no caching; limited to private channels in the API Token's scope
 
         Args:
             channel_name: name of private channel in Slack Workspace
@@ -337,7 +338,7 @@ class SlackAccount(object):
 
         Uses the Slack Web API call
         https://api.slack.com/methods/groups.setTopic
-        with no caching
+        with no caching; limited to private channels in the API Token's scope
 
         Args:
             channel_name: name of private channel in Slack Workspace
