@@ -23,8 +23,8 @@ class SlackAccount(object):
                     create a legacy token with full permissions scopes or
                 (2) https://api.slack.com/apps to create an internal
                     integration app having at least the permission scopes of
-                    chat:write:user, groups:read, groups:write, im:history,
-                    im:read, and users:read
+                    channels:read, chat:write:user, groups:read, groups:write,
+                    im:history, im:read, and users:read
             user_name: optional user name associated with Slack Account
 
         """
@@ -166,6 +166,43 @@ class SlackAccount(object):
         )
 
         return return_value
+
+    @property
+    def public_channels(self) -> Generator[
+        Dict[str, Union[Dict[str, str], List[str], str]],
+        None,
+        None
+    ]:
+        """Returns a generators of dicts, each describing a public channel
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/channels.list
+        with no caching and with handling for paging; all parameters are set
+        to values recommended in API documentation
+
+        """
+
+        cursor_position = ''
+        while True:
+            channels_response = requests.post(
+                url='https://slack.com/api/channels.list',
+                headers={
+                    'Authorization': f'Bearer {self.api_token}',
+                    'cursor': cursor_position,
+                    'exclude_archived': 'true',
+                    'exclude_members': 'true',
+                    'limit': '200',
+                },
+            ).json()
+
+            yield from channels_response['channels']
+
+            try:
+                cursor_position = (
+                    channels_response['response_metadata']['next_cursor']
+                )
+            except KeyError:
+                break
 
     @property
     def private_channels(self) -> Generator[

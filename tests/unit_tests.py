@@ -2527,6 +2527,110 @@ class TestSlackAccounts(TestCase):
                 list(test_method_response),
             )
 
+    def test_slack_account_public_channels_property_without_paging(self):
+        test_channel_name1 = 'Test Channel Name 1'
+        test_channel_name2 = 'Test Channel Name 2'
+        test_channel_id1 = 'Test Public Channel ID 1'
+        test_channel_id2 = 'Test Public Channel ID 2'
+        test_response_json = {
+            'channels': [
+                {
+                    'name': test_channel_name1,
+                    'id': test_channel_id1,
+                },
+                {
+                    'name': test_channel_name2,
+                    'id': test_channel_id2,
+                },
+            ],
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/channels.list',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            self.assertEqual(
+                test_response_json['channels'],
+                list(test_bot.public_channels),
+            )
+
+    def test_slack_account_public_channels_property_with_paging(self):
+        test_channel_name1 = 'Test Channel Name 1'
+        test_channel_name2 = 'Test Channel Name 2'
+        test_channel_id1 = 'Test Public Channel ID 1'
+        test_channel_id2 = 'Test Public Channel ID 2'
+        test_cursor = 'Test Next Cursor'
+        test_response_json1 = {
+            'channels': [
+                {
+                    'name': test_channel_name1,
+                    'id': test_channel_id1,
+                },
+            ],
+            'response_metadata': {
+                'next_cursor': test_cursor
+            },
+        }
+        test_response_json2 = {
+            'channels': [
+                {
+                    'name': test_channel_name2,
+                    'id': test_channel_id2,
+                },
+            ],
+        }
+
+        test_expectations = [
+            {
+                'name': test_channel_name1,
+                'id': test_channel_id1,
+            },
+            {
+                'name': test_channel_name2,
+                'id': test_channel_id2,
+            },
+        ]
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/channels.list',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                    'cursor': '',
+                },
+                status_code=200,
+                json=test_response_json1,
+            )
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/channels.list',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                    'cursor': test_cursor,
+                },
+                status_code=200,
+                json=test_response_json2,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            self.assertEqual(
+                test_expectations,
+                list(test_bot.public_channels),
+            )
+
     def test_slack_account_private_channels_property(self):
         test_channel_name1 = 'Test Channel Name 1'
         test_channel_name2 = 'Test Channel Name 2'
