@@ -2631,6 +2631,43 @@ class TestSlackAccounts(TestCase):
                 list(test_bot.public_channels),
             )
 
+    @patch(
+        'virtual_ta.SlackAccount.public_channels',
+        new_callable=PropertyMock
+    )
+    def test_slack_account_public_channels_ids_property(
+        self,
+        mock_public_channels,
+    ):
+        test_channel_name1 = 'Test Channel Name 1'
+        test_channel_name2 = 'Test Channel Name 2'
+        test_channel_id1 = 'Test Public Channel ID 1'
+        test_channel_id2 = 'Test Public Channel ID 2'
+        mock_public_channels.return_value = [
+            {
+                'name': test_channel_name1,
+                'id': test_channel_id1,
+            },
+            {
+                'name': test_channel_name2,
+                'id': test_channel_id2,
+            },
+        ]
+
+        test_expectations = {
+            test_channel_name1: test_channel_id1,
+            test_channel_name2: test_channel_id2,
+        }
+
+        test_token = 'Test Token Value'
+
+        test_bot = SlackAccount(test_token)
+
+        self.assertEqual(
+            test_expectations,
+            test_bot.public_channels_ids,
+        )
+
     def test_slack_account_private_channels_property(self):
         test_channel_name1 = 'Test Channel Name 1'
         test_channel_name2 = 'Test Channel Name 2'

@@ -205,6 +205,18 @@ class SlackAccount(object):
                 break
 
     @property
+    def public_channels_ids(self) -> Dict[str, str]:
+        """Returns a dict with public channel name -> channel id
+
+        Uses the Slack Web API call with no caching
+
+        """
+
+        return {
+            channel['name']: channel['id'] for channel in self.public_channels
+        }
+
+    @property
     def private_channels(self) -> Generator[
         Dict[str, Union[Dict[str, str], List[str], str]],
         None,
