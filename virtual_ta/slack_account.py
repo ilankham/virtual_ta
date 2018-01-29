@@ -252,6 +252,38 @@ class SlackAccount(object):
             channel['name']: channel['id'] for channel in self.private_channels
         }
 
+    def get_public_channel_info(
+        self,
+        channel_name: str,
+    ) -> Dict[
+        str, Union[Dict[str, Union[Dict[str, str], List[str], str]], str]
+    ]:
+        """Returns dict of public channel information for the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/channels.info
+        with no caching
+
+        Args:
+            channel_name: name of public channel in Slack Workspace
+
+        Returns:
+            A dictionary describing the public channel for the Slack Workspace
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/channels.info',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/x-www-form-urlencoded',
+            },
+            data={
+                'channel': self.public_channels_ids[channel_name.lower()],
+                'include_locale': 'true',
+            }
+        ).json()
+
     def get_private_channel_info(
         self,
         channel_name: str,
