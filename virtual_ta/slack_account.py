@@ -23,8 +23,9 @@ class SlackAccount(object):
                     create a legacy token with full permissions scopes or
                 (2) https://api.slack.com/apps to create an internal
                     integration app having at least the permission scopes of
-                    channels:read, chat:write:user, groups:read, groups:write,
-                    im:history, im:read, and users:read
+                    channels:read, channels:write, chat:write:user,
+                    groups:read, groups:write, im:history, im:read, and
+                    users:read
             user_name: optional user name associated with Slack Account
 
         """
@@ -315,34 +316,48 @@ class SlackAccount(object):
             }
         ).json()
 
-    def create_private_channel(
+    def create_channel(
         self,
-        channel_name,
+        channel_name: str,
+        public=True,
     ) -> Dict[str, Union[Dict[str, Union[List[str], str]], str]]:
-        """Creates a private channel in the Slack Workspace
+        """Creates a channel in the Slack Workspace
 
-        Uses the Slack Web API call
-        https://api.slack.com/methods/groups.create
-        with no caching
+        Uses the Slack Web API with no caching; the user associated with API
+        Token is automatically added to the created channel
 
         Args:
-            channel_name: name of private channel to create
+            channel_name: name of channel to create
+            public: determines whether channel is public; defaults to True; if
+                set to False, then channel will be private
 
         Returns:
             A dictionary describing the channel creation results
 
         """
 
-        return requests.post(
-            url='https://slack.com/api/groups.create',
-            headers={
-                'Authorization': f'Bearer {self.api_token}',
-                'Content-type': 'application/json; charset=utf-8',
-            },
-            json={
-                'name': channel_name,
-            }
-        ).json()
+        if public:
+            return requests.post(
+                url='https://slack.com/api/channels.create',
+                headers={
+                    'Authorization': f'Bearer {self.api_token}',
+                    'Content-type': 'application/json; charset=utf-8',
+                },
+                json={
+                    'name': channel_name,
+                }
+            ).json()
+        else:
+            return requests.post(
+                url='https://slack.com/api/groups.create',
+                headers={
+                    'Authorization': f'Bearer {self.api_token}',
+                    'Content-type': 'application/json; charset=utf-8',
+                },
+                json={
+                    'name': channel_name,
+                }
+            ).json()
 
     def invite_to_private_channel(
         self,
@@ -464,8 +479,9 @@ class SlackAccount(object):
 
         """
 
-        self.create_private_channel(
-            channel_name=channel_name
+        self.create_channel(
+            channel_name=channel_name,
+            public=False,
         )
 
         for user_name in users_to_invite:

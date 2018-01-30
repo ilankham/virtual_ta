@@ -2836,7 +2836,41 @@ class TestSlackAccounts(TestCase):
                 test_method_response,
             )
 
-    def test_slack_account_create_private_channel(self):
+    def test_slack_account_create_channel_with_public_flag_true(self):
+        test_channel_name1 = 'test-channel-name-1'
+        test_channel_id1 = 'Test Public Channel ID 1'
+        test_response_json = {
+            'group': {
+                'id': test_channel_id1,
+                'name': test_channel_name1,
+            }
+        }
+
+        test_token = 'Test Token Value'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'POST',
+                'https://slack.com/api/channels.create',
+                request_headers={
+                    'Authorization': f'Bearer {test_token}',
+                },
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = SlackAccount(test_token)
+
+            test_method_response = test_bot.create_channel(
+                channel_name=test_channel_name1,
+                public=True,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_method_response,
+            )
+
+    def test_slack_account_create_channel_with_public_flag_false(self):
         test_channel_name1 = 'test-channel-name-1'
         test_channel_id1 = 'Test Private Channel ID 1'
         test_response_json = {
@@ -2860,8 +2894,9 @@ class TestSlackAccounts(TestCase):
 
             test_bot = SlackAccount(test_token)
 
-            test_method_response = test_bot.create_private_channel(
+            test_method_response = test_bot.create_channel(
                 channel_name=test_channel_name1,
+                public=False,
             )
 
             self.assertEqual(
@@ -3026,7 +3061,7 @@ class TestSlackAccounts(TestCase):
                 test_method_response,
             )
 
-    @patch('virtual_ta.SlackAccount.create_private_channel')
+    @patch('virtual_ta.SlackAccount.create_channel')
     @patch('virtual_ta.SlackAccount.invite_to_private_channel')
     @patch('virtual_ta.SlackAccount.set_private_channel_purpose')
     @patch('virtual_ta.SlackAccount.set_private_channel_topic')
@@ -3037,12 +3072,12 @@ class TestSlackAccounts(TestCase):
         mock_set_private_channel_topic,
         mock_set_private_channel_purpose,
         mock_invite_to_private_channel,
-        mock_create_private_channel,
+        mock_create_channel,
     ):
 
         test_channel_name = 'test-channel-name'
         test_channel_id = 'Test Private Channel ID'
-        mock_create_private_channel.return_value = {
+        mock_create_channel.return_value = {
             'group': {
                 'id': test_channel_id,
                 'name': test_channel_name,
