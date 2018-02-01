@@ -602,3 +602,48 @@ class GitHubOrganization(object):
                 api_request_url = None
 
         return dict(return_value)
+
+    def get_pr_authors(
+        self,
+        repo_name: str,
+    ) -> Dict[int, str]:
+
+        """Returns dict summarizing all Pull Requests (PRs) for an Org repo
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/repos/{self.org_name}/{repo_name}/pulls'
+        with no caching and with handling for paging
+
+        Args:
+            repo_name: name of repo within the GitHub Organization
+
+        Returns:
+            A dict with PR number -> PR author
+
+        """
+
+        api_request_url = (
+            f'https://api.github.com/repos/{self.org_name}/{repo_name}/pulls'
+        )
+
+        return_value = {}
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={
+                    'Authorization': f'token {self.personal_access_token}',
+                },
+            )
+            for pr in api_response.json():
+                return_value[pr['number']] = pr['user']['login']
+
+            paging_navigation_header = api_response.headers.get('Link', '')
+            if 'rel="next"' in paging_navigation_header:
+                api_request_url = re.search(
+                    '<.*?>',
+                    paging_navigation_header
+                ).group()[1:-1]
+            else:
+                api_request_url = None
+
+        return dict(return_value)

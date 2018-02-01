@@ -1823,6 +1823,173 @@ class TestGitHubOrganizations(TestCase):
                 test_method_response,
             )
 
+    def test_github_org_get_pr_authors_without_paging(self):
+        test_pr_author1 = "Test PR Author 1"
+        test_pr_number1a = 1
+        test_pr_title1a = "Test PR Title 1a"
+        test_pr_number1b = 2
+        test_pr_title1b = "Test PR Title 1b"
+        test_pr_author2 = "Test PR Author 2"
+        test_pr_number2a = 3
+        test_pr_title2a = "Test PR Title 2a"
+        test_pr_number2b = 4
+        test_pr_title2b = "Test PR Title 2b"
+        test_expectations = {
+            test_pr_number1a: test_pr_author1,
+            test_pr_number1b: test_pr_author1,
+            test_pr_number2a: test_pr_author2,
+            test_pr_number2b: test_pr_author2,
+        }
+
+        test_prs_response_json = [
+            {
+                 'number': test_pr_number1a,
+                 'title': test_pr_title1a,
+                 'user': {
+                     'login': test_pr_author1,
+                 },
+            },
+            {
+                 'number': test_pr_number1b,
+                 'title': test_pr_title1b,
+                 'user': {
+                     'login': test_pr_author1,
+                 },
+            },
+            {
+                 'number': test_pr_number2a,
+                 'title': test_pr_title2a,
+                 'user': {
+                     'login': test_pr_author2,
+                 },
+            },
+            {
+                 'number': test_pr_number2b,
+                 'title': test_pr_title2b,
+                 'user': {
+                     'login': test_pr_author2,
+                 },
+            },
+
+        ]
+
+        test_repo_name = 'Test-Repo-Name'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/repos/{test_org_name}'
+                f'/{test_repo_name}/pulls',
+                status_code=200,
+                json=test_prs_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            test_method_response = test_bot.get_pr_authors(
+                repo_name=test_repo_name,
+            )
+
+            self.assertEqual(
+                test_expectations,
+                test_method_response,
+            )
+
+    def test_github_org_get_pr_authors_with_paging(self):
+        test_pr_author1 = "Test PR Author 1"
+        test_pr_number1a = 1
+        test_pr_title1a = "Test PR Title 1a"
+        test_pr_number1b = 2
+        test_pr_title1b = "Test PR Title 1b"
+        test_pr_author2 = "Test PR Author 2"
+        test_pr_number2a = 3
+        test_pr_title2a = "Test PR Title 2a"
+        test_pr_number2b = 4
+        test_pr_title2b = "Test PR Title 2b"
+        test_expectations = {
+            test_pr_number1a: test_pr_author1,
+            test_pr_number1b: test_pr_author1,
+            test_pr_number2a: test_pr_author2,
+            test_pr_number2b: test_pr_author2,
+        }
+
+        test_prs_response_json1 = [
+            {
+                 'number': test_pr_number1a,
+                 'title': test_pr_title1a,
+                 'user': {
+                     'login': test_pr_author1,
+                 },
+            },
+            {
+                 'number': test_pr_number1b,
+                 'title': test_pr_title1b,
+                 'user': {
+                     'login': test_pr_author1,
+                 },
+            },
+        ]
+
+        test_prs_response_json2 = [
+            {
+                 'number': test_pr_number2a,
+                 'title': test_pr_title2a,
+                 'user': {
+                     'login': test_pr_author2,
+                 },
+            },
+            {
+                 'number': test_pr_number2b,
+                 'title': test_pr_title2b,
+                 'user': {
+                     'login': test_pr_author2,
+                 },
+            },
+
+        ]
+
+        test_repo_name = 'Test-Repo-Name'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/repos/{test_org_name}'
+                f'/{test_repo_name}/pulls',
+                headers={
+                    'Link':
+                        f'<https://api.github.com/repos/{test_org_name}'
+                        f'/{test_repo_name}/pulls?page=2>; rel="next"'
+                },
+                status_code=200,
+                json=test_prs_response_json1,
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/repos/{test_org_name}'
+                f'/{test_repo_name}/pulls?page=2',
+                status_code=200,
+                json=test_prs_response_json2,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            test_method_response = test_bot.get_pr_authors(
+                repo_name=test_repo_name,
+            )
+
+            self.assertEqual(
+                test_expectations,
+                test_method_response,
+            )
+
 
 # noinspection SpellCheckingInspection
 class TestDataConversions(TestCase):
