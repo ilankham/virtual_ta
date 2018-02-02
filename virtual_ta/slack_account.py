@@ -427,6 +427,38 @@ class SlackAccount(object):
             }
         ).json()
 
+    def set_public_channel_purpose(
+        self,
+        channel_name: str,
+        channel_purpose: str,
+    ) -> Dict[str, str]:
+        """Sets purpose for public channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/channels.setPurpose
+        with no caching
+
+        Args:
+            channel_name: name of public channel in Slack Workspace
+            channel_purpose: purpose to set for public channel
+
+        Returns:
+            A dictionary describing the results of setting the channel purpose
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/channels.setPurpose',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'channel': self.public_channels_ids[channel_name.lower()],
+                'purpose': channel_purpose,
+            }
+        ).json()
+
     def set_private_channel_purpose(
         self,
         channel_name: str,
@@ -456,6 +488,38 @@ class SlackAccount(object):
             json={
                 'channel': self.private_channels_ids[channel_name.lower()],
                 'purpose': channel_purpose,
+            }
+        ).json()
+
+    def set_public_channel_topic(
+        self,
+        channel_name: str,
+        channel_topic: str,
+    ) -> Dict[str, str]:
+        """Sets purpose for public channel in the Slack Workspace
+
+        Uses the Slack Web API call
+        https://api.slack.com/methods/channels.setTopic
+        with no caching
+
+        Args:
+            channel_name: name of public channel in Slack Workspace
+            channel_topic: topic to set for public channel
+
+        Returns:
+            A dictionary describing the results of setting the channel topic
+
+        """
+
+        return requests.post(
+            url='https://slack.com/api/channels.setTopic',
+            headers={
+                'Authorization': f'Bearer {self.api_token}',
+                'Content-type': 'application/json; charset=utf-8',
+            },
+            json={
+                'channel': self.public_channels_ids[channel_name.lower()],
+                'topic': channel_topic,
             }
         ).json()
 
