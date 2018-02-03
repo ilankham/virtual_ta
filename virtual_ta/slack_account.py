@@ -8,6 +8,7 @@ See https://api.slack.com/web for more information about the Slack Web API
 """
 
 import requests
+from time import sleep
 from typing import Dict, Generator, Iterable, List, Union
 
 
@@ -555,47 +556,81 @@ class SlackAccount(object):
             }
         ).json()
 
-    def create_and_setup_private_channel(
+    def create_and_setup_channel(
         self,
         channel_name: str,
-        users_to_invite: Iterable[str],
+        user_names_to_invite: Iterable[str],
         channel_purpose: str,
         channel_topic: str,
+        public: bool = True,
+        sleep_time: int = 1,
     ) -> Dict[str, Union[Dict[str, Union[List[str], str]], str]]:
-        """Creates and sets up a private channel in the Slack Workspace
+        """Creates and sets up a channel in the Slack Workspace
 
-        Uses the Slack Web API call with no caching
+        Uses the Slack Web API call with no caching and naive handling of rate
+        limit by sleeping after each channel-setup operation; see
+        https://api.slack.com/docs/rate-limits
 
         Args:
-            channel_name: name of private channel to create
-            users_to_invite: iterable of user names to invite to channel
-            channel_purpose: purpose to set for private channel
-            channel_topic: topic to set for private channel
+            channel_name: name of channel to create
+            user_names_to_invite: iterable of user names to invite to channel
+            channel_purpose: purpose to set for channel
+            channel_topic: topic to set for channel
+            public: determines whether channel is public; defaults to True; if
+                set to False, then channel will be private
+            sleep_time: determines the number of seconds to sleep after each
+                channel-creation/setup operation; defaults to one (1)
 
         Returns:
             A dictionary describing the channel creation results
 
         """
 
-        self.create_channel(
-            channel_name=channel_name,
-            public=False,
-        )
-
-        for user_name in users_to_invite:
-            self.invite_to_private_channel(
+        if public:
+            self.create_channel(
                 channel_name=channel_name,
-                user_name=user_name,
+                public=True,
             )
+            sleep(sleep_time)
+            for user_name in user_names_to_invite:
+                self.invite_to_public_channel(
+                    channel_name=channel_name,
+                    user_name=user_name,
+                )
+                sleep(sleep_time)
+            self.set_public_channel_purpose(
+                channel_name=channel_name,
+                channel_purpose=channel_purpose,
+            )
+            sleep(sleep_time)
+            self.set_public_channel_topic(
+                channel_name=channel_name,
+                channel_topic=channel_topic,
+            )
+            return_value = self.get_public_channel_info(channel_name)
 
-        self.set_private_channel_purpose(
-            channel_name=channel_name,
-            channel_purpose=channel_purpose,
-        )
+        else:
+            self.create_channel(
+                channel_name=channel_name,
+                public=False,
+            )
+            sleep(sleep_time)
+            for user_name in user_names_to_invite:
+                self.invite_to_private_channel(
+                    channel_name=channel_name,
+                    user_name=user_name,
+                )
+                sleep(sleep_time)
+            self.set_private_channel_purpose(
+                channel_name=channel_name,
+                channel_purpose=channel_purpose,
+            )
+            sleep(sleep_time)
+            self.set_private_channel_topic(
+                channel_name=channel_name,
+                channel_topic=channel_topic,
+            )
+            sleep(sleep_time)
+            return_value = self.get_private_channel_info(channel_name)
 
-        self.set_private_channel_topic(
-            channel_name=channel_name,
-            channel_topic=channel_topic,
-        )
-
-        return self.get_private_channel_info(channel_name)
+        return return_value

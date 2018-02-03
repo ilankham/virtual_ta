@@ -3386,11 +3386,90 @@ class TestSlackAccounts(TestCase):
             )
 
     @patch('virtual_ta.SlackAccount.create_channel')
+    @patch('virtual_ta.SlackAccount.invite_to_public_channel')
+    @patch('virtual_ta.SlackAccount.set_public_channel_purpose')
+    @patch('virtual_ta.SlackAccount.set_public_channel_topic')
+    @patch('virtual_ta.SlackAccount.get_public_channel_info')
+    def test_slack_account_create_and_setup_channel_with_public_flag_true(
+        self,
+        mock_get_public_channel_info,
+        mock_set_public_channel_topic,
+        mock_set_public_channel_purpose,
+        mock_invite_to_public_channel,
+        mock_create_channel,
+    ):
+
+        test_channel_name = 'test-channel-name'
+        test_channel_id = 'Test Public Channel ID'
+        mock_create_channel.return_value = {
+            'channel': {
+                'id': test_channel_id,
+                'name': test_channel_name,
+            }
+        }
+
+        test_user_name1 = 'test-user-name-1'
+        test_user_name2 = 'test-user-name-2'
+        mock_invite_to_public_channel.side_effect = [
+            {
+                'channel': {
+                    'id': test_channel_id,
+                    'name': test_channel_name,
+                    'latest': {
+                        'user': test_user_name1,
+                    },
+                },
+            },
+            {
+                'channel': {
+                    'id': test_channel_id,
+                    'name': test_channel_name,
+                    'latest': {
+                        'user': test_user_name2,
+                    },
+                },
+            },
+        ]
+
+        test_purpose = "Test Channel Purpose"
+        mock_set_public_channel_purpose.return_value = {
+            'purpose': test_purpose,
+        }
+
+        test_topic = "Test Channel Topic"
+        mock_set_public_channel_topic.return_value = {
+            'topic': test_topic,
+        }
+
+        test_expectations = mock_get_public_channel_info.return_value = {
+            'group': {
+                'id': test_channel_id,
+                'name': test_channel_name,
+            }
+        }
+
+        test_token = 'Test Token Value'
+        test_bot = SlackAccount(test_token)
+        test_method_response = test_bot.create_and_setup_channel(
+            channel_name=test_channel_name,
+            user_names_to_invite=[test_user_name1, test_user_name2],
+            channel_purpose=test_purpose,
+            channel_topic=test_topic,
+            public=True,
+            sleep_time=0,
+        )
+
+        self.assertEqual(
+            test_expectations,
+            test_method_response,
+        )
+
+    @patch('virtual_ta.SlackAccount.create_channel')
     @patch('virtual_ta.SlackAccount.invite_to_private_channel')
     @patch('virtual_ta.SlackAccount.set_private_channel_purpose')
     @patch('virtual_ta.SlackAccount.set_private_channel_topic')
     @patch('virtual_ta.SlackAccount.get_private_channel_info')
-    def test_slack_account_create_and_setup_private_channel(
+    def test_slack_account_create_and_setup_channel_with_public_flag_false(
         self,
         mock_get_private_channel_info,
         mock_set_private_channel_topic,
@@ -3450,11 +3529,13 @@ class TestSlackAccounts(TestCase):
 
         test_token = 'Test Token Value'
         test_bot = SlackAccount(test_token)
-        test_method_response = test_bot.create_and_setup_private_channel(
+        test_method_response = test_bot.create_and_setup_channel(
             channel_name=test_channel_name,
-            users_to_invite=[test_user_name1, test_user_name2],
+            user_names_to_invite=[test_user_name1, test_user_name2],
             channel_purpose=test_purpose,
             channel_topic=test_topic,
+            public=False,
+            sleep_time=0,
         )
 
         self.assertEqual(
