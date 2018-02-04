@@ -63,12 +63,19 @@ class GitHubOrganization(object):
                 },
             )
             yield from api_response.json()
-            paging_navigation_header = api_response.headers.get('Link', '')
-            if 'rel="next"' in paging_navigation_header:
-                api_request_url = re.search(
-                    '<.*?>',
-                    paging_navigation_header
-                ).group()[1:-1]
+            paging_navigation_header = (
+                page
+                for page in api_response.headers.get('Link', '').split(', ')
+            )
+            for page in paging_navigation_header:
+                if not page:
+                    continue
+                page_split = page.split('; rel=')
+                url = re.sub('[<>\s]', '', page_split[0])
+                rel = page_split[1].replace('"', '')
+                if rel == 'next':
+                    api_request_url = url
+                    break
             else:
                 api_request_url = None
 
