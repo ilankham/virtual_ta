@@ -236,8 +236,9 @@ class TAWorkflowTests(TestCase):
         # (1) visiting https://api.slack.com/custom-integrations/legacy-tokens
         #     and generating a Legacy Token, or
         # (2) visiting https://api.slack.com/apps and creating a new app with
-        #     permission scopes of chat:write:user, groups:read, groups:write,
-        # im:history, im:read, and users:read
+        #     permission scopes of channels:read, channels:write,
+        #     chat:write:user, groups:read, groups:write, im:history, im:read,
+        #     and users:read
 
         # Prof. X saves a gradebook csv file named with column headings and one
         # row per student grade record; columns include Slack_User_Name
@@ -298,17 +299,54 @@ class TAWorkflowTests(TestCase):
                 list(test_message_received)[0],
             )
 
-        # Prof. X then creates a new private channel, inviting the users to
+        # Prof. X then creates a new public channel, inviting the same users to
         # join and settings the channel's purpose and topic
         test_channel_name = datetime.now().strftime('channel%Y%m%d%H%M%S')
         test_users_to_invite = test_mail_merge_results.keys()
         test_channel_purpose = datetime.now().strftime('Test Channel Purpose')
         test_channel_topic = datetime.now().strftime('Test Channel Topic')
-        test_bot.create_and_setup_private_channel(
+        test_bot.create_and_setup_channel(
             channel_name=test_channel_name,
-            users_to_invite=test_users_to_invite,
+            user_names_to_invite=test_users_to_invite,
             channel_purpose=test_channel_purpose,
             channel_topic=test_channel_topic,
+            public=True,
+        )
+
+        # Prof. X verifies the channel was created as expected
+        test_channel_info = test_bot.get_public_channel_info(
+            channel_name=test_channel_name,
+        )
+        self.assertEqual(
+            test_channel_name,
+            test_channel_info['channel']['name'],
+        )
+        for test_users in test_mail_merge_results.keys():
+            self.assertIn(
+                test_bot.user_ids[test_users],
+                test_channel_info['channel']['members']
+            )
+        self.assertEqual(
+            test_channel_purpose,
+            test_channel_info['channel']['purpose']['value'],
+        )
+        self.assertEqual(
+            test_channel_topic,
+            test_channel_info['channel']['topic']['value'],
+        )
+
+        # Prof. X then creates a new private channel, inviting the same users
+        # to join and settings the channel's purpose and topic
+        test_channel_name = datetime.now().strftime('channel%Y%m%d%H%M%S')
+        test_users_to_invite = test_mail_merge_results.keys()
+        test_channel_purpose = datetime.now().strftime('Test Channel Purpose')
+        test_channel_topic = datetime.now().strftime('Test Channel Topic')
+        test_bot.create_and_setup_channel(
+            channel_name=test_channel_name,
+            user_names_to_invite=test_users_to_invite,
+            channel_purpose=test_channel_purpose,
+            channel_topic=test_channel_topic,
+            public=False,
         )
 
         # Prof. X verifies the channel was created as expected
