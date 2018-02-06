@@ -243,7 +243,7 @@ account.direct_message_by_username(mail_merge_results)
 
 
 #
-# Slack Example 4: create and setup a private channel, inviting multiple users
+# Slack Example 4: create and setup a public channel, inviting multiple users
 #
 
 # set parameters for channel to setup, inviting the users in the mail merging
@@ -252,9 +252,29 @@ channel_name = datetime.now().strftime('channel%Y%m%d%H%M%S')
 users_to_invite = mail_merge_results.keys()
 channel_purpose = datetime.now().strftime('Test Channel Purpose')
 channel_topic = datetime.now().strftime('Test Channel Topic')
-account.create_and_setup_private_channel(
+account.create_and_setup_channel(
     channel_name=channel_name,
-    users_to_invite=users_to_invite,
+    user_names_to_invite=users_to_invite,
     channel_purpose=channel_purpose,
     channel_topic=channel_topic,
+    public=True,
+)
+
+
+#
+# Slack Example 5: create and setup a private channel, inviting multiple users
+#
+
+# set parameters for channel to setup, inviting the users in the mail merging
+# results from the above example
+channel_name = datetime.now().strftime('channel%Y%m%d%H%M%S')
+users_to_invite = mail_merge_results.keys()
+channel_purpose = datetime.now().strftime('Test Channel Purpose')
+channel_topic = datetime.now().strftime('Test Channel Topic')
+account.create_and_setup_channel(
+    channel_name=channel_name,
+    user_names_to_invite=users_to_invite,
+    channel_purpose=channel_purpose,
+    channel_topic=channel_topic,
+    public=False,
 )
