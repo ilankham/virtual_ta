@@ -43,6 +43,14 @@ class GitHubOrganization(object):
             f'{self.__class__.__name__}(org_name={self.org_name})'
         )
 
+    def __get_org_teams_response(self, api_request_url=''):
+        return requests.get(
+            api_request_url,
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+            },
+        )
+
     @property
     def org_teams(self) -> Generator[Dict[str, Union[int, str]], None, None]:
         """Returns a generator of dicts, each describing an organization team
@@ -56,12 +64,7 @@ class GitHubOrganization(object):
         api_request_url = f'https://api.github.com/orgs/{self.org_name}/teams'
 
         while api_request_url:
-            api_response = requests.get(
-                api_request_url,
-                headers={
-                    'Authorization': f'token {self.personal_access_token}',
-                },
-            )
+            api_response = self.__get_org_teams_response(api_request_url)
             yield from api_response.json()
             paging_navigation_header = (
                 page
