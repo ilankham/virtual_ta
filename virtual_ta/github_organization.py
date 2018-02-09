@@ -11,9 +11,10 @@ API v3
 
 from collections import defaultdict
 from difflib import unified_diff
+from functools import wraps
 import re
 import requests
-from typing import Dict, Generator, List, Union
+from typing import Callable, Dict, Generator, List, Union
 
 NestedDict = Dict[
     str,
@@ -43,16 +44,46 @@ class GitHubOrganization(object):
             f'{self.__class__.__name__}(org_name={self.org_name})'
         )
 
-    def __get_org_teams_response(self, api_request_url=''):
-        return requests.get(
-            api_request_url,
-            headers={
-                'Authorization': f'token {self.personal_access_token}',
-            },
-        )
+    @staticmethod
+    def handle_api_paging(wrapped_fcn: Callable) -> Callable:
+        """Decorator for handling GitHub REST API v3 paging
+
+        Args:
+            wrapped_fcn: function having two arguments (api_request_url and
+                api_headers) and returning a response object with headers
+                indicating paging information
+
+        Returns:
+            A callable version of wrapped_fcn handling paging
+
+        """
+
+        @wraps(wrapped_fcn)
+        def return_json_helper(api_request_url='', api_headers=None):
+            while api_request_url:
+                api_response = wrapped_fcn(api_request_url, api_headers)
+                yield from api_response.json()
+                paging_navigation_header = (
+                    page
+                    for page
+                    in api_response.headers.get('Link', '').split(', ')
+                )
+                for page in paging_navigation_header:
+                    if not page:
+                        continue
+                    page_split = page.split('; rel=')
+                    url = re.sub('[<>\s]', '', page_split[0])
+                    rel = page_split[1].replace('"', '')
+                    if rel == 'next':
+                        api_request_url = url
+                        break
+                else:
+                    api_request_url = None
+
+        return return_json_helper
 
     @property
-    def org_teams(self) -> Generator[Dict[str, Union[int, str]], None, None]:
+    def org_teams(self) -> Generator[dict, None, None]:
         """Returns a generator of dicts, each describing an organization team
 
         Uses the GitHub REST API v3 call
@@ -61,26 +92,25 @@ class GitHubOrganization(object):
 
         """
 
-        api_request_url = f'https://api.github.com/orgs/{self.org_name}/teams'
+        url = f'https://api.github.com/orgs/{self.org_name}/teams'
 
-        while api_request_url:
-            api_response = self.__get_org_teams_response(api_request_url)
-            yield from api_response.json()
-            paging_navigation_header = (
-                page
-                for page in api_response.headers.get('Link', '').split(', ')
+        headers = {
+            'Authorization': f'token {self.personal_access_token}',
+        }
+
+        @self.handle_api_paging
+        def __get_org_teams_response(
+            api_request_url: str ='',
+            api_headers: Dict = None,
+        ) -> requests.Response:
+            if not api_headers:
+                api_headers = {}
+            return requests.get(
+                api_request_url,
+                headers=api_headers,
             )
-            for page in paging_navigation_header:
-                if not page:
-                    continue
-                page_split = page.split('; rel=')
-                url = re.sub('[<>\s]', '', page_split[0])
-                rel = page_split[1].replace('"', '')
-                if rel == 'next':
-                    api_request_url = url
-                    break
-            else:
-                api_request_url = None
+
+        return __get_org_teams_response(url, headers)
 
     @property
     def org_team_ids(self) -> Dict[str, int]:
