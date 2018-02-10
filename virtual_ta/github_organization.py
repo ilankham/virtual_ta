@@ -178,7 +178,7 @@ class GitHubOrganization(object):
     def get_team_membership(
             self,
             team_id: Union[int, str],
-    ) -> Generator[Dict[str, Union[int, str]], None, None]:
+    ) -> Generator[dict, None, None]:
         """Returns a generator of dicts, each describing an org team member
 
         Uses the GitHub REST API v3 call
@@ -194,24 +194,25 @@ class GitHubOrganization(object):
 
         """
 
-        api_request_url = f'https://api.github.com/teams/{team_id}/members'
+        url = f'https://api.github.com/teams/{team_id}/members'
 
-        while api_request_url:
-            api_response = requests.get(
+        headers = {
+            'Authorization': f'token {self.personal_access_token}',
+        }
+
+        @self.handle_api_paging
+        def __get_team_membership_response(
+            api_request_url: str ='',
+            api_headers: Dict = None,
+        ) -> requests.Response:
+            if not api_headers:
+                api_headers = {}
+            return requests.get(
                 api_request_url,
-                headers={
-                    'Authorization': f'token {self.personal_access_token}',
-                },
+                headers=api_headers,
             )
-            yield from api_response.json()
-            paging_navigation_header = api_response.headers.get('Link', '')
-            if 'rel="next"' in paging_navigation_header:
-                api_request_url = re.search(
-                    '<.*?>',
-                    paging_navigation_header
-                ).group()[1:-1]
-            else:
-                api_request_url = None
+
+        return __get_team_membership_response(url, headers)
 
     def set_team_membership(
             self,
