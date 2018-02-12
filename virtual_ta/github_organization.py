@@ -82,99 +82,6 @@ class GitHubOrganization(object):
 
         return return_json_helper
 
-    @property
-    def org_teams(self) -> Generator[dict, None, None]:
-        """Returns a generator of dicts, each describing an organization team
-
-        Uses the GitHub REST API v3 call
-        f'https://api.github.com/orgs/{self.org_name}/teams'
-        with no caching and with handling for paging
-
-        """
-
-        url = f'https://api.github.com/orgs/{self.org_name}/teams'
-
-        headers = {
-            'Authorization': f'token {self.personal_access_token}',
-        }
-
-        @self.handle_api_paging
-        def __get_org_teams_response(
-            api_request_url: str ='',
-            api_headers: Dict = None,
-        ) -> requests.Response:
-            if not api_headers:
-                api_headers = {}
-            return requests.get(
-                api_request_url,
-                headers=api_headers,
-            )
-
-        return __get_org_teams_response(url, headers)
-
-    @property
-    def org_team_ids(self) -> Dict[str, int]:
-        """Returns a dict with team name -> team id
-
-        Uses the GitHub REST API v3 with no caching
-
-        """
-
-        return {
-            team['name']: team['id'] for team in self.org_teams
-        }
-
-    def create_org_team(
-            self,
-            team_name: str,
-            team_description: str = '',
-            team_maintainers: List[str] = None,
-            team_repo_names: List[str] = None,
-            team_privacy: str = 'secret',
-    ) -> NestedDict:
-        """Creates GitHub organization team with specified properties
-
-        Uses the GitHub REST API v3 call
-        f'https://api.github.com/orgs/{self.org_name}/teams'
-        with no caching
-
-        Args:
-            team_name: display name of team to create
-            team_description: display description of team to create
-            team_maintainers: list of login names for team maintainers
-            team_repo_names: list of repo names to add to team in the format
-                'org_name/repo_name'
-            team_privacy: if 'secret', then the team is visible to organization
-                owners and team members; if 'closed', then the team is visible
-                to all organization members; defaults to 'secret'
-
-        Returns:
-            A dictionary describing the resulting gradebook column
-
-        """
-
-        if team_maintainers is None:
-            team_maintainers = []
-        if team_repo_names is None:
-            team_repo_names = []
-
-        return_value = requests.post(
-            url=f'https://api.github.com/orgs/{self.org_name}/teams',
-            headers={
-                'Authorization': f'token {self.personal_access_token}',
-                'Content-type': 'application/json',
-            },
-            json={
-                'name': team_name,
-                'description': team_description,
-                'maintainers': team_maintainers,
-                'repo_names': team_repo_names,
-                'privacy': team_privacy
-                if team_privacy == 'closed' else 'secret',
-            }
-        ).json()
-        return return_value
-
     def get_team_membership(
             self,
             team_id: Union[int, str],
@@ -252,6 +159,119 @@ class GitHubOrganization(object):
                 'role': team_role if team_role == 'maintainer' else 'member',
             }
         ).json()
+        return return_value
+
+    @property
+    def org_teams(self) -> Generator[dict, None, None]:
+        """Returns a generator of dicts, each describing an organization team
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/orgs/{self.org_name}/teams'
+        with no caching and with handling for paging
+
+        """
+
+        url = f'https://api.github.com/orgs/{self.org_name}/teams'
+
+        headers = {
+            'Authorization': f'token {self.personal_access_token}',
+        }
+
+        @self.handle_api_paging
+        def __get_org_teams_response(
+            api_request_url: str ='',
+            api_headers: Dict = None,
+        ) -> requests.Response:
+            if not api_headers:
+                api_headers = {}
+            return requests.get(
+                api_request_url,
+                headers=api_headers,
+            )
+
+        return __get_org_teams_response(url, headers)
+
+    @property
+    def org_team_ids(self) -> Dict[str, int]:
+        """Returns a dict with team name -> team id
+
+        Uses the GitHub REST API v3 with no caching
+
+        """
+
+        return {
+            team['name']: team['id'] for team in self.org_teams
+        }
+
+    def create_org_team(
+            self,
+            team_name: str,
+            team_description: str = '',
+            team_maintainers: List[str] = None,
+            team_members: List[str] = None,
+            team_repo_names: List[str] = None,
+            team_privacy: str = 'secret',
+    ) -> NestedDict:
+        """Creates GitHub organization team with specified properties
+
+        Uses the GitHub REST API v3 call
+        f'https://api.github.com/orgs/{self.org_name}/teams'
+        with no caching
+
+        Args:
+            team_name: display name of team to create
+            team_description: display description of team to create
+            team_maintainers: list of login names for team maintainers; if
+                a user is not yet a member of the GitHub Org, they will be
+                invited to join the Org, as well; these users are granted
+                permission to edit the team's name/description, add/remove
+                team members, and promote other team members to team
+                maintainer
+            team_members: list of login names for normal team members; if
+                a user is not yet a member of the GitHub Org, they will be
+                invited to join the Org, as well
+            team_repo_names: list of repo names to add to team in the format
+                'org_name/repo_name'
+            team_privacy: if 'secret', then the team is visible to organization
+                owners and team members; if 'closed', then the team is visible
+                to all organization members; defaults to 'secret'
+
+        Returns:
+            A dictionary describing the resulting team creation
+
+        """
+
+        if team_maintainers is None:
+            team_maintainers = []
+        if team_members is None:
+            team_members = []
+        if team_repo_names is None:
+            team_repo_names = []
+
+        return_value = requests.post(
+            url=f'https://api.github.com/orgs/{self.org_name}/teams',
+            headers={
+                'Authorization': f'token {self.personal_access_token}',
+                'Content-type': 'application/json',
+            },
+            json={
+                'name': team_name,
+                'description': team_description,
+                'maintainers': team_maintainers,
+                'repo_names': team_repo_names,
+                'privacy': team_privacy
+                if team_privacy == 'closed' else 'secret',
+            }
+        ).json()
+
+        team_id = return_value['id']
+        for user_name in team_members:
+            self.set_team_membership(
+                team_id=team_id,
+                user_name=user_name,
+                team_role='member',
+            )
+
         return return_value
 
     def create_org_repo(

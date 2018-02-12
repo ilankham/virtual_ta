@@ -869,6 +869,120 @@ class TestGitHubOrganizations(TestCase):
 
         self.assertIn(test_org_name, repr(test_bot))
 
+    def test_github_org_get_team_membership_without_paging(self):
+        test_user_id = 'Test User ID'
+        test_user_name = 'Test User Name'
+        test_response_json = {
+            'id': test_user_id,
+            'login': test_user_name,
+        }
+        test_response = [test_response_json]
+
+        test_team_id = 'Test-Team-ID'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/teams/{test_team_id}/members',
+                status_code=200,
+                json=test_response,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.get_team_membership(test_team_id)),
+            )
+
+    def test_github_org_get_team_membership_with_paging(self):
+        test_user_id1 = 'Test User ID 1'
+        test_user_name1 = 'Test User Name 1'
+        test_response_json1 = {
+            'id': test_user_id1,
+            'login': test_user_name1,
+        }
+        test_user_id2 = 'Test User ID 2'
+        test_user_name2 = 'Test User Name 2'
+        test_response_json2 = {
+            'id': test_user_id2,
+            'login': test_user_name2,
+        }
+        test_response = [
+            test_response_json1,
+            test_response_json2
+        ]
+
+        test_team_id = 'Test-Team-ID'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/teams/{test_team_id}/members',
+                headers={
+                    'Link':
+                        f'<https://api.github.com/teams/{test_team_id}'
+                        f'/memberz?page=2>; rel="next"'
+                },
+                status_code=200,
+                json=[test_response_json1],
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://api.github.com/teams/{test_team_id}/memberz?page=2',
+                status_code=200,
+                json=[test_response_json2],
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.get_team_membership(test_team_id)),
+            )
+
+    def test_github_org_set_team_membership(self):
+        test_user_name = 'Test-User-Name'
+        test_user_role = 'Test User Role'
+        test_response_json = {
+            'role': test_user_role,
+        }
+
+        test_team_id = 'Test-Team-ID'
+        test_org_name = 'Test-Org-Name'
+        test_personal_access_token = 'Test Personal Access Token'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'PUT',
+                f'https://api.github.com/teams/{test_team_id}/memberships'
+                f'/{test_user_name}',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = GitHubOrganization(
+                test_org_name,
+                test_personal_access_token,
+            )
+            test_set_team_membership_response = test_bot.set_team_membership(
+                team_id=test_team_id,
+                user_name=test_user_name,
+                team_role=test_user_name,
+            )
+
+            self.assertEqual(
+                test_response_json,
+                test_set_team_membership_response,
+            )
+
     def test_github_org_teams_property_without_paging(self):
         test_team_name = 'Test Team Name'
         test_team_id = 'Test Team ID'
@@ -995,7 +1109,15 @@ class TestGitHubOrganizations(TestCase):
             test_bot.org_team_ids,
         )
 
-    def test_github_org_create_org_team(self):
+    @patch('virtual_ta.GitHubOrganization.set_team_membership')
+    def test_github_org_create_org_team(self, mock_set_team_membership):
+        test_user_name1 = 'Test-User-Name1'
+        test_user_name2 = 'Test-User-Name2'
+        test_user_role = 'Test User Role'
+        mock_set_team_membership.return_value = {
+                'role': test_user_role,
+            }
+
         test_team_name = 'Test Team Name'
         test_team_id = 'Test Team ID'
         test_team_description = 'Test Team Description'
@@ -1024,126 +1146,14 @@ class TestGitHubOrganizations(TestCase):
             test_create_org_team_results = test_bot.create_org_team(
                 team_name=test_team_name,
                 team_description=test_team_description,
+                team_maintainers=[test_user_name1],
+                team_members=[test_user_name2],
                 team_privacy=team_team_privacy,
             )
 
             self.assertEqual(
                 test_response_json,
                 test_create_org_team_results,
-            )
-
-    def test_github_org_get_team_membership_without_paging(self):
-        test_user_id = 'Test User ID'
-        test_user_name = 'Test User Name'
-        test_response_json = {
-            'id': test_user_id,
-            'login': test_user_name,
-        }
-        test_response = [test_response_json]
-
-        test_team_id = 'Test-Team-ID'
-        test_org_name = 'Test-Org-Name'
-        test_personal_access_token = 'Test Personal Access Token'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://api.github.com/teams/{test_team_id}/members',
-                status_code=200,
-                json=test_response,
-            )
-
-            test_bot = GitHubOrganization(
-                test_org_name,
-                test_personal_access_token,
-            )
-
-            self.assertEqual(
-                test_response,
-                list(test_bot.get_team_membership(test_team_id)),
-            )
-
-    def test_github_org_get_team_membership_with_paging(self):
-        test_user_id1 = 'Test User ID 1'
-        test_user_name1 = 'Test User Name 1'
-        test_response_json1 = {
-            'id': test_user_id1,
-            'login': test_user_name1,
-        }
-        test_user_id2 = 'Test User ID 2'
-        test_user_name2 = 'Test User Name 2'
-        test_response_json2 = {
-            'id': test_user_id2,
-            'login': test_user_name2,
-        }
-        test_response = [
-            test_response_json1,
-            test_response_json2
-        ]
-
-        test_team_id = 'Test-Team-ID'
-        test_org_name = 'Test-Org-Name'
-        test_personal_access_token = 'Test Personal Access Token'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://api.github.com/teams/{test_team_id}/members',
-                headers={
-                    'Link':
-                        f'<https://api.github.com/teams/{test_team_id}'
-                        f'/memberz?page=2>; rel="next"'
-                },
-                status_code=200,
-                json=[test_response_json1],
-            )
-            mock_requests.register_uri(
-                'GET',
-                f'https://api.github.com/teams/{test_team_id}/memberz?page=2',
-                status_code=200,
-                json=[test_response_json2],
-            )
-
-            test_bot = GitHubOrganization(
-                test_org_name,
-                test_personal_access_token,
-            )
-
-            self.assertEqual(
-                test_response,
-                list(test_bot.get_team_membership(test_team_id)),
-            )
-
-    def test_github_org_set_team_membership(self):
-        test_user_name = 'Test-User-Name'
-        test_user_role = 'Test User Role'
-        test_response_json = {
-            'role': test_user_role,
-        }
-
-        test_team_id = 'Test-Team-ID'
-        test_org_name = 'Test-Org-Name'
-        test_personal_access_token = 'Test Personal Access Token'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'PUT',
-                f'https://api.github.com/teams/{test_team_id}/memberships'
-                f'/{test_user_name}',
-                status_code=200,
-                json=test_response_json,
-            )
-
-            test_bot = GitHubOrganization(
-                test_org_name,
-                test_personal_access_token,
-            )
-            test_set_team_membership_response = test_bot.set_team_membership(
-                team_id=test_team_id,
-                user_name=test_user_name,
-                team_role=test_user_name,
-            )
-
-            self.assertEqual(
-                test_response_json,
-                test_set_team_membership_response,
             )
 
     def test_github_org_create_org_repo(self):
