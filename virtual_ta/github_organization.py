@@ -592,9 +592,11 @@ class GitHubOrganization(object):
         for line_index, line_contents in enumerate(file_diffs):
             if line_index in range(0, 3):
                 continue
-            elif line_contents[1:] == '':
+            elif line_contents[0] != '+' and line_contents[1:] == '':
                 consecutive_line_breaks += '\n'
-            elif line_contents[0] == '+':
+            elif line_contents[0] == '+' and line_contents[1:] == '':
+                continue
+            elif line_contents[0] == '+' and line_contents[1:] != '':
                 insertion_text += (line_contents[1:] + '\n')
             else:
                 return_value += insertion_text
