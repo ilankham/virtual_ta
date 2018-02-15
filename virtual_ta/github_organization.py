@@ -612,6 +612,7 @@ class GitHubOrganization(object):
     def summarize_prs_by_author(
         self,
         repo_name: str,
+        files_changed_counts: bool = True,
     ) -> Dict[str, List[str]]:
 
         """Returns dict summarizing all Pull Requests (PRs) for an Org repo
@@ -621,6 +622,8 @@ class GitHubOrganization(object):
 
         Args:
             repo_name: name of repo within the GitHub Organization
+            files_changed_counts: determines whether files-changed
+                counts are included in output; defaults to True
 
         Returns:
             A dict keyed by PR author and having as values lists of all PRs for
@@ -642,17 +645,25 @@ class GitHubOrganization(object):
                 },
             )
             for pr in api_response.json():
-
-                pr_details_response = requests.get(
-                    url=f'https://api.github.com/repos/{self.org_name}'
-                        f'/{repo_name}/pulls/{pr["number"]}',
-                    headers={
-                        'Authorization': f'token {self.personal_access_token}',
-                    },
-                ).json()
+                if files_changed_counts:
+                    pr_details_response = requests.get(
+                        url=f'https://api.github.com/repos/{self.org_name}'
+                            f'/{repo_name}/pulls/{pr["number"]}',
+                        headers={
+                            'Authorization': (
+                                f'token {self.personal_access_token}'
+                            ),
+                        },
+                    ).json()
+                    files_changed_summary = (
+                        f' (files changed: '
+                        f'{pr_details_response["changed_files"]})'
+                    )
+                else:
+                    files_changed_summary = ''
                 return_value[pr['user']['login']].append(
-                    f'PR {pr["number"]}: {pr["title"]}'
-                    f' (files changed: {pr_details_response["changed_files"]})'
+                    f'PR {pr["number"]}: {pr["title"]}'.strip() +
+                    files_changed_summary
                 )
             paging_navigation_header = api_response.headers.get('Link', '')
             if 'rel="next"' in paging_navigation_header:
