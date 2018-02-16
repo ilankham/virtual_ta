@@ -119,6 +119,7 @@ class TAWorkflowTests(TestCase):
             config['Blackboard']['server_address'],
             config['Blackboard']['application_key'],
             config['Blackboard']['application_secret'],
+            verify_ssl_certificate=False,
         )
 
         # Prof. X uses the BlackboardCourse create_gradebook_column method to

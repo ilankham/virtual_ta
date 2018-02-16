@@ -28,7 +28,8 @@ class BlackboardCourse(object):
         course_id: str,
         server_address: str,
         application_key: str,
-        application_secret: str
+        application_secret: str,
+        verify_ssl_certificate: bool = True,
     ) -> None:
         """Initializes a BlackboardCourse object
 
@@ -46,6 +47,8 @@ class BlackboardCourse(object):
                 course_id's gradebook
             application_secret: application secret corresponding to
                 application_key
+            verify_ssl_certificate: determines whether an ssl certificate is
+                verified during HTTPS requests; defaults to True
 
         """
 
@@ -55,6 +58,7 @@ class BlackboardCourse(object):
         self.server_address = server_address
         self.application_key = application_key
         self.application_secret = application_secret
+        self.verify_ssl_certificate = verify_ssl_certificate
 
         self.__api_token: str = None
         self.api_token_expiration_datetime: datetime = None
@@ -89,7 +93,7 @@ class BlackboardCourse(object):
                     'grant_type': 'client_credentials'
                 },
                 auth=(self.application_key, self.application_secret),
-                verify=False
+                verify=self.verify_ssl_certificate,
             ).json()
             self.__api_token = api_token_response['access_token']
             self.api_token_expiration_datetime = (
@@ -129,7 +133,7 @@ class BlackboardCourse(object):
             api_response = requests.get(
                 api_request_url,
                 headers={'Authorization': 'Bearer ' + self.api_token},
-                verify=False
+                verify=self.verify_ssl_certificate,
             ).json()
             yield from api_response['results']
             try:
@@ -213,7 +217,7 @@ class BlackboardCourse(object):
                 'Authorization': 'Bearer ' + self.api_token,
                 'Content-Type': 'application/json'
             },
-            verify=False,
+            verify=self.verify_ssl_certificate,
         ).json()
         return return_value
 
@@ -243,7 +247,7 @@ class BlackboardCourse(object):
         return_value = requests.get(
             api_request_url,
             headers={'Authorization': 'Bearer ' + self.api_token},
-            verify=False
+            verify=self.verify_ssl_certificate
         ).json()
         return return_value.get('userId', '')
 
@@ -284,7 +288,7 @@ class BlackboardCourse(object):
                 'Authorization': 'Bearer ' + self.api_token,
                 'Content-Type': 'application/json'
             },
-            verify=False,
+            verify=self.verify_ssl_certificate,
         ).json()
         return return_value
 
@@ -321,7 +325,7 @@ class BlackboardCourse(object):
             api_response = requests.get(
                 api_request_url,
                 headers={'Authorization': 'Bearer ' + self.api_token},
-                verify=False
+                verify=self.verify_ssl_certificate
             ).json()
             yield from api_response['results']
             try:
@@ -391,7 +395,7 @@ class BlackboardCourse(object):
                     'Authorization': 'Bearer ' + self.api_token,
                     'Content-Type': 'application/json'
                 },
-                verify=False,
+                verify=self.verify_ssl_certificate,
             ).json()
         else:
             return_value = current_grade
