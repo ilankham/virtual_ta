@@ -627,8 +627,8 @@ class GitHubOrganization(object):
 
         Returns:
             A dict keyed by PR author and having as values lists of all PRs for
-            repo_name by author, summarizing each PR's number, title, and
-            number of files changed
+            repo_name by author, summarizing each PR's number, title, URL,
+            and, optionally, number of files changed
 
         """
 
@@ -663,6 +663,7 @@ class GitHubOrganization(object):
                     files_changed_summary = ''
                 return_value[pr['user']['login']].append(
                     f'PR {pr["number"]}: {pr["title"]}'.strip() +
+                    f' at {pr["html_url"]}' +
                     files_changed_summary
                 )
             paging_navigation_header = api_response.headers.get('Link', '')

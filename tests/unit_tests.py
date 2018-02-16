@@ -1400,60 +1400,68 @@ class TestGitHubOrganizations(TestCase):
         test_pr_author1 = "Test PR Author 1"
         test_pr_number1a = "Test-PR-Number-1a"
         test_pr_title1a = "Test PR Title 1a"
+        test_pr_url1a = "Test PR URL 1a"
         test_pr_files_changed1a = "Test PR Files Changed 1a"
         test_pr_number1b = "Test-PR-Number-1b"
         test_pr_title1b = "Test PR Title 1b"
+        test_pr_url1b = "Test PR URL 1b"
         test_pr_files_changed1b = "Test PR Files Changed 1b"
         test_pr_author2 = "Test PR Author 2"
         test_pr_number2a = "Test-PR-Number-2a"
         test_pr_title2a = "Test PR Title 2a"
+        test_pr_url2a = "Test PR URL 2a"
         test_pr_files_changed2a = "Test PR Files Changed 2a"
         test_pr_number2b = "Test-PR-Number-2b"
         test_pr_title2b = "Test PR Title 2b"
+        test_pr_url2b = "Test PR URL 2b"
         test_pr_files_changed2b = "Test PR Files Changed 2b"
         test_expectations = {
             test_pr_author1: [
-                f'PR {test_pr_number1a}: {test_pr_title1a} '
+                f'PR {test_pr_number1a}: {test_pr_title1a} at {test_pr_url1a} '
                 f'(files changed: {test_pr_files_changed1a})',
-                f'PR {test_pr_number1b}: {test_pr_title1b} '
+                f'PR {test_pr_number1b}: {test_pr_title1b} at {test_pr_url1b} '
                 f'(files changed: {test_pr_files_changed1b})',
             ],
             test_pr_author2: [
-                f'PR {test_pr_number2a}: {test_pr_title2a} (files changed: '
-                f'{test_pr_files_changed2a})',
-                f'PR {test_pr_number2b}: {test_pr_title2b} (files changed: '
-                f'{test_pr_files_changed2b})',
+                f'PR {test_pr_number2a}: {test_pr_title2a} at {test_pr_url2a} '
+                f'(files changed: {test_pr_files_changed2a})',
+                f'PR {test_pr_number2b}: {test_pr_title2b} at {test_pr_url2b} '
+                f'(files changed: {test_pr_files_changed2b})',
             ],
         }
 
         test_prs_response_json = [
             {
-                 'number': test_pr_number1a,
-                 'title': test_pr_title1a,
-                 'user': {
-                     'login': test_pr_author1,
-                 },
+                'number': test_pr_number1a,
+                'title': test_pr_title1a,
+                'html_url': test_pr_url1a,
+                'user': {
+                    'login': test_pr_author1,
+                },
             },
             {
-                 'number': test_pr_number1b,
-                 'title': test_pr_title1b,
-                 'user': {
-                     'login': test_pr_author1,
-                 },
+                'number': test_pr_number1b,
+                'title': test_pr_title1b,
+                'html_url': test_pr_url1b,
+                'user': {
+                    'login': test_pr_author1,
+                },
             },
             {
-                 'number': test_pr_number2a,
-                 'title': test_pr_title2a,
-                 'user': {
-                     'login': test_pr_author2,
-                 },
+                'number': test_pr_number2a,
+                'title': test_pr_title2a,
+                'html_url': test_pr_url2a,
+                'user': {
+                    'login': test_pr_author2,
+                },
             },
             {
-                 'number': test_pr_number2b,
-                 'title': test_pr_title2b,
-                 'user': {
-                     'login': test_pr_author2,
-                 },
+                'number': test_pr_number2b,
+                'title': test_pr_title2b,
+                'html_url': test_pr_url2b,
+                'user': {
+                    'login': test_pr_author2,
+                },
             },
 
         ]
@@ -1552,65 +1560,72 @@ class TestGitHubOrganizations(TestCase):
         test_pr_author1 = "Test PR Author 1"
         test_pr_number1a = "Test-PR-Number-1a"
         test_pr_title1a = "Test PR Title 1a"
+        test_pr_url1a = "Test PR URL 1a"
         test_pr_files_changed1a = "Test PR Files Changed 1a"
         test_pr_number1b = "Test-PR-Number-1b"
         test_pr_title1b = "Test PR Title 1b"
+        test_pr_url1b = "Test PR URL 1b"
         test_pr_files_changed1b = "Test PR Files Changed 1b"
         test_pr_author2 = "Test PR Author 2"
         test_pr_number2a = "Test-PR-Number-2a"
         test_pr_title2a = "Test PR Title 2a"
+        test_pr_url2a = "Test PR URL 2a"
         test_pr_files_changed2a = "Test PR Files Changed 2a"
         test_pr_number2b = "Test-PR-Number-2b"
         test_pr_title2b = "Test PR Title 2b"
+        test_pr_url2b = "Test PR URL 2b"
         test_pr_files_changed2b = "Test PR Files Changed 2b"
         test_expectations = {
             test_pr_author1: [
-                f'PR {test_pr_number1a}: {test_pr_title1a} '
+                f'PR {test_pr_number1a}: {test_pr_title1a} at {test_pr_url1a} '
                 f'(files changed: {test_pr_files_changed1a})',
-                f'PR {test_pr_number1b}: {test_pr_title1b} '
+                f'PR {test_pr_number1b}: {test_pr_title1b} at {test_pr_url1b} '
                 f'(files changed: {test_pr_files_changed1b})',
             ],
             test_pr_author2: [
-                f'PR {test_pr_number2a}: {test_pr_title2a} (files changed: '
-                f'{test_pr_files_changed2a})',
-                f'PR {test_pr_number2b}: {test_pr_title2b} (files changed: '
-                f'{test_pr_files_changed2b})',
+                f'PR {test_pr_number2a}: {test_pr_title2a} at {test_pr_url2a} '
+                f'(files changed: {test_pr_files_changed2a})',
+                f'PR {test_pr_number2b}: {test_pr_title2b} at {test_pr_url2b} '
+                f'(files changed: {test_pr_files_changed2b})',
             ],
         }
 
         test_prs_response_json1 = [
             {
-                 'number': test_pr_number1a,
-                 'title': test_pr_title1a,
-                 'user': {
-                     'login': test_pr_author1,
-                 },
+                'number': test_pr_number1a,
+                'title': test_pr_title1a,
+                'html_url': test_pr_url1a,
+                'user': {
+                    'login': test_pr_author1,
+                },
             },
             {
-                 'number': test_pr_number1b,
-                 'title': test_pr_title1b,
-                 'user': {
-                     'login': test_pr_author1,
-                 },
+                'number': test_pr_number1b,
+                'title': test_pr_title1b,
+                'html_url': test_pr_url1b,
+                'user': {
+                    'login': test_pr_author1,
+                },
             },
         ]
 
         test_prs_response_json2 = [
             {
-                 'number': test_pr_number2a,
-                 'title': test_pr_title2a,
-                 'user': {
-                     'login': test_pr_author2,
-                 },
+                'number': test_pr_number2a,
+                'title': test_pr_title2a,
+                'html_url': test_pr_url2a,
+                'user': {
+                    'login': test_pr_author2,
+                },
             },
             {
-                 'number': test_pr_number2b,
-                 'title': test_pr_title2b,
-                 'user': {
-                     'login': test_pr_author2,
-                 },
+                'number': test_pr_number2b,
+                'title': test_pr_title2b,
+                'html_url': test_pr_url2b,
+                'user': {
+                    'login': test_pr_author2,
+                },
             },
-
         ]
 
         test_pr1a_response_json = {
