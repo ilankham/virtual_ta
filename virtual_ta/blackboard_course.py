@@ -153,15 +153,59 @@ class BlackboardCourse(object):
             column['name']: column['id'] for column in self.gradebook_columns
         }
 
+    @property
+    def gradebook_schemas(self) -> Generator[Dict[str, str], None, None]:
+        """Returns a generator of dicts, each describing a gradebook schema
+
+        Uses the Blackboard Learn REST API call
+        f'http://{self.server_address}/learn/api/public/v1/courses'
+        f'/courseId:{self.course_id}/gradebook/schemas'
+        with no caching
+
+        """
+
+        api_request_url = (
+            'https://' +
+            self.server_address +
+            f'/learn/api/public/v1/courses/courseId:{self.course_id}'
+            '/gradebook/schemas'
+        )
+
+        while api_request_url:
+            api_response = requests.get(
+                api_request_url,
+                headers={'Authorization': 'Bearer ' + self.api_token},
+                verify=self.verify_ssl_certificate,
+            ).json()
+            yield from api_response['results']
+            try:
+                api_request_url = api_response['paging']['nextPage']
+            except KeyError:
+                api_request_url = None
+
+    @property
+    def gradebook_schemas_primary_ids(self) -> Dict[str, str]:
+        """Returns a dict with gradebook schema name -> schema primary id
+
+        Uses the Blackboard Learn REST API with no caching
+
+        """
+
+        return {
+            schema['scaleType']: schema['id']
+            for schema in self.gradebook_schemas
+        }
+
     def create_gradebook_column(
         self,
-        name,
-        due_date,
+        name: str,
+        due_date: str,
         *,
-        description='',
-        max_score_possible=0,
-        available_to_students='Yes',
-        grading_type='Manual',
+        description: str ='',
+        max_score_possible: int =0,
+        available_to_students: str ='Yes',
+        grading_type: str ='Manual',
+        scale_type: str ='Text',
     ) -> Dict[str, str]:
         """Creates gradebook column with specified properties
 
@@ -172,7 +216,9 @@ class BlackboardCourse(object):
 
         Args:
             name: display name of column to create
-            due_date: display date assignments corresponding to column are due
+            due_date: due date for column in ISO 8601 format; e.g., for
+                datetime.datetime.strftime(), the format could be written as
+                '%Y-%m-%dT%H:%M:%SZ'
             description: display description of column to create
             max_score_possible: display value for maximum score possible for
                 assignments corresponding to column; defaulting to 0, which
@@ -182,6 +228,8 @@ class BlackboardCourse(object):
                 displayed student's gradebook view; defaults to 'Yes'
             grading_type: allowable values are 'Attempts', 'Calculated', and
                 'Manual'; defaults to 'Manual'
+            scale_type: allowable values are 'Score', 'Text', 'Percentage',
+                and 'CompleteIncomplete'; defaults to 'Text'
 
         Returns:
             A dictionary describing the resulting gradebook column
@@ -195,6 +243,12 @@ class BlackboardCourse(object):
             f'/gradebook/columns'
         )
 
+        # handle exception if server version doesn't support gradebook schemas:
+        try:
+            schema_id = self.gradebook_schemas_primary_ids[scale_type]
+        except KeyError:
+            schema_id = None
+
         request_data = {
             'name': name,
             'description': description,
@@ -207,6 +261,7 @@ class BlackboardCourse(object):
             'grading': {
                 'type': grading_type,
                 'due': due_date,
+                'schemaId': schema_id,
             },
         }
 

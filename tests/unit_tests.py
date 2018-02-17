@@ -365,8 +365,184 @@ class TestBlackboardCourses(TestCase):
         )
 
     @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_create_gradebook_column(self, mock_api_token):
+    def test_bb_course_gradebook_schemas_property_without_paging(
+        self,
+        mock_api_token
+    ):
         mock_api_token.return_value = 'Test Token Value'
+
+        test_schema_id = 'Test Schema Id'
+        test_schema_scale_type = 'Test Schema Scale Type'
+        test_response_json = {
+            'results': [
+                {
+                    'id': test_schema_id,
+                    'scaleType': test_schema_scale_type
+                }
+            ],
+        }
+        test_response = test_response_json['results']
+
+        test_course_id = 'Test-Course-ID'
+        test_server_address = 'test.server.address'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v1/courses'
+                f'/courseId:{test_course_id}/gradebook/schemas',
+                status_code=200,
+                json=test_response_json,
+            )
+
+            test_bot = BlackboardCourse(
+                test_course_id,
+                test_server_address,
+                test_application_key,
+                test_application_secret
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.gradebook_schemas),
+            )
+
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
+    def test_bb_course_gradebook_schemas_property_with_paging(
+        self,
+        mock_api_token
+    ):
+        mock_api_token.return_value = 'Test Token Value'
+
+        test_course_id = 'Test-Course-ID'
+        test_server_address = 'test.server.address'
+        test_schema_id1 = 'Test Schema Id 1'
+        test_schema_scale_type1 = 'Test Schema Scale Type 1'
+        test_response_json1 = {
+            'results': [
+                {
+                    'id': test_schema_id1,
+                    'scaleType': test_schema_scale_type1
+                }
+            ],
+            'paging': {
+                'nextPage':
+                f'https://{test_server_address}/learn/api/public/v1/courses'
+                f'/courseId:{test_course_id}/gradebook/schemas?next=101',
+            }
+        }
+        test_schema_id2 = 'Test Schema Id 2'
+        test_schema_scale_type2 = 'Test Schema Scale Type 2'
+        test_response_json2 = {
+            'results': [
+                {
+                    'id': test_schema_id2,
+                    'scaleType': test_schema_scale_type2
+                }
+            ],
+        }
+        test_response = (
+            test_response_json1['results'] +
+            test_response_json2['results']
+        )
+
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v1/courses'
+                f'/courseId:{test_course_id}/gradebook/schemas',
+                status_code=200,
+                json=test_response_json1,
+            )
+            mock_requests.register_uri(
+                'GET',
+                f'https://{test_server_address}/learn/api/public/v1/courses'
+                f'/courseId:{test_course_id}/gradebook/schemas?next=101',
+                status_code=200,
+                json=test_response_json2,
+            )
+
+            test_bot = BlackboardCourse(
+                test_course_id,
+                test_server_address,
+                test_application_key,
+                test_application_secret
+            )
+
+            self.assertEqual(
+                test_response,
+                list(test_bot.gradebook_schemas),
+            )
+
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
+    @patch(
+        'virtual_ta.BlackboardCourse.gradebook_schemas',
+        new_callable=PropertyMock
+    )
+    def test_bb_course_gradebook_schemas_primary_ids_property(
+        self,
+        mock_gradebook_schemas,
+        mock_api_token,
+    ):
+        mock_api_token.return_value = 'Test Token Value'
+        test_schema_id1 = 'Test Schema Id 1'
+        test_schema_scale_type1 = 'Test Schema Scale Type 1'
+        test_schema_id2 = 'Test Schema Id 2'
+        test_schema_scale_type2 = 'Test Schema Scale Type 2'
+        mock_gradebook_schemas.return_value = (
+            {
+                'id': test_schema_id1,
+                'scaleType': test_schema_scale_type1
+            },
+            {
+                'id': test_schema_id2,
+                'scaleType': test_schema_scale_type2
+            },
+        )
+
+        test_response = {
+            test_schema_scale_type1: test_schema_id1,
+            test_schema_scale_type2: test_schema_id2,
+        }
+
+        test_course_id = 'Test-Course-ID'
+        test_server_address = 'test.server.address'
+        test_application_key = 'Test Application Key'
+        test_application_secret = 'Test Application Secret'
+        test_bot = BlackboardCourse(
+            test_course_id,
+            test_server_address,
+            test_application_key,
+            test_application_secret
+        )
+
+        self.assertEqual(
+            test_response,
+            test_bot.gradebook_schemas_primary_ids,
+        )
+
+    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
+    @patch(
+        'virtual_ta.BlackboardCourse.gradebook_schemas_primary_ids',
+        new_callable=PropertyMock
+    )
+    def test_bb_course_create_gradebook_column(
+        self,
+        mock_gradebook_schemas_primary_ids,
+        mock_api_token
+    ):
+        mock_api_token.return_value = 'Test Token Value'
+        test_schema_id1 = 'Test Schema Id 1'
+        test_schema_scale_type1 = 'Test Schema Scale Type 1'
+        test_schema_id2 = 'Test Schema Id 2'
+        test_schema_scale_type2 = 'Test Schema Scale Type 2'
+        mock_gradebook_schemas_primary_ids.return_value = {
+            test_schema_scale_type1: test_schema_id1,
+            test_schema_scale_type2: test_schema_id2,
+        }
 
         test_column_name = 'Test Column Name'
         test_column_due_date = 'Test Column Due Date'
@@ -402,6 +578,7 @@ class TestBlackboardCourses(TestCase):
             test_create_column_response = test_bot.create_gradebook_column(
                 name=test_column_name,
                 due_date=test_column_due_date,
+                scale_type=test_schema_scale_type1,
             )
 
             self.assertEqual(
