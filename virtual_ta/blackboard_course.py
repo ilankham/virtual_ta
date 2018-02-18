@@ -13,9 +13,10 @@ about the Blackboard Learn REST API
 """
 
 from datetime import datetime, timedelta
+from functools import wraps
 import json
 from time import sleep
-from typing import Dict, Generator, List, Union
+from typing import Callable, Dict, Generator, List, Union
 
 import requests
 
@@ -110,6 +111,33 @@ class BlackboardCourse(object):
             self.__api_token = self.api_token
 
         return self.__api_token
+
+    @staticmethod
+    def handle_api_paging(wrapped_fcn: Callable) -> Callable:
+        """Decorator for handling Blackboard Learn REST API paging
+
+        Args:
+            wrapped_fcn: function having one fixed argument (api_request_url),
+                passing additional **kwargs arguments to requests.get, and
+                returning a response object with optional paging information
+
+        Returns:
+            A callable version of wrapped_fcn handling paging
+
+        """
+
+        @wraps(wrapped_fcn)
+        def yield_json_results_helper(api_request_url='', **kwargs):
+
+            while api_request_url:
+                api_response = wrapped_fcn(api_request_url, **kwargs)
+                yield from api_response.json().get('results', [])
+                try:
+                    api_request_url = api_response.json()['paging']['nextPage']
+                except KeyError:
+                    api_request_url = None
+
+        return yield_json_results_helper
 
     @property
     def gradebook_columns(self) -> Generator[Dict[str, str], None, None]:

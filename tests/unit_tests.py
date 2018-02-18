@@ -175,6 +175,54 @@ class TestBlackboardCourses(TestCase):
                 places=0
             )
 
+    def test_bb_course_handle_api_paging(self):
+        test_url1 = 'http://test_url1'
+        test_url2 = 'http://test_url2'
+        test_json1 = {
+            'results': [
+                {
+                    'test_json': 1
+                }
+            ],
+            'paging': {
+                'nextPage': test_url2,
+            }
+        }
+        test_json2 = {
+            'results': [
+                {
+                    'test_json': 2
+                }
+            ],
+        }
+        test_expectations = test_json1['results'] + test_json2['results']
+
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.register_uri(
+                'GET',
+                test_url1,
+                status_code=200,
+                json=test_json1,
+            )
+            mock_requests.register_uri(
+                'GET',
+                test_url2,
+                status_code=200,
+                json=test_json2,
+            )
+
+            @BlackboardCourse.handle_api_paging
+            def mock_get_request(api_request_url, **kwargs):
+                return requests.get(
+                    api_request_url,
+                    **kwargs,
+                )
+
+            self.assertEqual(
+                test_expectations,
+                list(mock_get_request(test_url1))
+            )
+
     @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
     def test_bb_course_gradebook_columns_property_without_paging(
         self,
