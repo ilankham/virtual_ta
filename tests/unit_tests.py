@@ -224,7 +224,7 @@ class TestBlackboardCourses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_gradebook_columns_property_without_paging(
+    def test_bb_course_gradebook_columns_property(
         self,
         mock_api_token
     ):
@@ -258,85 +258,6 @@ class TestBlackboardCourses(TestCase):
                 f'/courseId:{test_course_id}/gradebook/columns',
                 status_code=200,
                 json=test_response_json,
-            )
-
-            test_bot = BlackboardCourse(
-                test_course_id,
-                test_server_address,
-                test_application_key,
-                test_application_secret
-            )
-
-            self.assertEqual(
-                test_response,
-                list(test_bot.gradebook_columns),
-            )
-
-    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_gradebook_columns_property_with_paging(
-        self,
-        mock_api_token
-    ):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_course_id = 'Test-Course-ID'
-        test_server_address = 'test.server.address'
-        test_column_name1 = 'Test Column Name 1'
-        test_column_due_date1 = 'Test Column Due Date 1'
-        test_response_json1 = {
-            'results': [
-                {
-                    'availability': {'available': 'Yes'},
-                    'grading': {
-                        'due': test_column_due_date1,
-                        'type': 'Manual'
-                    },
-                    'name': test_column_name1,
-                    'score': {'possible': 0.0},
-                }
-            ],
-            'paging': {
-                'nextPage':
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns?next=101',
-            }
-        }
-        test_column_name2 = 'Test Column Name 2'
-        test_column_due_date2 = 'Test Column Due Date 2'
-        test_response_json2 = {
-            'results': [
-                {
-                    'availability': {'available': 'Yes'},
-                    'grading': {
-                        'due': test_column_due_date2,
-                        'type': 'Manual'
-                    },
-                    'name': test_column_name2,
-                    'score': {'possible': 0.0},
-                }
-            ],
-        }
-        test_response = (
-            test_response_json1['results'] +
-            test_response_json2['results']
-        )
-
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns',
-                status_code=200,
-                json=test_response_json1,
-            )
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns?next=101',
-                status_code=200,
-                json=test_response_json2,
             )
 
             test_bot = BlackboardCourse(
