@@ -334,7 +334,7 @@ class TestBlackboardCourses(TestCase):
         )
 
     @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_gradebook_schemas_property_without_paging(
+    def test_bb_course_gradebook_schemas_property(
         self,
         mock_api_token
     ):
@@ -363,75 +363,6 @@ class TestBlackboardCourses(TestCase):
                 f'/courseId:{test_course_id}/gradebook/schemas',
                 status_code=200,
                 json=test_response_json,
-            )
-
-            test_bot = BlackboardCourse(
-                test_course_id,
-                test_server_address,
-                test_application_key,
-                test_application_secret
-            )
-
-            self.assertEqual(
-                test_response,
-                list(test_bot.gradebook_schemas),
-            )
-
-    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_gradebook_schemas_property_with_paging(
-        self,
-        mock_api_token
-    ):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_course_id = 'Test-Course-ID'
-        test_server_address = 'test.server.address'
-        test_schema_id1 = 'Test Schema Id 1'
-        test_schema_scale_type1 = 'Test Schema Scale Type 1'
-        test_response_json1 = {
-            'results': [
-                {
-                    'id': test_schema_id1,
-                    'scaleType': test_schema_scale_type1
-                }
-            ],
-            'paging': {
-                'nextPage':
-                f'https://{test_server_address}/learn/api/public/v1/courses'
-                f'/courseId:{test_course_id}/gradebook/schemas?next=101',
-            }
-        }
-        test_schema_id2 = 'Test Schema Id 2'
-        test_schema_scale_type2 = 'Test Schema Scale Type 2'
-        test_response_json2 = {
-            'results': [
-                {
-                    'id': test_schema_id2,
-                    'scaleType': test_schema_scale_type2
-                }
-            ],
-        }
-        test_response = (
-            test_response_json1['results'] +
-            test_response_json2['results']
-        )
-
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v1/courses'
-                f'/courseId:{test_course_id}/gradebook/schemas',
-                status_code=200,
-                json=test_response_json1,
-            )
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v1/courses'
-                f'/courseId:{test_course_id}/gradebook/schemas?next=101',
-                status_code=200,
-                json=test_response_json2,
             )
 
             test_bot = BlackboardCourse(

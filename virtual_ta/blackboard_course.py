@@ -189,7 +189,7 @@ class BlackboardCourse(object):
         }
 
     @property
-    def gradebook_schemas(self) -> Generator[Dict[str, str], None, None]:
+    def gradebook_schemas(self) -> Generator[dict, None, None]:
         """Returns a generator of dicts, each describing a gradebook schema
 
         Uses the Blackboard Learn REST API call
@@ -199,24 +199,31 @@ class BlackboardCourse(object):
 
         """
 
-        api_request_url = (
+        url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v1/courses/courseId:{self.course_id}'
             '/gradebook/schemas'
         )
 
-        while api_request_url:
-            api_response = requests.get(
+        request_get_options = {
+            'headers': {
+                'Authorization': 'Bearer ' + self.api_token,
+            },
+            'verify': self.verify_ssl_certificate,
+        }
+
+        @self.handle_api_paging
+        def __get_gradebook_schemas_response(
+            api_request_url: str ='',
+            **kwargs,
+        ) -> requests.Response:
+            return requests.get(
                 api_request_url,
-                headers={'Authorization': 'Bearer ' + self.api_token},
-                verify=self.verify_ssl_certificate,
-            ).json()
-            yield from api_response['results']
-            try:
-                api_request_url = api_response['paging']['nextPage']
-            except KeyError:
-                api_request_url = None
+                **kwargs,
+            )
+
+        return __get_gradebook_schemas_response(url, **request_get_options)
 
     @property
     def gradebook_schemas_primary_ids(self) -> Dict[str, str]:
