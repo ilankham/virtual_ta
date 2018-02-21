@@ -392,14 +392,14 @@ class BlackboardCourse(object):
     def get_grades_in_column(
         self,
         column_primary_id: str
-    ) -> Generator[Dict[str, str], None, None]:
+    ) -> Generator[dict, None, None]:
         """Returns generator yielding grade information for a gradebook column
 
         Uses the Blackboard Learn REST API call
         f'http://{self.server_address}/learn/api/public/v2/courses
         f'/courseId:{self.course_id}/gradebook/columns/{column_primary_id}'
         f'/users'
-        with no caching and with handling for paging
+        with no caching
 
         Args:
             column_primary_id: primary id for a gradebook column associated
@@ -411,24 +411,31 @@ class BlackboardCourse(object):
 
         """
 
-        api_request_url = (
+        url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v2/courses/courseId:{self.course_id}'
             f'/gradebook/columns/{column_primary_id}/users'
         )
 
-        while api_request_url:
-            api_response = requests.get(
+        request_get_options = {
+            'headers': {
+                'Authorization': 'Bearer ' + self.api_token,
+            },
+            'verify': self.verify_ssl_certificate,
+        }
+
+        @self.handle_api_paging
+        def __get_grades_in_column_response(
+            api_request_url: str ='',
+            **kwargs,
+        ) -> requests.Response:
+            return requests.get(
                 api_request_url,
-                headers={'Authorization': 'Bearer ' + self.api_token},
-                verify=self.verify_ssl_certificate
-            ).json()
-            yield from api_response['results']
-            try:
-                api_request_url = api_response['paging']['nextPage']
-            except KeyError:
-                api_request_url = None
+                **kwargs,
+            )
+
+        return __get_grades_in_column_response(url, **request_get_options)
 
     def set_grade(
         self,

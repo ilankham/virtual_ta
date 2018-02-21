@@ -567,7 +567,7 @@ class TestBlackboardCourses(TestCase):
             )
 
     @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_get_grades_in_column_without_paging(
+    def test_bb_course_get_grades_in_column(
         self,
         mock_api_token
     ):
@@ -623,85 +623,6 @@ class TestBlackboardCourses(TestCase):
 
             self.assertEqual(
                 test_response_json['results'],
-                list(test_bot.get_grades_in_column(test_column_primary_id)),
-            )
-
-    @patch('virtual_ta.BlackboardCourse.api_token', new_callable=PropertyMock)
-    def test_bb_course_get_grades_in_column_with_paging(self, mock_api_token):
-        mock_api_token.return_value = 'Test Token Value'
-
-        test_course_id = 'Test-Course-ID'
-        test_server_address = 'test.server.address'
-        test_column_primary_id = 'Test-Primary-ID'
-        test_grade_feedback1 = 'Test Grade Feedback 1'
-        test_grade_as_score1 = 'Test Grade as Score 1'
-        test_grade_as_text1 = 'Test Grade as Text 1'
-        test_user_id1 = 'Test-User-ID1'
-        test_response_json1 = {
-            'results': [
-                {
-                    'columnId': test_column_primary_id,
-                    'feedback': test_grade_feedback1,
-                    'score': test_grade_as_score1,
-                    'text': test_grade_as_text1,
-                    'userId': test_user_id1,
-                }
-            ],
-            'paging': {
-                'nextPage':
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns'
-                f'/{test_column_primary_id}/users?next=101',
-            }
-        }
-        test_grade_feedback2 = 'Test Grade Feedback 2'
-        test_grade_as_score2 = 'Test Grade as Score 2'
-        test_grade_as_text2 = 'Test Grade as Text 2'
-        test_user_id2 = 'Test-User-ID2'
-        test_response_json2 = {
-            'results': [
-                {
-                    'columnId': test_column_primary_id,
-                    'feedback': test_grade_feedback2,
-                    'score': test_grade_as_score2,
-                    'text': test_grade_as_text2,
-                    'userId': test_user_id2,
-                }
-            ],
-        }
-        test_response = (
-            test_response_json1['results'] + test_response_json2['results']
-        )
-
-        test_application_key = 'Test Application Key'
-        test_application_secret = 'Test Application Secret'
-        with requests_mock.Mocker() as mock_requests:
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns'
-                f'/{test_column_primary_id}/users',
-                status_code=200,
-                json=test_response_json1,
-            )
-            mock_requests.register_uri(
-                'GET',
-                f'https://{test_server_address}/learn/api/public/v2/courses'
-                f'/courseId:{test_course_id}/gradebook/columns'
-                f'/{test_column_primary_id}/users?next=101',
-                status_code=200,
-                json=test_response_json2,
-            )
-
-            test_bot = BlackboardCourse(
-                test_course_id,
-                test_server_address,
-                test_application_key,
-                test_application_secret
-            )
-
-            self.assertEqual(
-                test_response,
                 list(test_bot.get_grades_in_column(test_column_primary_id)),
             )
 
