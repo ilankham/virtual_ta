@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 import json
 from time import sleep
-from typing import Callable, Dict, Generator, List, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 import requests
 
@@ -61,8 +61,8 @@ class BlackboardCourse(object):
         self.application_secret = application_secret
         self.verify_ssl_certificate = verify_ssl_certificate
 
-        self.__api_token: str = None
-        self.api_token_expiration_datetime: datetime = None
+        self.__api_token: Optional[str] = None
+        self.api_token_expiration_datetime: Optional[datetime] = None
 
     def __repr__(self) -> str:
         """Returns string representation of Blackboard Course"""
@@ -78,7 +78,7 @@ class BlackboardCourse(object):
 
         Uses the Blackboard Learn REST API call
         f'http://{self.server_address}/learn/api/public/v1/oauth2/token'
-        with the API token value cached unless expired
+        with caching and a new token requested within 1 second of expiration
 
         """
 
@@ -113,13 +113,16 @@ class BlackboardCourse(object):
         return self.__api_token
 
     @staticmethod
-    def handle_api_paging(wrapped_fcn: Callable) -> Callable:
+    def handle_api_paging(
+        wrapped_fcn: Callable[[str, Any], requests.Response]
+    ) -> Callable[[str, Any], Generator[dict, None, None]]:
         """Decorator for handling Blackboard Learn REST API paging
 
         Args:
-            wrapped_fcn: function having one fixed argument (api_request_url),
-                passing additional **kwargs arguments to requests.get, and
-                returning a response object with optional paging information
+            wrapped_fcn: a function with fixed argument api_request_url: str,
+                variable argument **kwargs passed through to requests.get, and
+                returning a requests.Response object that optionally specifies
+                paging information
 
         Returns:
             A callable version of wrapped_fcn handling paging
@@ -127,7 +130,10 @@ class BlackboardCourse(object):
         """
 
         @wraps(wrapped_fcn)
-        def yield_json_results_helper(api_request_url='', **kwargs):
+        def __yield_json_results(
+            api_request_url: str ='',
+            **kwargs: Any,
+        ) -> Generator[dict, None, None]:
 
             while api_request_url:
                 api_response = wrapped_fcn(api_request_url, **kwargs)
@@ -137,7 +143,7 @@ class BlackboardCourse(object):
                 except KeyError:
                     api_request_url = None
 
-        return yield_json_results_helper
+        return __yield_json_results
 
     @property
     def gradebook_columns(self) -> Generator[dict, None, None]:
@@ -150,14 +156,14 @@ class BlackboardCourse(object):
 
         """
 
-        url = (
+        requests_get_url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v2/courses/courseId:{self.course_id}'
             '/gradebook/columns'
         )
 
-        request_get_options = {
+        requests_get_options = {
             'headers': {
                 'Authorization': 'Bearer ' + self.api_token,
             },
@@ -167,14 +173,21 @@ class BlackboardCourse(object):
         @self.handle_api_paging
         def __get_gradebook_columns_response(
             api_request_url: str ='',
-            **kwargs,
+            **kwargs: Any,
         ) -> requests.Response:
             return requests.get(
                 api_request_url,
                 **kwargs,
             )
 
-        return __get_gradebook_columns_response(url, **request_get_options)
+        return_value: Generator[dict, None, None] = (
+            __get_gradebook_columns_response(
+                requests_get_url,
+                **requests_get_options
+            )
+        )
+
+        return return_value
 
     @property
     def gradebook_columns_primary_ids(self) -> Dict[str, str]:
@@ -199,14 +212,14 @@ class BlackboardCourse(object):
 
         """
 
-        url = (
+        requests_get_url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v1/courses/courseId:{self.course_id}'
             '/gradebook/schemas'
         )
 
-        request_get_options = {
+        requests_get_options = {
             'headers': {
                 'Authorization': 'Bearer ' + self.api_token,
             },
@@ -216,14 +229,21 @@ class BlackboardCourse(object):
         @self.handle_api_paging
         def __get_gradebook_schemas_response(
             api_request_url: str ='',
-            **kwargs,
+            **kwargs: Any,
         ) -> requests.Response:
             return requests.get(
                 api_request_url,
                 **kwargs,
             )
 
-        return __get_gradebook_schemas_response(url, **request_get_options)
+        return_value: Generator[dict, None, None] = (
+            __get_gradebook_schemas_response(
+                requests_get_url,
+                **requests_get_options
+            )
+        )
+
+        return return_value
 
     @property
     def gradebook_schemas_primary_ids(self) -> Dict[str, str]:
@@ -244,11 +264,11 @@ class BlackboardCourse(object):
         due_date: str,
         *,
         description: str ='',
-        max_score_possible: int =0,
-        available_to_students: str ='Yes',
-        grading_type: str ='Manual',
-        scale_type: str ='Text',
-    ) -> Dict[str, str]:
+        max_score_possible: int = 0,
+        available_to_students: str = 'Yes',
+        grading_type: str = 'Manual',
+        scale_type: str = 'Text',
+    ) -> dict:
         """Creates gradebook column with specified properties
 
         Uses the Blackboard Learn REST API call
@@ -264,14 +284,14 @@ class BlackboardCourse(object):
             description: display description of column to create
             max_score_possible: display value for maximum score possible for
                 assignments corresponding to column; defaulting to 0, which
-                suppresses display of maximum grade in student's gradebook view
+                suppresses display of maximum grade in students' gradebook view
             available_to_students: if 'Yes', then the column is displayed
                 student's gradebook view; if 'No', then the column is not
-                displayed student's gradebook view; defaults to 'Yes'
+                displayed in students' gradebook view; defaults to 'Yes'
             grading_type: allowable values are 'Attempts', 'Calculated', and
                 'Manual'; defaults to 'Manual'
-            scale_type: allowable values are 'Score', 'Text', 'Percentage',
-                and 'CompleteIncomplete'; defaults to 'Text'
+            scale_type: allowable values are 'CompleteIncomplete',
+                'Percentage', 'Score', and 'Text'; defaults to 'Text'
 
         Returns:
             A dictionary describing the resulting gradebook column
@@ -348,11 +368,7 @@ class BlackboardCourse(object):
         ).json()
         return return_value.get('userId', '')
 
-    def get_grade(
-        self,
-        column_primary_id: str,
-        user_name: str
-    ) -> Dict[str, str]:
+    def get_grade(self, column_primary_id: str, user_name: str) -> dict:
         """Returns dict describing grade for user_name from a gradebook column
 
         Uses the Blackboard Learn REST API call
@@ -411,14 +427,14 @@ class BlackboardCourse(object):
 
         """
 
-        url = (
+        requests_get_url = (
             'https://' +
             self.server_address +
             f'/learn/api/public/v2/courses/courseId:{self.course_id}'
             f'/gradebook/columns/{column_primary_id}/users'
         )
 
-        request_get_options = {
+        requests_get_options = {
             'headers': {
                 'Authorization': 'Bearer ' + self.api_token,
             },
@@ -428,14 +444,21 @@ class BlackboardCourse(object):
         @self.handle_api_paging
         def __get_grades_in_column_response(
             api_request_url: str ='',
-            **kwargs,
+            **kwargs: Any,
         ) -> requests.Response:
             return requests.get(
                 api_request_url,
                 **kwargs,
             )
 
-        return __get_grades_in_column_response(url, **request_get_options)
+        return_value: Generator[dict, None, None] = (
+            __get_grades_in_column_response(
+                requests_get_url,
+                **requests_get_options
+            )
+        )
+
+        return return_value
 
     def set_grade(
         self,
@@ -446,7 +469,7 @@ class BlackboardCourse(object):
         grade_as_text: str = '',
         grade_feedback: str = '',
         overwrite: bool = True,
-    ) -> Dict[str, str]:
+    ) -> dict:
         """Sets grade for user_name in gradebook column as score/text/feedback
 
         Uses the Blackboard Learn REST API call
@@ -508,11 +531,11 @@ class BlackboardCourse(object):
     def set_grades_in_column(
         self,
         column_primary_id: str,
-        grades_as_scores: dict,
-        grades_as_text: dict = None,
-        grades_feedback: dict = None,
+        grades_as_scores: Dict[str, Union[int, str]],
+        grades_as_text: Optional[Dict[str, str]] = None,
+        grades_feedback: Optional[Dict[str, str]] = None,
         overwrite: bool = True,
-    ) -> List[Dict[str, str]]:
+    ) -> List[dict]:
         """Sets grades in gradebook column as score/text/feedback
 
         Uses the Blackboard Learn REST API call with no caching
@@ -546,14 +569,14 @@ class BlackboardCourse(object):
             grades_feedback = {}
 
         return_value = []
-        for username, score in grades_as_scores.items():
+        for user_name, score in grades_as_scores.items():
             return_value.append(
                 self.set_grade(
                     column_primary_id=column_primary_id,
-                    user_name=username,
+                    user_name=user_name,
                     grade_as_score=score,
-                    grade_as_text=grades_as_text.get(username, ''),
-                    grade_feedback=grades_feedback.get(username, ''),
+                    grade_as_text=grades_as_text.get(user_name, ''),
+                    grade_feedback=grades_feedback.get(user_name, ''),
                     overwrite=overwrite,
                 )
             )
